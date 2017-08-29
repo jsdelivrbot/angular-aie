@@ -1,0 +1,12 @@
+<!-- Loading modal -->
+<div class="modal fade" bsModal #loadingModal="bs-modal"
+	[config]="{backdrop: 'static'}">
+	<div class="modal-dialog modal-sm">
+		<div class="modal-content">
+			<div class="modal-body" style="font-size: 125%; text-align: center;">
+				Loading....
+				<progressbar class="progress-striped" [value]="100"></progressbar>
+			</div>
+		</div>
+	</div>
+</div>

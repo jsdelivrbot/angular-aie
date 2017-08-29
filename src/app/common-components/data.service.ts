@@ -1,0 +1,72 @@
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { SecurityRecord } from './common-structures';
+
+@Injectable()
+export class DataService {
+    // This will host the host name where we are running the application 
+    private hostName = new BehaviorSubject<string>("");
+    currentHostName = this.hostName.asObservable();
+    
+    // This will hold the customer LID selected in landing page
+    private lid = new BehaviorSubject<string>("");
+    currentLid = this.lid.asObservable();
+    
+    // This will hold List of customer LIDs
+    private lids = new BehaviorSubject<string[]>(null);
+    currentLids = this.lids.asObservable();
+
+    // This will hold the customer Name associated with the LID
+    private customerName = new BehaviorSubject<string>("");
+    currentCustomerName = this.customerName.asObservable();
+
+    // This will hold the zone for selected LID
+    private zone = new BehaviorSubject<number>(0);
+    currentZone = this.zone.asObservable();
+
+    // This will hold the region for selected LID
+    private region = new BehaviorSubject<number>(0);
+    currentRegion = this.region.asObservable();
+    
+    // This will hold the Security Record associated with the LID
+    private securityRecord = new BehaviorSubject<SecurityRecord>(null);
+    currentSecurityRecord = this.securityRecord.asObservable();
+    
+    // This will hold if the user has edit access to the application - Permission level 1, 2 or 8 only
+    private editAccess = new BehaviorSubject<boolean>(false);
+    hasEditAccess = this.editAccess.asObservable();
+    
+    constructor() { }
+    
+    setHost(host: string) {
+        this.hostName.next(host);
+    }
+    
+    setLid(lid: string) {
+        this.lid.next(lid);
+    }
+    
+    setLids(lids: string[]) {
+        this.lids.next(lids);
+    }
+    
+    setCustomerName(customerName: string) {
+        this.customerName.next(customerName);
+    }
+
+    setZone(zone: number) {
+        this.zone.next(zone);
+    }
+
+    setRegion(region: number) {
+        this.region.next(region);
+    }
+    
+    setSecurityRecord(securityRecord: SecurityRecord) {
+        this.securityRecord.next(securityRecord);
+    }
+    
+    setEditAccess(editAccess: boolean) {
+        this.editAccess.next(editAccess);
+    }
+}

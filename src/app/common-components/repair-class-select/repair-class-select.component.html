@@ -1,0 +1,7 @@
+<!-- Repair Class key used for sale-aie 
+-->
+<select	name="repairClassKey"	class="form-control" style="max-width:100%;" 
+	[(ngModel)]="repairClassKey" 
+	(ngModelChange)="change($event)">
+	<option *ngFor="let class of repairClassList" [value]="class.code">{{class.description}}</option>
+</select>

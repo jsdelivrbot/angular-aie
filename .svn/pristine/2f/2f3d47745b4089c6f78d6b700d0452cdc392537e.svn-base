@@ -1,0 +1,20 @@
+<select	name="costAcct" class="form-control" style="max-width:100%;" 
+	[(ngModel)]="costAcct" 
+	(ngModelChange)="change($event)">
+	<option value ="   ">   </option>
+	<option value ="000">000</option>
+	<option value ="145">145</option>
+	<option value ="160">160</option>
+	<option value ="161">161</option>
+	<option value ="170">170</option>
+	<option value ="171">171</option>
+	<option value ="172">172</option>
+	<option value ="180">180</option>
+	<option value ="190">190</option>
+	<option value ="191">191</option>
+	<option value ="511">511</option>
+	<option value ="611">611</option>
+	<option value ="711">711</option>
+	<option value ="712">712</option>
+	<option value ="811">811</option>
+</select>

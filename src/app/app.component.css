@@ -1,0 +1,19 @@
+.emphasis {
+	background-color: green; 
+	border: 5px solid red; 
+	color: white; 
+	text-align: center; 
+	text-transform: uppercase; 
+	font-size: x-large; 
+	font-weight: bold;
+}
+
+.development {  
+	border: 1px solid hsla(200, 100%, 60%, .8); 
+	background-color: hsla(200, 100%, 60%, .1); 
+	padding: 10px; 
+	text-align: center;
+}
+
+TD .ng-invalid {border: 1px solid #aa1535; background-color: hsla(360, 67%, 80%, 0.53);}
+.custom-component {display:inline-block; padding: 5px;}

@@ -1,0 +1,56 @@
+<div class="banner">
+  <img src="/assets/images/AIEbanner.jpg" width="465" height="63" alt="GSA logo for Fleet Drive-thru">
+  <div class="welcome">
+    <a href="#">Privacy Statement</a>
+  </div>
+</div>
+
+
+<div class="navbar navbar-default">
+  <div class="navbar-header" role="navigation">
+    <button type="button" title="Main Navigation" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+  <div class="collapse navbar-collapse">
+    <ul class="nav navbar-nav">
+      <li><a routerLink="/home" >Home</a></li>
+      <li><a routerLink="/sale" >Sale AIE</a></li>
+      <li><a routerLink="/repair">AIE Repair</a></li>
+      <li><a routerLink="/misc">AIE Misc</a></li>
+      <li><a routerLink="/single">AIE Single</a></li>
+      <li class="dropdown" dropdown>
+        <a class="dropdown-toggle" dropdownToggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+          AIE Decision
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+<!--      <li><a routerLink="/decision/123">Class 1-3</a></li> 		doesn't work if clicked while inside AIE Decision page -->
+<!--      <li><a routerLink="/decision/45" >Class 4-5</a></li> 		doesn't work if clicked while inside AIE Decision page -->
+          <li><a onclick="window.open('/decision/123', '_self')" style="cursor:pointer">Class 1-3</a></li>
+          <li><a onclick="window.open('/decision/45' , '_self')" style="cursor:pointer">Class 4-5</a></li>
+        </ul>
+      </li>
+      <li><a routerLink="/multiple">AIE Multiple</a></li>
+      <li><a routerLink="/fleet-card">AIE Fleet Card</a></li>
+      <li class="dropdown" dropdown>
+        <a class="dropdown-toggle" dropdownToggle data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+          Reports&nbsp;
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Over-Tank Report</a></li>
+          <li><a href="#">Car Wash Report</a></li>
+          <li><a href="#">Same Day/Back-to-Back Report</a></li>
+          <li><a href="#">FSR Management Fleet Card Reports</a></li>
+        </ul>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="#">Help</a></li>
+      <li><a [routerLink]="['']">Logout</a></li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,347 @@
+import { Component, OnInit, OnChanges, ViewChild } from '@angular/core';
+//For model driven forms
+import { FormGroup, FormControl, FormsModule, Validators, NgForm} from '@angular/forms';
+import {AfterViewChecked} from '@angular/core';
+
+// For services
+
+import { AppValidationMessages } from './AieSingle';
+import { DataCollector } from './AieSingle';
+import { AieSingleService } from './aie-single.service';
+import { CommonService } from '../common-components/common.service';
+import { SalesCodeSelectComponent } from '../common-components/sales-code-select/sales-code-select.component';
+import { CustomerSelectComponent } from '../common-components/cust-select/cust-select.component';
+import { createCounterRangeValidator } from '../common-components/sales/sales.component';
+import { DataService } from '../common-components/data.service';
+
+
+@Component({
+    selector: 'app-aie-single',
+    templateUrl: './aie-single.component.html',
+    styleUrls: ['./aie-single.component.css']
+})
+
+
+export class AieSingleComponent implements OnInit {
+
+    @ViewChild('salesCdSelector') salesCdSelector;
+    @ViewChild('costAcctSelector') costAcctSelector;
+
+    aieSingleForm;
+    salesCode: string;
+    region;
+    salesCd;
+    fmc;
+    custNo;
+    costAcct;
+    message: string[] = [];
+    userLid: string;
+    userPermLvl1: string;
+    userPermLvl2: string;
+    inboac:string;
+
+
+    //customer = new String("");
+    customer;
+
+
+    aieSingle = new DataCollector("","", 0, 0, 0, "", "", "", "", "", "", "", 0, "", "", "", "", 0, 0);
+    formErrors = [];
+
+    constructor(private aieSingleService: AieSingleService, 
+    private dataService: DataService) { }
+
+    ngOnInit() {
+        //Getting lid from dataService ??
+        this.dataService.currentSecurityRecord.subscribe(           
+          currentSecurityRecord =>  {
+              this.userLid = currentSecurityRecord.lid;
+              //this.userRegion = currentSecurityRecord.region;
+              this.userPermLvl1 = currentSecurityRecord.lvl1Perm;
+              this.userPermLvl2 = currentSecurityRecord.lvl2Perm;
+              }); 
+        this.dataService.currentLid.subscribe(customerLid => this.userLid = customerLid);
+        console.info("Customer Lid : "+this.userLid +" userPermLvl1:"+this.userPermLvl1 +" userPermLvl2:"+this.userPermLvl2);
+        this.aieSingle.lid = this.userLid;
+        console.info("selected Lid : "+this.aieSingle.lid);
+                
+        }
+
+    ngOnChanges() {
+        this.aieSingleForm.reset({
+        });
+
+    }
+
+    //    function isEmptyOrSpaces(str){
+    //        return str === null || str.match(/^ *$/) !== null;
+    //    }
+
+    public NoWhitespaceValidator(control: FormControl) {
+        let isWhitespace = (control.value || '').trim().length === 0;
+        let isValid = !isWhitespace;
+        return isValid ? null : { 'whitespace': true }
+    }
+
+
+    onSubmit = function(formValues) {
+
+        this.message.length = 0;
+
+        if(this.validateSalesCode(formValues.salesCd, formValues.costAcct) === false) return false;
+        if(this.validateFormFields(formValues) === false) return false;
+
+        console.log("On Submit " + this.message.length + " Msg: " + this.message);
+        if (this.message != null && this.message.length > 0) {
+
+            return false;
+        }
+
+        console.log("On Submit second " + this.message.length + " Msg: " + this.message);
+
+        //this.customer = formValues.custNo;
+        let custSplit = this.customer.split("-", 5);
+        this.aieSingle.dc_Region = custSplit[0];
+        this.aieSingle.fmc = custSplit[1];
+        this.aieSingle.dc_subFMC = custSplit[2];
+        this.aieSingle.boac = custSplit[3];
+        this.aieSingle.serialNo = custSplit[4];
+        this.aieSingle.credInd = formValues.credInd;
+
+        let agencyClass = null !== formValues.dc_class ? formValues.dc_class : "";
+
+        this.aieSingle.dc_class = agencyClass;         
+    
+        let desc = formValues.desc1;
+
+        if (desc.length > 75) {
+            this.aieSingle.desc1 = desc.substring(0, 25);
+            this.aieSingle.desc2 = desc.substring(25, 50);
+            this.aieSingle.desc3 = desc.substring(50, 75);
+            this.aieSingle.desc4 = desc.substring(75, 100);
+        } else if (desc.length > 50 && desc.length <= 75) {
+            this.aieSingle.desc1 = desc.substring(0, 25);
+            this.aieSingle.desc2 = desc.substring(25, 50);
+            this.aieSingle.desc3 = desc.substring(50, 75);
+        } else if (desc.length > 25 && desc.length <= 50) {
+            this.aieSingle.desc1 = desc.substring(0, 25);
+            this.aieSingle.desc2 = desc.substring(25, 50);
+        } else if (desc.length > 0 && desc.length <= 25) {
+            this.aieSingle.desc1 = desc.substring(0, 25);
+        }
+
+        let serializedForm = JSON.stringify(this.aieSingle);
+        //debug message
+        console.debug("AieSingle Request " + serializedForm);
+        
+        this.aieSingleService.saveAieSingle(serializedForm)
+            .subscribe(
+            result => {
+
+                console.log("Service Reposne: " + result);
+                if (result == true){
+                    this.clear();
+                    this.message.push("AIESINGLE RECORD SUCCESSFULLY ADDED ");
+                    console.log("Message: " + this.message);
+                    
+                }else{
+                    //this.message.push(result.message.split('=')[1]);
+                    this.message.push(result.message);
+                }
+                
+            },
+            error => {
+                this.errorMessage = <any>error;
+                //log error
+                console.error(this.errorMessage);
+                this.message.push("COULD NOT SAVE SIESINGLE RECORD" + this.errorMessage);
+
+            });
+    }
+
+    clear() {
+        console.log("Clearing content");
+        this.ngOnInit();
+        this.aieSingle = new DataCollector("","", 0, 0, 0, "", "", "", "", "", "", "", 0, "", "", "", "", 0, 0);
+        this.region = 0;
+        this.salesCd = 0;
+        this.fmc = 0;
+        this.custNo = "";
+        this.costAcct = "";
+        //clear any msg
+        this.message.length = 0;
+        console.log("Content Cleared");
+        
+    }
+
+    costAcctChangeBrodCast(costAcct) {
+        let salesCd = "";
+        console.log("in costAcctChangeBroadCost: Cost Acct: " + costAcct + " sales Code from model " + this.aieSingle.salesCd);
+        salesCd = this.aieSingleService.getSalesCodeForCostAcct(costAcct, this.aieSingle.salesCd);
+        console.log("in costAcctChangeBroadCost: Sales Code: " + salesCd);
+        this.salesCdSelector.salesCode = salesCd;
+        this.aieSingle.salesCd = salesCd;
+    }
+
+    salesCodeChangeBrodCast(salesCd) {
+        let costAcct = "";
+        console.log("in salesCodeChangeBrodCost: salesCd:  " + salesCd);
+        costAcct = this.aieSingleService.getCostAcctForSalesCode(salesCd, this.aieSingle.costAcct);
+        console.log("in salesCodeChangeBrodCost: costAcct: " + costAcct);
+        this.costAcctSelector.costAcct = costAcct;
+        if(null != costAcct && costAcct !== "") this.aieSingle.costAcct = Number(costAcct);
+    }
+
+    validateSalesCode(salesCode, costAcct) {
+        console.log("validaton check", salesCode, costAcct);
+
+        //    if(null == salesCode && salesCode.trim() === ""){
+        //        this.message.push("Sales Code is Required");
+        //    }
+
+        switch (salesCode) {
+            //case "V3": //already defined below
+            case "X2":
+                //case "U2": //already defined below
+                //case "U3": //already defined        
+                if (costAcct == "") this.message.push("Sales Code X1 ==> No Cost Acct ");
+                //this.aieSingleForm.costAcct="";
+                break;
+            case "Q1":
+            case "A1":
+            case "A8":
+
+                if (costAcct != "") this.message.push("Sales Code Q1, A1, A8 ==> No Cost Acct ");
+                //this.aieSingleForm.costAcct="";
+                break;
+            case "V3":
+
+                if (costAcct != "161") this.message.push("Sales Code V3 can only be used with Cost Acct 161");
+                //this.aieSingleForm.costAcct="161";
+                break;
+            case "U2":
+            case "U3":
+                if (!(costAcct == "145" ||
+                    costAcct == "170" ||
+                    costAcct == "172" ||
+                    costAcct == "180" ||
+                    costAcct == "811")) this.message.push("For Sales Code U2, U3 Cost Acct" + costAcct + " is not valid");
+                break;
+            case "P1":
+
+                if (costAcct != "511") this.message.push("Sales Code P1 can only be used with cost account 511");
+                //this.aieSingleForm.costAcct="511";
+                break;
+            case "V4":
+                if (costAcct != "191") this.message.push("Sales Code V4 ==> Cost Acct 191");
+                //this.aieSingleForm.costAcct="191";
+                break;
+            case "D1":
+                if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
+                {
+                    this.message.push("Only CO Admin & CO-Support can use D1 and D2");
+                    return false;                    
+                }
+                break;
+            case "D2":
+                if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
+                {
+                    this.message.push("Only CO Admin & CO-Support can use D1 and D2");
+                    return false;                    
+                }
+                break;
+            default:
+                alert("PLEASE SELECT SALES CODE");
+                return false;
+                //this.message.push("SALES CODE IS REQUIRED");
+                //break;
+                //return false;
+
+        }
+        console.log("validaton check: ");
+        //this.message.push(result);
+    }
+
+    validateFormFields(aieSingleForm) {
+        console.log("validaton check for amount", aieSingleForm);
+        console.log("validaton check for customer ", this.customer);
+
+        //    if(!aieSingleForm.credInd.checked) {
+        //    this.message.push( "BillBack isRequir;
+        //    }
+
+        var custRegExp = new RegExp('^[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9A-Z]{6}-[0-9]{3}$');
+        if (this.customer === null) {
+            alert("PLEASE ENTER CUSTOMER NUMBER");
+            return false;
+            //this.message.push("CustomerNo is required");
+        } else {
+            if (!custRegExp.test(this.customer)) {
+                alert("INVALID CUSTOMER NUMBER FORMAT");
+                return false;
+                //this.message.push("CustomerNo format invalid");
+            }
+        }
+
+
+        var descRegExp = new RegExp('^[0-9]{2}$');
+        if (null != aieSingleForm.dc_class && aieSingleForm.dc_class != "" && !descRegExp.test(aieSingleForm.dc_class)) {
+            //this.message.push("Invalid Agency Class ");
+            alert("INVALID AGENCY CLASS");
+            return false;
+        }
+
+        var tagRegExp = new RegExp('^[0-9]{4}[A-Z]{1}$');
+        if (null != aieSingleForm.tag && aieSingleForm.tag != "" && !tagRegExp.test(aieSingleForm.tag)) {
+            alert("INVALID TAG FORMAT ");
+            return false;
+            //this.message.push(" Invalid Tag format ");
+        }
+
+        var amtRegExp = new RegExp('^[0-9]{0,7}(\.[0-9]{0,2})?$');
+        if (!amtRegExp.test(aieSingleForm.dolAmt)) {
+            alert("INVALID AMOUNT");
+            return false;
+            //this.message.push("Invalid Amount ");
+        }
+
+        if (null === aieSingleForm.desc1 || aieSingleForm.desc1.trim() === "") {
+            alert("PLEASE ENTER DESCRIPTION");
+            return false;
+            //this.message.push("Enter Descritpion ");
+        }
+        if(aieSingleForm.desc1.indexOf('"')> -1 || aieSingleForm.desc1.indexOf("<script")> -1)
+        {
+            alert("DESCRIPTION DETAILS CONTAIN INVALID CHARACTERS");
+            return false;
+        }
+        
+        if (null == aieSingleForm.dolAmt || 0 == aieSingleForm.dolAmt )
+        {
+            alert("PLEASE ENTER AMOUNT");
+            return false;
+        }
+        
+        this.inboac = this.customer.split("-", 5)[3];
+        if ( this.inboac.substring(0,2) === "47" )
+        {
+            if(null == aieSingleForm.fundCdBOAC || aieSingleForm.fundCdBOAC == "")
+            {
+                alert("FUNDCODE CAN NOT BE EMPTY FOR ENTERED BOAC");
+                return false;
+            }
+            
+        }
+
+
+    }
+
+    isNumber(x: any): x is number {
+        return typeof x === "number";
+    }
+
+    isString(x: any): x is string {
+        return typeof x === "string";
+    }
+}
+

@@ -1,0 +1,131 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "ng2-daterangepicker",
+        "scope": null,
+        "escapedName": "ng2-daterangepicker",
+        "name": "ng2-daterangepicker",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "C:\\work\\aieWorkspace\\aiedecisiontoolclient"
+    ]
+  ],
+  "_from": "ng2-daterangepicker@latest",
+  "_id": "ng2-daterangepicker@2.0.7",
+  "_inCache": true,
+  "_location": "/ng2-daterangepicker",
+  "_nodeVersion": "7.7.3",
+  "_npmOperationalInternal": {
+    "host": "packages-18-east.internal.npmjs.com",
+    "tmp": "tmp/ng2-daterangepicker-2.0.7.tgz_1492005393744_0.9145407669711858"
+  },
+  "_npmUser": {
+    "name": "mevans",
+    "email": "evansmwendwa@live.com"
+  },
+  "_npmVersion": "4.4.4",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "ng2-daterangepicker",
+    "scope": null,
+    "escapedName": "ng2-daterangepicker",
+    "name": "ng2-daterangepicker",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/ng2-daterangepicker/-/ng2-daterangepicker-2.0.7.tgz",
+  "_shasum": "ab059b9f9ededc4960a4433c0a9e76fecf85d5f2",
+  "_shrinkwrap": null,
+  "_spec": "ng2-daterangepicker",
+  "_where": "C:\\work\\aieWorkspace\\aiedecisiontoolclient",
+  "bugs": {
+    "url": "https://github.com/evansmwendwa/ng2-daterangepicker/issues"
+  },
+  "dependencies": {
+    "@types/jquery": "^2.0.40",
+    "bootstrap-daterangepicker": "^2.1.25",
+    "jquery": "^3.1.1",
+    "moment": "^2.16.0"
+  },
+  "description": "Angular 2 DaterangePicker component",
+  "devDependencies": {
+    "@angular/cli": "1.0.0",
+    "@angular/common": "^4.0.0",
+    "@angular/compiler": "^4.0.0",
+    "@angular/compiler-cli": "^4.0.1",
+    "@angular/core": "^4.0.0",
+    "@angular/forms": "^4.0.0",
+    "@angular/http": "^4.0.0",
+    "@angular/platform-browser": "^4.0.0",
+    "@angular/platform-browser-dynamic": "^4.0.0",
+    "@angular/platform-server": "^4.0.1",
+    "@angular/router": "^4.0.0",
+    "@types/jasmine": "2.5.38",
+    "@types/node": "~6.0.60",
+    "codelyzer": "~2.0.0",
+    "core-js": "^2.4.1",
+    "jasmine-core": "~2.5.2",
+    "jasmine-spec-reporter": "~3.2.0",
+    "karma": "~1.4.1",
+    "karma-chrome-launcher": "~2.0.0",
+    "karma-cli": "~1.0.1",
+    "karma-coverage-istanbul-reporter": "^0.2.0",
+    "karma-jasmine": "~1.1.0",
+    "karma-jasmine-html-reporter": "^0.2.2",
+    "moment": "^2.18.1",
+    "protractor": "~5.1.0",
+    "rxjs": "^5.1.0",
+    "ts-node": "~2.0.0",
+    "tslint": "~4.5.0",
+    "typescript": "~2.2.0",
+    "zone.js": "^0.8.4"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "ab059b9f9ededc4960a4433c0a9e76fecf85d5f2",
+    "tarball": "https://registry.npmjs.org/ng2-daterangepicker/-/ng2-daterangepicker-2.0.7.tgz"
+  },
+  "files": [
+    "README.md",
+    "index.js",
+    "index.d.ts",
+    "daterangepicker.component.css",
+    "lib/*"
+  ],
+  "gitHead": "a5fb6dcadfc8d1df35472ee13e013191c7522054",
+  "homepage": "https://github.com/evansmwendwa/ng2-daterangepicker#readme",
+  "license": "MIT",
+  "main": "./index.js",
+  "maintainers": [
+    {
+      "name": "mevans",
+      "email": "evansmwendwa@live.com"
+    }
+  ],
+  "name": "ng2-daterangepicker",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evansmwendwa/ng2-daterangepicker.git"
+  },
+  "scripts": {
+    "build": "ng build",
+    "e2e": "ng e2e",
+    "lint": "ng lint",
+    "ng": "ng",
+    "ngc-build": "rm -rf lib && \"node_modules/.bin/ngc\" -p tsconfig-aot.json",
+    "start": "ng serve",
+    "test": "ng test"
+  },
+  "types": "./index.d.ts",
+  "version": "2.0.7"
+}

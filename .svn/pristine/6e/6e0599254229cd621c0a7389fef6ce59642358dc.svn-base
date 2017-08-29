@@ -1,0 +1,15 @@
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-aie-header',
+  templateUrl: './aie-header.component.html',
+  styleUrls: ['./aie-header.component.css']
+})
+export class AieHeaderComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

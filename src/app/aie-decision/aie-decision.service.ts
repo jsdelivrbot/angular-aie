@@ -1,0 +1,347 @@
+import { Injectable } from '@angular/core';
+import { Http, Response, Headers, RequestOptions, URLSearchParams } from '@angular/http';
+// Converting the response to JSON
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/toPromise';
+
+import { AIEDecision } from './aie-decision';
+import { Customer    } from './Customer';
+
+@Injectable()
+export class AieDecisionService {      
+  //private headers = new Headers({'Content-Type': 'application/json'});
+  private options = new RequestOptions({headers: new Headers({'Content-Type': 'application/json'})});
+  private headers = new Headers({'Content-Type': 'application/json'});
+    
+  constructor(private http: Http) { }
+
+    getLIDs(zone: string): Observable<string[]> {
+        console.log("Zone getLIDs: " + zone);
+        let params: URLSearchParams = new URLSearchParams();
+        params.set("zone", zone);
+        this.options.search = params;
+        
+        return this.http.get('aiedec/lids', this.options)
+            .map(this.extractData)
+            .catch(this.handleError);
+    }
+
+    getCustomers(lid: string): Observable<string[]>{
+        console.log("Lid getCustomers: " + lid);
+        let params: URLSearchParams = new URLSearchParams();
+        params.set("FSRLID", lid);
+        this.options.search = params;
+        console.log("params: " + this.options.search);
+        
+        let customers = this.http.get('aiedec/customers', this.options)
+            .map(this.extractCustomerNumber)
+            .catch(this.handleError);
+        
+//      console.log("Customer 2: ", customers || { });
+        
+        return customers;
+    }
+
+    getAIEDecRepairsByLid(lid: string, repairclass: string): Observable<AIEDecision[]> {
+        let params: URLSearchParams = new URLSearchParams();
+        params.set("FSRLID", lid);
+        params.set("repairclass", repairclass);
+        this.options.search = params;
+        
+        return this.http.get('aiedec/repairsByLid', this.options)
+            .map(this.extractDataRows)
+            .catch(this.handleError);
+    }
+
+    getAIEDecRepairs(customer: string, repairclass: string): Observable<AIEDecision[]> {
+//      alert('aie-decision.service.ts repairclass=' + repairclass);
+        let params: URLSearchParams = new URLSearchParams();
+        params.set("customerNumber", customer);
+        params.set("repairclass"   , repairclass);
+        this.options.search = params;
+        
+        return this.http.get('aiedec/repairs', this.options)
+            .map(this.extractDataRows)      
+            .catch(this.handleError);
+    }
+
+
+    submitAiedec(len: number, i: number, userLid: string): Observable<AIEDecision[]> {
+        let url = "aiedec/saveOrReview";  
+
+        console.log("aie-decision.service.ts: URL: ", url);
+//      console.log("aie-decision.service.ts: newcustdatetime=" + newcustdatetime);
+        
+//        for (var i=0; i<len; i++) {
+//            if (i == idx) {
+                let params: URLSearchParams = new URLSearchParams();
+                params.set("region"   , document.getElementsByName('rpRegion'      )[i]["value"]);
+                params.set("seqno"    , document.getElementsByName('rpSequenceNo'  )[i]["value"]);
+                params.set("agencyCl" , document.getElementsByName('agencyCl'      )[i]["value"]);
+                params.set("tag"      , document.getElementsByName('tag'           )[i]["value"]);
+                params.set("boac"     , document.getElementsByName('boac'          )[i]["value"]);
+                params.set("actno"    , document.getElementsByName('actNo'         )[i]["value"]);
+                params.set("aieamt"   , document.getElementsByName('aieamount'     )[i]["value"]);
+                params.set("salesCode", document.getElementsByName('salesCode'     )[i]["value"]);
+                params.set("costAcct" , document.getElementsByName('costAcct'      )[i]["value"]);
+                params.set("descChgd" , document.getElementsByName('descChgd'      )[i]["value"]);
+//
+                var x     = document.getElementsByName('desc1234')[i]["value"];
+                var desc1 = x.substr( 0, 25);
+                var desc2 = x.substr(25, 25);
+                var desc3 = x.substr(50, 25);
+                var desc4 = x.substr(75, 25);
+           
+                params.set("desc1", desc1);
+                params.set("desc2", desc2);
+                params.set("desc3", desc3);
+                params.set("desc4", desc4);
+//        
+                var j = document.getElementsByName('justification')[i]["value"];
+                params.set("justif", j);
+                
+                params.set("justifRsn"      , "");            
+                params.set("newCustNo"      , ""   );
+                params.set("newCustRegion"  , "00" );
+                params.set("newCustFmc"     , "00" );
+                params.set("newCustSubfmc"  , "00" );
+                params.set("newCustBoac"    , ""   );
+                params.set("newCustSerial"  , "000");
+//              params.set("newCustDateTime", ""   );
+        
+                if (j == "01")                      // 01 - AIE needs billed 
+                    params.set("justifRsn", document.getElementsByName('justifReason01')[i]["value"]);
+                else
+                if (j == "02") {                    // 02 - AIE different agency
+                    params.set("justifRsn", document.getElementsByName('justifReason02')[i]["value"]);
+                    
+                    var c = document.getElementsByName('newcustno')[i]["value"];            // 00-00-00-XXXXXX-000 format
+                    params.set("newCustNo", c);
+//                  params.set("newCustNo", justifCstNo);
+//                  var c = justifCstNo;            // 00-00-00-XXXXXX-000 format
+                
+                    var newCustRegion = c.substr( 0, 2);     
+                    var newCustFmc    = c.substr( 3, 2);
+                    var newCustSubfmc = c.substr( 6, 2);
+                    var newCustBoac   = c.substr( 9, 6);
+                    var newCustSerial = c.substr(16, 3);            
+                    params.set("newCustRegion"  , newCustRegion  );
+                    params.set("newCustFmc"     , newCustFmc     );
+                    params.set("newCustSubfmc"  , newCustSubfmc  );
+                    params.set("newCustBoac"    , newCustBoac    );
+                    params.set("newCustSerial"  , newCustSerial  );
+//                  params.set("newCustDateTime", newcustdatetime);
+                }
+
+//              console.log("aie-decision.service.ts:: after params set newcustdatetime=");
+
+                params.set("revwLid", userLid);
+
+// other field(s) to avoid error in updating Repair record
+                params.set("actdttime", document.getElementsByName('actdttime')[i]["value"]);        
+//
+        
+                this.options.search = params;
+
+                return this.http.post(url, JSON.stringify(params), this.options)
+                    .map(res => res.json()) 
+                    .catch(this.handleErrorRow);
+//            }
+//        }
+    }
+//
+    
+    private extractData(res: Response) {
+        let body = res.json();
+        console.log("body: ", body || { });
+//      alert(body[0].rp_Region + " " + body[0].as_ActNo + " " + body[0].rp_SequenceNo);
+        return body || { };
+    }
+
+    private extractDataRows(res: Response) {
+        let body = res.json();
+        console.log("body before: ", body || { });
+//      alert(body[0].rp_Region + " " + body[0].as_ActNo + " " + body[0].rp_SequenceNo);
+        
+        if (body.length > 0) {
+            for (var i=0; i<body.length; i++) {
+                if (body[i].rp_AieAmount == 0 )     body[i].rp_AieAmount = body[i].rp_TotalEst;
+                if (body[i].as_SalesCode == "")     body[i].as_SalesCode = "X2";
+            }
+        }
+        
+        console.log("body after: w/ aieamount=", body || { });
+        
+        return body || { };
+    }
+
+
+    getDCdesc(region, actNo, rpSequenceNo) {        // get from DATA-COLLECTOR
+        console.log("aie-decision.service.ts: getDCdesc region/actno/rpseqno=" + region + " " + actNo + " " + rpSequenceNo);
+        
+        let params: URLSearchParams = new URLSearchParams();
+        params.set("region"      , region      );
+        params.set("actNo"       , actNo       );
+        params.set("rpSequenceNo", rpSequenceNo);
+        this.options.search = params;
+        
+        console.log("params: " + this.options.search);
+        
+        let descDetails = this.http.get('aiedec/dcDesc', this.options)
+            .map(this.extractDataDescDC)
+            .catch(this.handleError);
+
+        return descDetails;
+    }   
+
+    getIDdesc(region, rpSequenceNo) {               // get from INCOME-DET-2MOS
+        console.log("aie-decision.service.ts: getIDdesc region/rpseqno=" + region + " " + rpSequenceNo);
+        
+        let params: URLSearchParams = new URLSearchParams();
+        params.set("region"      , region      );
+        params.set("rpSequenceNo", rpSequenceNo);
+        this.options.search = params;
+        
+        console.log("params: " + this.options.search);
+        
+        let descDetails = this.http.get('aiedec/idDesc', this.options)
+            .map(this.extractDataDescID)
+            .catch(this.handleError);
+
+        return descDetails;
+    }   
+
+    
+    getCustomerByCustNo(i, newregion, newfmc, newsubfmc, newboac, newserial) {
+        console.log("aie-decision.service.ts: getCustomerByCustNo=" + newregion + " " + newfmc + " " + newsubfmc + " " + newboac + " " + newserial);
+        
+        let params: URLSearchParams = new URLSearchParams();
+        params.set("newregion", newregion);
+        params.set("newfmc"   , newfmc   );
+        params.set("newsubfmc", newsubfmc);
+        params.set("newboac"  , newboac  );
+        params.set("newserial", newserial);
+        this.options.search = params;
+        
+        console.log("params: " + this.options.search);
+        
+        let tempCusts = this.http.get('aiedec/newcust', this.options)
+            .map(this.extractData)
+            .catch(this.handleError);
+
+        return tempCusts;
+    }   
+    
+    descArray: string[];
+    private extractDataDescDC(res: Response) {          // DATA-COLLECTOR
+        let body   = res.json();
+        let result = [];
+        
+        let desc1 = "";
+        let desc2 = "";
+        let desc3 = "";
+        let desc4 = "";
+        
+        console.log("DC res="  + res);
+        console.log("DC body=" + body);
+        
+        for (let descArray of body) {
+            desc1 = descArray[4];
+            desc2 = descArray[5];
+            desc3 = descArray[6];
+            desc4 = descArray[7];
+                      
+            let descString = "" + desc1 + desc2 + desc3 + desc4;
+            result.push(descString);
+        }
+        
+        console.log("DC result: ", result || { });
+        return result;
+    }
+
+    private extractDataDescID(res: Response) {          // INCOME-DET-2MOS
+        let body   = res.json();
+        let result = [];
+        
+        let desc1 = "";
+        let desc2 = "";
+        let desc3 = "";
+        let desc4 = "";
+        
+        console.log("ID res="  + res);
+        console.log("ID body=" + body);
+        
+        for (let descArray of body) {
+            desc1 = descArray[2];
+            desc2 = descArray[3];
+            desc3 = descArray[4];
+            desc4 = descArray[5];
+                      
+            let descString = "" + desc1 + desc2 + desc3 + desc4;
+            result.push(descString);
+        }
+        
+        console.log("ID result: ", result || { });
+        return result;
+    }
+
+    
+    private extractCustomerNumber(res: Response) {
+        console.log("Lid extractCustomerNumber: " + res);
+        let body   = res.json()
+        let result = [];
+        let region = "";
+        let fmc    = "";
+        let subfmc = "";
+        let boac   = "";
+        let serial = "";
+        
+        for (let customer of body){
+            region = customer[0];
+            fmc    = customer[1];
+            subfmc = customer[2];
+            boac   = customer[3];
+            serial = customer[4].toString();
+            
+            console.log("customer of body=" + region + "-" + fmc + "-" + subfmc + "-" + boac + "-" + serial);
+            
+            if (region < "10")    region = "0" + region;
+            if (fmc    < "10")    fmc    = "0" + fmc;
+            if (subfmc < "10")    subfmc = "0" + subfmc;
+            
+            if (boac   == null || boac == ""  )     boac   = "000000";            
+            
+            if (serial == null || serial == "")     serial = "000";             else
+            if (serial.length == 1)                 serial = "00"  + serial;    else
+            if (serial.length == 2)                 serial = "0"   + serial;
+            
+            let custString = region + "-" + fmc + "-" + subfmc + "-" + boac + "-" + serial;
+            result.push(custString);
+        }
+        console.log("result: ", result || { });
+        return result;
+    }
+
+    private extractSingleObject(res: Response) {
+        let body = res.json();
+        console.log("body: ", body || { });
+        console.log("body.code/message=" + body.code + " " + body.message);
+        return body;
+    }
+
+    
+    private handleError(error: any): Promise<any> {
+        console.error('An error occurred: ' +  error); 
+        return Promise.reject(error.message || error);
+    }
+
+    private handleErrorRow(error: any): Promise<any> {
+        console.error('An error occurred: ' +  error); 
+        error = "UPDATE FAILED due to some exception." + 
+                "\n\n\Click OK to see the row highlighted in red.";
+        return Promise.reject(error.message || error);
+    }
+
+}

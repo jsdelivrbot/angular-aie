@@ -1,0 +1,17 @@
+<!--This is your master form-->
+<form [formGroup]="teamForm">
+  <!--Use formArray to create multiple, smaller forms'-->
+  <table formArrayName="memberDetails">
+    <tr *ngFor="let single of allTeamDetails; let $index=index">
+      <div [formGroupName]="$index">
+        <td>
+          <!--your field properties of every repeated items-->
+          <input placeholder="First Name" type="text" formControlName="firstName" />
+        </td>
+        <td>
+          <input placeholder="Last Name" type="text" formControlName="lastName" />
+        </td>
+      </div>
+    </tr>
+  </table>
+</form>

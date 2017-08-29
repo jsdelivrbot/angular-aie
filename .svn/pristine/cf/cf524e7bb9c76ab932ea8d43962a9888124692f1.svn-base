@@ -1,0 +1,5 @@
+<select name="justification" class="form-control" style="max-width:100%" 
+	[(ngModel)]="justification" 
+	(ngModelChange)="change($event)">
+	<option *ngFor="let reason of justifications" [value]="reason.code">{{reason.description}}</option>
+</select>

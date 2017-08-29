@@ -1,0 +1,64 @@
+<td>
+	<select class="form-control" id="idSalesCode" name="idSalesCode" [(ngModel)]="salesCode" 
+		(ngModelChange)="changeSalesCode($event)">
+		<option *ngFor="let salesCode of salesCodes">{{salesCode}}</option> 
+	</select>
+</td>
+
+<td>
+	<select class="form-control" *ngIf="salesCode=='X2'" [(ngModel)]="costAccount" 
+		(ngModelChange)="changeCostAccount($event)">
+		<option *ngFor="let costAccount of costAccountX2">{{costAccount}}</option>
+	</select>
+</td>
+
+<td>
+	<select class="form-control" *ngIf="salesCode=='Q1' || salesCode=='A1' || salesCode=='A8'" 
+		[(ngModel)]="costAccount" (ngModelChange)="changeCostAccount($event)">
+		<option value=0>000</option>
+	</select>
+</td>
+
+<td>
+	<select class="form-control" *ngIf="salesCode=='V3'" [(ngModel)]="costAccount" 
+		(ngModelChange)="changeCostAccount($event)">
+		<option *ngFor="let costAccount of costAccountV3">{{costAccount}}</option>
+	</select>
+</td>
+
+<td>
+	<select class="form-control" *ngIf="salesCode=='V4'" [(ngModel)]="costAccount" 
+		(ngModelChange)="changeCostAccount($event)">
+		<option *ngFor="let costAccount of costAccountV4">{{costAccount}}</option>
+	</select>
+</td>
+
+<td>
+	<select class="form-control" *ngIf="salesCode=='U2' || salesCode=='U3'" [(ngModel)]="costAccount" 
+		(ngModelChange)="changeCostAccount($event)">
+		<option *ngFor="let costAccount of costAccountU23">{{costAccount}}</option>
+	</select>
+</td>
+
+<td>
+	<select class="form-control" *ngIf="salesCode=='P1'" [(ngModel)]="costAccount" 
+		(ngModelChange)="changeCostAccount($event)">
+		<option *ngFor="let costAccount of costAccountP1">{{costAccount}}</option>
+	</select>
+</td>
+
+<td>
+	<select class="form-control" *ngIf="salesCode=='' || salesCode == null" [(ngModel)]="costAccount" 
+		(ngModelChange)="changeCostAccount($event)">
+		<option *ngFor="let costAccount of costAccountBlank">{{costAccount}}</option>
+	</select>
+</td>
+
+<td>
+	<select class="form-control" *ngIf="salesCode == 'D1' || salesCode == 'N1' || salesCode == 'S1' || 
+										salesCode == 'X1' || salesCode == 'X4'" [(ngModel)]="costAccount" 
+										(ngModelChange)="changeCostAccount($event)">
+		<option value=0>000</option>
+		<option *ngFor="let costAccount of costAccountAll">{{costAccount}}</option>
+	</select>
+</td>

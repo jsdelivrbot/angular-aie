@@ -1,0 +1,60 @@
+{
+	"/saleAie/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+	"/fct/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+
+	"/aiedec/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+
+	"/RepairAIE/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+
+	"/AieMultiple/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+
+	"/aiesingle/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+
+	"/common/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+
+	"/MiscAIE/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+
+	"/sso/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	},
+
+	"/modulepage/*":{
+		"target": "http://localhost:8080",
+		"secure": false,
+		"logLevel": "debug"
+	}
+}

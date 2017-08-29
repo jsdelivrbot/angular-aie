@@ -1,0 +1,904 @@
+
+import { Component, OnInit, NgModule, ViewChild  } from '@angular/core';
+
+//For model driven forms
+import { FormGroup, FormControl, FormsModule } from '@angular/forms';
+
+// For services
+import { AieDecisionService } from './aie-decision.service';
+import { AIEDecision } from './aie-decision';
+import { Customer } from './Customer';
+
+import 'rxjs/util/isNumeric';
+
+import { CompleterService, CompleterData } from 'ng2-completer';
+import { TypeaheadModule } from 'ngx-bootstrap';
+import { DatepickerModule } from 'ngx-bootstrap';
+
+import { CommonService } from '../common-components/common.service';
+//import { RegionSelectComponent } from '../common-components/region-select/region-select.component';
+import { JustificationSelectComponent } from '../common-components/justification-select/justification-select.component';
+import { LoadingBarComponent } from '../common-components/loading-bar/loading-bar.component';
+
+import { ModalDirective } from 'ngx-bootstrap/modal';
+import {ActivatedRoute} from '@angular/router';
+import { PopoverModule } from 'ngx-bootstrap';
+
+@Component({
+  selector: 'app-aie-decision',
+  templateUrl: './aie-decision.component.html',
+  styleUrls: ['./aie-decision.component.css']
+})
+
+export class AieDecisionComponent implements OnInit {
+
+   /*
+   * @ViewChild allows you to directly access an instance of a child component.
+   * This will allow you to access any public defined variables of the child
+   * as well.
+   * 
+   * @ViewChild can also allow you to directly access local variables from
+   * the view/html. And example can be seen in LoadingBarComponent.
+   */
+  @ViewChild(LoadingBarComponent )      public loadingBarComponent: LoadingBarComponent; 
+  @ViewChild(PopoverModule       )      public popoverModule:       PopoverModule;
+    
+  @ViewChild('searchmodal'       )      public searchmodal:         ModalDirective;
+  @ViewChild('clearscreenmodal'  )      public clearscreenmodal:    ModalDirective;
+  @ViewChild('assemblymodal'     )      public assemblymodal:       ModalDirective;
+  @ViewChild('aiejustmodal'      )      public aiejustmodal:        ModalDirective;
+  @ViewChild('savebillbacksmodal')      public savebillbacksmodal:  ModalDirective;
+    
+//  options: NgDateRangePickerOptions;
+   
+  repairClassesParam: string;
+  aieForm;
+  customerForm;
+
+  zone:   "";
+  lid:    "";
+  custno: "";
+  boac:   "";
+  justification: "";
+  region: "";
+  cstDtTime: "";
+  customer: string;
+  newCustomer: string;
+  vh_Agency_Cl;
+  vh_Tag;
+  rpRegion;
+  rpSequenceNo;
+  aieAmount;
+  repairclass;
+  actNo;
+  sequenceNo;
+  userLid;
+  justifIndex:     number;
+
+    
+  constructor(
+      private aieDecisionService: AieDecisionService, 
+      private commonService: CommonService,
+      route: ActivatedRoute
+  ) { 
+      console.log('route', route);
+      
+      this.repairClassesParam = route.snapshot.params['repairClasses'];
+//    alert(this.repairClassesParam);
+      }
+
+    
+  ngOnInit() {
+//    alert("ngOnInit...");
+      this.aieForm = new FormGroup({
+            aie_class: new FormControl(""),
+            aie_tag: new FormControl(""),
+            aie_boac: new FormControl(""),
+//          aie_trans_date: new FormControl(""),
+            aie_line_cost: new FormControl(""),
+            aie_aie_amount: new FormControl(""),
+            aie_justification: new FormControl(""),
+//          aie_key: new FormControl(""),
+//          aie_newCustNum: new FormControl(""),
+            aie_region: new FormControl(""),
+            aie_sequenceno: new FormControl(""),
+            aie_aieamount: new FormControl(""),
+            aie_dc_Desc1: new FormControl(""),
+            aie_dc_Desc2: new FormControl(""),
+            aie_dc_Desc3: new FormControl(""),
+            aie_dc_Desc4: new FormControl(""),
+            aie_as_Comment: new FormControl(""),
+            aie_rp_TotalEst: new FormControl(""),
+            aie_actNo: new FormControl(""),
+            aie_rpSequenceNo: new FormControl("")
+        });
+    
+      this.customerForm = new FormGroup({
+          aie_region: new FormControl(""),
+          aie_fmc: new FormControl(""),
+          aie_boac: new FormControl(""),
+          aie_serial: new FormControl("")
+      });
+
+      this.repairclass = this.repairClassesParam;
+      this.initScreen();
+
+      this.justifIndex = 0;
+  }
+
+    
+    public NoWhitespaceValidator(fieldval) {
+        let isWhitespace = (fieldval || '').trim().length === 0;
+        let isValid = !isWhitespace;
+        return isValid ? null : { 'whitespace': true }
+    }
+
+    
+    msg: string;
+    errorMessage: string;
+  
+    //Get the list of LIDs for drop down menu
+    lids: string[];
+    getLIDs() {
+        this.loadingBarComponent.loadingModal.show();
+        
+        this.lid = "";
+        this.customer = "";
+        
+        this.aieDecisionService.getLIDs(this.zone)
+            .subscribe(
+                lids  => {
+                    this.lids = lids;
+                    this.loadingBarComponent.loadingModal.hide();
+                    this.hideTableButtons();
+                    if (lids.length == 0) {
+                        alert('LIDS NOT FOUND!');
+                        return false;
+                    }
+                },
+                error => {
+                    this.loadingBarComponent.loadingModal.hide();
+                    this.errorMessage = <any>error;
+                }
+            );
+//         console.log("LIDs: ", this.lids);
+    }
+
+    customers: string[];
+    getCustomers() {
+        this.loadingBarComponent.loadingModal.show();
+
+        this.customer = "";
+
+        console.log("this.lid=" + this.lid);
+        this.aieDecisionService.getCustomers(this.lid)
+            .subscribe(
+                customers => {
+                    this.customers = customers;
+                    this.loadingBarComponent.loadingModal.hide();
+                    this.hideTableButtons();
+                    if (customers.length == 0) {
+                        alert('CUSTOMERS NOT FOUND!');
+                        return false;
+                    }
+                },
+                error => {
+                    this.loadingBarComponent.loadingModal.hide();
+                    this.errorMessage = <any>error;
+                    this.customerForm.pathValue({message: this.errorMessage});
+                });
+//      this.customers = ['String1','String2'];  
+    }
+
+    
+    //Get the list of Repairs for AIE Review
+    AIEDecisions: AIEDecision[];
+    aiePages = [];
+    aiePage  = [];
+//  sortedArray: string[];
+
+    currentPage : number;
+    totalPages  : number;
+    startItem   : number;
+    endItem     : number;
+    totalItems  : number;
+    itemsPerPage: number = 20;
+
+    haveNoPage  : boolean = true;
+
+    getAIEDecRepairs() {
+        this.loadingBarComponent.loadingModal.show();
+
+        if (this.customer > "") {
+            this.aieDecisionService.getAIEDecRepairs(this.customer, this.repairclass)
+                .subscribe(
+                    AIEDecisions => {
+                        this.AIEDecisions = AIEDecisions;
+                        this.loadingBarComponent.loadingModal.hide();
+                        this.hideTableButtons();
+                        if (AIEDecisions.length == 0) {
+                            alert('NO RECORDS FOUND!');
+                            this.totalItems = 0;
+                            return false;
+                        }
+                        this.showTableButtons();
+                        this.totalItems  = this.AIEDecisions.length;
+                        this.aiePages    = this.commonService.breakArray(this.itemsPerPage, this.AIEDecisions);
+                        this.totalPages  = this.aiePages.length;
+                        this.currentPage = 1;
+                        this.changePage(this.currentPage);
+                        this.haveNoPage = false;
+                    },
+                    error => {
+                        this.loadingBarComponent.loadingModal.hide();
+                        this.errorMessage = <any>error;
+                        this.aieForm.patchValue({message: this.errorMessage});
+                    }
+                );
+        }
+        else {
+            this.aieDecisionService.getAIEDecRepairsByLid(this.lid, this.repairclass)
+                .subscribe(
+                    AIEDecisions => {
+                        this.AIEDecisions = AIEDecisions;
+                        this.loadingBarComponent.loadingModal.hide();
+                        this.hideTableButtons();
+                        if (AIEDecisions.length == 0) {
+                            alert('NO RECORDS FOUND!');
+                            return false;
+                        }
+                        this.showTableButtons();
+                        this.totalItems  = this.AIEDecisions.length;
+                        this.aiePages    = this.commonService.breakArray(this.itemsPerPage, this.AIEDecisions);
+                        this.totalPages  = this.aiePages.length;
+                        this.currentPage = 1;
+                        this.changePage(this.currentPage);
+                        this.haveNoPage = false;
+                    },
+                    error => {
+                        this.loadingBarComponent.loadingModal.hide();
+                        this.errorMessage = <any>error;
+                        this.aieForm.patchValue({message: this.errorMessage});
+                    }
+                );
+        }
+    }
+
+    
+    changePage(p: number) {
+        this.currentPage = p;
+        this.aiePage = this.aiePages[this.currentPage - 1];
+        this.startItem = ((this.currentPage - 1) * this.itemsPerPage) + 1;
+        this.endItem = this.startItem + this.aiePage.length - 1;
+    }
+    
+//handle pagination change
+    pageChanged(e) {
+        //this.currentPage = e.page;
+        this.changePage(e.page);
+    }
+
+
+    initScreen() {
+        if (this.repairClassesParam == "123") 
+            (<HTMLInputElement>document.getElementById('screenTitle')).innerHTML = "AIE Decision - Repair Class 1, 2, 3";
+        else
+            (<HTMLInputElement>document.getElementById('screenTitle')).innerHTML = "AIE Decision - Repair Class 4, 5";
+
+        this.repairclass = this.repairClassesParam;
+        this.zone        = "";
+        this.lid         = "";
+        this.customer    = "";
+        this.hideTableButtons();
+        
+        if (this.repairclass == 123) {
+            document.getElementById("savebbButton1")["style"]["visibility"] = "visible";
+            document.getElementById("savebbButton2")["style"]["visibility"] = "visible";        
+            document.getElementById("reviewButton1")["style"]["display"   ] = "none";
+            document.getElementById("reviewButton2")["style"]["display"   ] = "none";        
+        }
+        else {
+            document.getElementById("reviewButton1")["style"]["visibility"] = "visible";
+            document.getElementById("reviewButton2")["style"]["visibility"] = "visible";        
+//          document.getElementById("savebbButton1")["style"]["display"   ] = "none";
+//          document.getElementById("savebbButton2")["style"]["display"   ] = "none";        
+        }
+    }
+
+
+    hideTableButtons() {
+        document.getElementById('table1'       ).hidden=true;    
+        document.getElementById('bottombuttons').hidden=true;   
+        this.haveNoPage = true;
+    }
+    
+    showTableButtons() {
+        document.getElementById('table1'       ).hidden=false;    
+        document.getElementById('bottombuttons').hidden=false; 
+    }
+
+    cancelDesc(i) {
+        document.getElementsByName('desc1234')[i]["value"] = document.getElementsByName('descSave')[i]["value"];
+    }
+
+//////////
+    descDetails: string[];
+    
+    getDesc(i) {                                  // for Assembly Lit modal 
+        if (document.getElementsByName('descChgd')[i]["value"] == "Y")
+            return;
+
+        this.region       = document.getElementsByName('rpRegion'    )[i]["value"];
+        this.actNo        = document.getElementsByName('actNo'       )[i]["value"];
+        this.rpSequenceNo = document.getElementsByName('rpSequenceNo')[i]["value"];
+
+        this.aieDecisionService.getDCdesc(this.region, this.actNo, this.rpSequenceNo)       // first, get from DATA-COLLECTOR
+            .subscribe(
+                descDetails => {
+                    document.getElementsByName('desc1234')[i]["value"] = descDetails;
+                    document.getElementsByName('descSave')[i]["value"] = descDetails;
+                    this.descDetails = descDetails;
+                    console.log("DC descDetails=" + this.descDetails);
+                    if (this.descDetails.length == 0)
+                        this.getIDdesc(i);
+                },
+                error => {
+                    this.errorMessage = <any>error;
+                });
+    }
+
+    getIDdesc(i) {                                // for Assembly Lit modal                 // get from INCOME-DET-2MOS (if not in DATA-COLLECTOR)
+        this.region       = document.getElementsByName('rpRegion'    )[i]["value"];
+        this.rpSequenceNo = document.getElementsByName('rpSequenceNo')[i]["value"];
+
+        this.aieDecisionService.getIDdesc(this.region, this.rpSequenceNo)
+            .subscribe(
+                descDetails => {
+                    document.getElementsByName('desc1234')[i]["value"] = descDetails;
+                    document.getElementsByName('descSave')[i]["value"] = descDetails;
+                    this.descDetails = descDetails;
+                    console.log("ID descDetails=" + this.descDetails);
+                },
+                error => {
+                    this.errorMessage = <any>error;
+                });
+    }
+//////////
+    
+    submitDesc(i) {     // Actually 'OK' button: Temporarily save the Assembly Lit description details (popup/modal); to be stored in database later
+        var x = document.getElementsByName('desc1234')[i]["value"];
+        
+        if (x.toLowerCase().indexOf('"') > -1) {
+            alert ('DESCRIPTION DETAILS CONTAIN INVALID CHARACTER: QUOTE (")');
+            this.assemblymodal.show();
+            return false;
+        }        
+
+        if (x.toLowerCase().indexOf('<script') > -1) {
+            alert ('DESCRIPTION DETAILS CONTAIN INVALID CHARACTERS: <script');
+            this.assemblymodal.show();
+            return false;
+        }        
+        
+        document.getElementsByName('descChgd')[i]["value"] = "Y";
+        document.getElementsByName('descSave')[i]["value"] = document.getElementsByName('desc1234')[i]["value"];
+    }
+
+    clearDesc(i) {      // Assembly Lit description details (popup/modal)
+        document.getElementsByName('desc1234')[i]['value'] = "";
+    }
+
+    
+    justifDropdown() {
+        for (var i=0; i<this.aiePage.length; i++) {
+            if (this.repairclass == 45 && document.getElementsByName("justification")[i]["options"].length < 4) {
+                document.getElementsByName("justification")[i].innerHTML = 
+                    '<option value=""  >- Select -</option>' +
+                    '<option value="01">AIE needs billed</option>' +
+                    '<option value="02">AIE different agency</option>' +
+                    '<option value="03">Bed liner covered by GSA</option>' +
+                    '<option value="04">Brakes high miles miscoded</option>' +
+                    '<option value="05">Cost adjustment</option>' +
+                    '<option value="06">Driver authorized repair over $100</option>' +
+                    '<option value="07">Driver authorized repair under $100</option>' +
+                    '<option value="08">Equipment code added to vehicle</option>' +
+                    '<option value="09">High mile tire replacement miscoded</option>' +
+                    '<option value="10">Non-abuse repair miscoded</option>' +
+                    '<option value="11">PM overdue</option>' +
+                    '<option value="12">PM services performed</option>' +
+                    '<option value="13">Shop performed work before PO</option>' +
+                    '<option value="14">Towed by subcontractor of shop, not called in for PO</option>' +
+                    '<option value="15">Weekend Repairs</option>';
+            }
+        }
+    }
+
+    justifChange(i) {
+        var sel = document.getElementsByName('justification')[i]["value"];
+        
+        if (sel == "01" || sel == "02") {
+            document.getElementById('justificationModal').click();
+                        
+            if (sel == '01') {                                      // 01 - AIE needs billed
+                document.getElementById('custnoEntry').hidden = true;
+                
+                if (document.getElementsByName("justifReason01")[i]["value"] === undefined)  
+                    document.getElementById('justifReason' )["value"] = "";
+                else 
+                    document.getElementById('justifReason' )["value"] = document.getElementsByName("justifReason01")[i]["value"];
+            }
+            else {                                                  // 02 - AIE different agency
+                document.getElementById('custnoEntry').hidden = false;
+                
+                if (document.getElementsByName("justifReason02")[i]["value"] === undefined)
+                    document.getElementById('justifReason' )["value"] = "";
+                else 
+                    document.getElementById('justifReason' )["value"] = document.getElementsByName("justifReason02")[i]["value"];
+                
+                if (document.getElementsByName("newcustno" )[i]["value"] === undefined)
+                    document.getElementById('newCustNumber')["value"] = "";
+                else 
+                    document.getElementById('newCustNumber')["value"] = document.getElementsByName("newcustno")[i]["value"];                
+            }                
+            
+            this.justifIndex = i;
+        }
+    }
+      
+    submitJustif() {        // Actually 'OK' button. Temporarily save the Justification Reason / New Customer No. (popup/modal); to be stored in database later
+        var y = document.getElementById('justifReason')["value"];
+        if (y == "" && document.getElementsByName('justification')[this.justifIndex]["value"] < "03") {
+            alert("JUSTIFICATION REASON IS REQUIRED FOR BILL BACKS");
+            return false; 
+        }
+        
+        if (y.toLowerCase().indexOf('"') > -1) {
+            alert ('JUSTIFICATION REASON CONTAINS INVALID CHARACTER: QUOTE (")');
+            return false;
+        }        
+
+        if (y.toLowerCase().indexOf('<script') > -1) {
+            alert ('JUSTIFICATION REASON CONTAINS INVALID CHARACTERS: <script');
+            return false;
+        }        
+
+//        this.NoWhitespaceValidator(x);
+//        alert("validate whitespace=" + this.NoWhitespaceValidator(x));          // do also for DESC1234 ////////////////////////////////////
+        
+        if (document.getElementsByName('justification' )[this.justifIndex]["value"] == '01')          // 01 - AIE needs billed
+            document.getElementsByName('justifReason01')[this.justifIndex]["value"] = y;
+        else {                                                                                        // 02 - AIE different agency
+            document.getElementsByName('justifReason02')[this.justifIndex]["value"] = y;
+            var c = document.getElementById("newCustNumber")["value"];
+            if (c == "") {
+                alert("CUSTOMER NUMBER IS REQUIRED"); 
+                return false;   
+            }
+            else {
+                var custRegExp = new RegExp('^[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9A-Za-z]{6}-[0-9]{3}$');
+                if (!custRegExp.test(c) || (c.length != 19)) {
+                    alert("CUSTOMER NUMBER SHOULD BE IN THIS FORMAT: 00-00-00-XXXXXX-000")
+                    return false;    
+                }
+                document.getElementsByName('newcustno' )[this.justifIndex]["value"] = c.toUpperCase();
+            }
+        }
+        
+        this.aiejustmodal.hide();
+    }
+
+//////////
+    len: number;
+    withcheck: string = "N";
+
+    examineBoxes() {
+        this.len = this.aiePage.length;
+        this.withcheck = "N";
+        
+        if (document.getElementById('table1').hidden == true)
+            return;
+
+        for (var idx=0; idx < this.len; idx++) {
+            if (document.getElementsByName('updStatus'  )[idx]["value"  ] != "Y" &&
+                document.getElementsByName('tagCheckbox')[idx]["checked"] == true) {
+                this.withcheck = "Y";
+                break;
+            }   
+        }
+    }
+//////////
+    
+    searchAiedec() {
+        if (this.zone > "" && this.lid > "") {}
+        else {
+            alert("ZONE AND LID ARE REQUIRED!");
+            return false;
+        }
+
+        this.examineBoxes();
+        
+        if (this.withcheck == "Y") 
+            this.searchmodal.show();
+        else {
+            for (var i=0; i<this.aiePage.length; i++) {
+                document.getElementsByName("updStatus")[i]["value"] = "N";
+            }
+            document.getElementById("sortway10")["value"] = "DSC";      // back to original (sortway10 is for column10 - vh_AgencyCl)
+            this.getAIEDecRepairs();
+            if (this.totalItems > 0) {      
+                document.getElementById("pagebuttons")["style"]["visibility"] = "visible";  // previously hidden by submitAiedec
+                this.currentPage = 1;
+            }
+        }
+    }
+
+    clearscreen() {
+        this.examineBoxes();
+        
+        if (this.withcheck == "Y") 
+            this.clearscreenmodal.show();
+        else
+            this.initScreen();
+    }
+
+    submitAiedec() {            // either Save Billbacks or Review Selected
+        console.log("aie-decision.component.ts: saveBillbacks or review selected...");
+        
+        this.examineBoxes();
+        if (this.withcheck == "N") {
+            alert("THERE'S NOTHING TO SAVE OR REVIEW.  CHECK AT LEAST ONE (1) TAG.");
+            return false;    
+        }
+
+        for (var i=0; i < this.len; i++) {
+            document.getElementsByName('tablerow')[i]["style"]["background-color"] = "initial";
+            if (document.getElementsByName('updStatus')[i]["value"] != "Y") {
+                if (document.getElementsByName('tagCheckbox')[i]["checked"] == true) {
+                    if (!this.validateFields(i)) {
+                        this.highlightRowWithError(i);
+                        return false;
+                    }
+                }
+                else {
+                    if (document.getElementsByName('justification')[i]["value"] > "") {
+                        this.errorMessage = "TAG CHECKBOX SHOULD BE CHECKED TO MAKE CHANGE(S)!";
+                        this.highlightRowWithError(i);
+                        return false;
+                    }
+                }
+            }
+        }
+        this.savebillbacksmodal.show();
+    }
+
+    validateFields(i) {
+        var x = document.getElementsByName('desc1234')[i]["value"];
+        if (x.toLowerCase().indexOf('"') > -1) {
+            this.errorMessage = 'DESCRIPTION DETAILS CONTAIN INVALID CHARACTER: QUOTE (")';
+            return false;
+        }        
+        if (x.toLowerCase().indexOf('<script') > -1) {
+            this.errorMessage = 'DESCRIPTION DETAILS CONTAIN INVALID CHARACTERS: <script';
+            return false;
+        }        
+
+        var y = document.getElementById('justifReason')["value"];
+        if (y.toLowerCase().indexOf('"') > -1) {
+            this.errorMessage = 'JUSTIFICATION REASON CONTAINS INVALID CHARACTER: QUOTE (")';
+            return false;
+        }        
+        if (y.toLowerCase().indexOf('<script') > -1) {
+            this.errorMessage = 'JUSTIFICATION REASON CONTAINS INVALID CHARACTERS: <script';
+            return false;
+        }        
+
+        var justcode = document.getElementsByName('justification')[i]["value"];
+            
+        var aieamt   = document.getElementsByName('aieamount')[i]["value"]
+        aieamt = aieamt.toString().replace("," , "");
+        document.getElementsByName('aieamount')[i]["value"] = aieamt;
+        
+        if (aieamt == 0 && 
+           (justcode == "01" ||      // AIE needs billed
+            justcode == "02") ) {    // AIE different agency
+            this.errorMessage = "AIE AMOUNT IS REQUIRED!";
+            return false;
+        }    
+                    
+        if (aieamt > 0 && justcode > "02") {
+            this.errorMessage = "AIE AMOUNT IS NOT REQUIRED FOR THE SELECTED JUSTIFICATION!";
+            return false;
+        }    
+        
+        var amtRegExp = new RegExp('^[0-9]{0,7}(\.[0-9]{0,2})?$');
+        if (!amtRegExp.test(aieamt) || aieamt > 99999.99) {
+            this.errorMessage = "AIE AMOUNT IS INVALID.  FORMAT IS 0.00, NO COMMA.  CANNOT EXCEED 99999.99";
+            return false;
+        }
+            
+        if (!this.validateSalescodeCostacct(i)) 
+            return false;       
+                    
+        if (justcode == "") {
+            this.errorMessage = "JUSTIFICATION IS REQUIRED!";
+            return false;
+        }    
+        
+        if (justcode <  "03" && document.getElementById('justifReason')["value"] == "") {
+            this.errorMessage = "JUSTIFICATION REASON IS REQUIRED FOR BILL BACKS";
+            return false;
+        }    
+        
+        if (justcode == "02" && document.getElementById('newCustNumber')["value"] == "") {
+            this.errorMessage = "NEW CUSTOMER NUMBER IS REQUIRED FOR BILL BACKS - AIE DIFFERENT AGENCY";
+            return false;
+        }
+        
+        return true;                           
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Per Chris Alward's email, dated 8/3/2017:
+// 1. For Sales Codes V3, X2, U2, U3 user must select a Cost Account other than zero.
+// 2. For Sales Codes Q1, A1, A8 cost account should not be entered.
+// 3. For Sales Code  V3 cost account must be 161.  The AIE will auto-convert any 160 to a 161 Cost Account code.
+// 4. For Sales Codes U2, U3 cost account must be 145 OR 170 OR 172 OR 180 OR 811.
+// 5. For Sales Code  P1 cost account must be 511 or vice-versa.
+// 6. For Sales Code  V4 cost account must be 191 or vice-versa.
+    
+    validateSalescodeCostacct(i) {
+        this.errorMessage = "";
+        
+        var salesCode = document.getElementsByName('salesCode')[i]["value"];
+        var costAcct  = document.getElementsByName('costAcct' )[i]["value"];
+              
+        switch (salesCode) {
+            case "X2":
+                if (costAcct <= "000")      this.errorMessage = "Sales Code X2 ==> Select Cost Acct";
+                break;
+            case "Q1":
+            case "A1":
+            case "A8":
+                if (costAcct != "000")      this.errorMessage = "Sales Code Q1, A1, A8 ==> Cost Acct is not required";
+                break;
+            case "V3":
+                if (costAcct != "161")      this.errorMessage = "Sales Code V3 can only be used with Cost Acct 161";
+                break;
+            case "U2":
+            case "U3":
+                if (!(costAcct == "145" ||
+                      costAcct == "170" ||
+                      costAcct == "172" ||
+                      costAcct == "180" ||
+                      costAcct == "811" ))  this.errorMessage = "For Sales Code U2, U3 Cost Acct " + costAcct + " is not valid";
+                break;
+            case "P1":
+                if (costAcct != "511")      this.errorMessage = "Sales Code P1 can only be used with cost account 511 or vice versa";
+                break;
+            case "V4":
+                if (costAcct != "191")      this.errorMessage = "Sales Code V4 ==> Cost Acct should be 191 or vice versa";
+                break;
+            case "":
+                this.errorMessage = "Sales Code is Required";
+                break;
+        }
+
+        if (this.errorMessage > "")
+            return false;
+
+        switch (costAcct) {
+            case "511":
+                if (salesCode != "P1")      this.errorMessage = "Cost Account 511 can only be used with Sales Code P1 or vice versa";
+                break;
+            case "191":
+                if (salesCode != "V4")      this.errorMessage = "Cost Account 191 can only be used with Sales Code V4 or vice versa";
+                break;
+        }
+        
+        if (this.errorMessage > "")
+            return false;
+        else
+            return true;
+    }   
+
+    
+//    setNewcustdatetime(i, newcustdatetime) {
+//        document.getElementsByName("newcustdatetime")[i]["value"] = newcustdatetime;
+//        console.log("aie-decision.component.ts: setNewcustdatetime " + i + " " + document.getElementsByName("newcustdatetime")[i]["value"]);
+//        this.loadingBarComponent.loadingModal.hide();
+//    }
+    
+//////////
+        
+    submitAiedecContinue() {
+
+    // AT THIS POINT, USER IS NOT ALLOWED TO GO TO ANOTHER PAGE NOR SORT ANY COLUMN TO AVOID MESSING UP CHECKBOXES/DATA/UPDATE/DUPLICATE DATA-COLLECTOR; 
+    // NEEDS TO CLICK SEARCH AGAIN. 
+        document.getElementById("pagebuttons")["style"]["visibility"] = "hidden";
+//      this.haveNoPage = true;
+        document.getElementById("sortway10"  )["value"] = "disablesort";
+    //  document.getElementById('column10').addEventListener('click',()=>this.test()); 
+
+        this.loadingBarComponent.loadingModal.show();
+        this.errorMessage = "";
+        this.len = this.aiePage.length;
+        
+        for (var i=0; i < this.len; i++) {
+            if (document.getElementsByName('updStatus'  )[i]["value"  ] != "Y" && 
+                document.getElementsByName('tagCheckbox')[i]["checked"] == true) {
+                
+                console.log("before aieDecisionService.submitAiedecContinue: " + i); 
+                
+                this.subscribeAiedec(this.len, i);
+            }
+        }
+    }
+    
+
+    result: any;
+
+    subscribeAiedec(len, i) {
+        this.aieDecisionService.submitAiedec(len, i)
+            .subscribe(
+                result => {
+                    this.result = result;
+                    console.log("i=" + i + " Service Response: " + this.result);
+//                  alert("i=" + i + " Service Response: " + this.result);
+                    if (this.result == true || this.result == "true") {
+//                      alert("success " + i);
+                        document.getElementsByName('updStatus')[i]["value"] = "";
+                        this.highlightSuccess(len, i);
+                        this.loadingBarComponent.loadingModal.hide();
+//                      return true;        
+                    }             
+                    else {
+                        this.loadingBarComponent.loadingModal.hide();        
+                        this.errorMessage = this.result.message;
+                        this.highlightFailure(len, i);
+                        return false;
+                    } 
+                },
+                error =>  {
+                    this.loadingBarComponent.loadingModal.hide();
+                    this.errorMessage = <any>error;
+                    console.log(this.errorMessage);
+                    this.highlightFailure(len, i);
+                    return false;        
+                }
+        );
+    }
+
+        
+//    test() {
+//        alert("i am clicked");
+//    }
+
+        
+    highlightRowWithError(i) {
+        alert("ERROR ==> " + this.errorMessage);
+        document.getElementsByName('tablerow')[i]["style"]["background-color"] = "lightcoral";
+    }
+
+    highlightSuccess(len, idx) {  
+        for (var j=0; j<len; j++) {
+//          if (j == idx) {
+                if (document.getElementsByName('updStatus'    )[j]["value"    ] != "Y" &&
+                    document.getElementsByName('updStatus'    )[j]["value"    ] != "E" &&       // ERROR
+                    document.getElementsByName('tagCheckbox'  )[j]["checked"  ] == true) 
+                {
+//                  alert("j=" + j + " idx=" + idx);
+                    document.getElementsByName('tablerow'     )[j]["style"    ]["background-color"] = "lightgreen";
+                    
+                    if (document.getElementsByName('justification')[j]["value"] < "03")
+                        document.getElementsByName('aiestatus')[j]["innerHTML"] = "P - Pending Billback";
+                    else                    // R - Review Selected
+                        document.getElementsByName('aiestatus')[j]["innerHTML"] = "Repair Reviewed";
+    
+                    document.getElementsByName('aiestatus'    )[j]["style"    ]["font-weight"] = "bold";
+    //              document.getElementsByName('tagCheckbox'  )[j]["checked"  ] = false;
+                    document.getElementsByName('tagCheckbox'  )[j]["style"    ]["visibility" ] = "hidden";
+                    document.getElementsByName('tagCheckbox'  )[j]["disabled" ] = true;
+                    document.getElementsByName('aieamount'    )[j]["disabled" ] = true;
+    //              document.getElementsByName('assylit'      )[j]["disabled" ] = true;    // not disabled to allow user to view entries
+    //              document.getElementsByName('salesCode'    )[j]["disabled" ] = true;    // ????? disabled is not working on dropdown in angularjs
+    //              document.getElementsByName('costAcct '    )[j]["disabled" ] = true;    // ????? disabled is not working on dropdown in angularjs
+    //              document.getElementsByName('justification')[j]["disabled" ] = true;    // not disabled to allow user to view entries
+                    document.getElementsByName('updStatus'    )[j]["value"    ] = "Y";
+//                  alert("j/len/updStatus=" + j + "/" + len + "/" + document.getElementsByName('updStatus'    )[j]["value"    ]);
+//              }
+//              break;
+            }
+        }
+    }
+
+//    highlightFail(idx) {  
+//        alert("ERROR ==> " + this.errorMessage);
+//        document.getElementsByName('tablerow')[idx]["style"]["background-color"] = "lightcoral";
+//    }
+
+    highlightFailure(len, idx) { 
+        console.log("highlightFailure ERROR ==> " + this.errorMessage + "/" + idx); 
+        alert("ERROR ==> " + this.errorMessage);
+
+        for (var j=0; j<len; j++) {
+            if (j == idx) {
+                if (document.getElementsByName('tagCheckbox')[j]["checked"] == true) { 
+                    document.getElementsByName('tablerow'   )[j]["style"  ]["background-color"] = "lightcoral";
+                    document.getElementsByName('updStatus'  )[j]["value"  ] = "E";      // ERROR
+                    break;
+                }
+            }
+        }
+    }
+
+
+    //html: string;
+    togglePopover(p, row) {     //accept pop object AND element (row)
+        console.log("in toggle popover ", p, row);
+        p.popover= row.as_Comment;
+        //'<span style="background-color: red">' + e.as_Comment + '</span>';
+        //console.log(this.html);
+        p.toggle();    
+    }
+
+    sortColumn(body, key1, wayfield, colfield) {
+        
+        if (document.getElementById("sortway10")["value"] == "disablesort") {
+            // do nothing (user not allowed to sort after submitting records; needs user to refresh screen via Search button; to avoid messing up data);
+            return;        
+        }
+    
+        var key2, key3;
+        var x, y;
+        var way;
+        
+        if (key1 == "vh_AgencyCl") {
+            key2 = "vh_Tag";
+            key3 = "rp_AssemblyLit";    
+        }
+        else {
+            key2 = "vh_AgencyCl";
+            key3 = "vh_Tag";            
+        }
+        
+        way = document.getElementById(wayfield)["value"];
+       
+        let sortedArray = body.sort(function(a,b) {
+            x = "" + a[key1] + a[key2] + a[key3]; 
+            y = "" + b[key1] + b[key2] + b[key3];
+            if (way === 'ASC')  { return ( x < y ? -1 : x > y ? 1 : 0 ); }
+            else                { return ( x > y ? -1 : x < y ? 1 : 0 ); }
+        });
+        
+        if (way == 'ASC') {  
+            document.getElementById(wayfield)["value"] = "DSC"; 
+            document.getElementById(colfield)["title"] = "Sort descending"; 
+        }
+        else {
+            document.getElementById(wayfield)["value"] = "ASC";
+            document.getElementById(colfield)["title"] = "Sort ascending"; 
+        }              
+
+        console.log("sortedArray: ", sortedArray || { });
+        
+        this.AIEDecisions = sortedArray;
+        
+        this.totalItems   = this.AIEDecisions.length;
+        this.aiePages     = this.commonService.breakArray(this.itemsPerPage, this.AIEDecisions);
+        this.totalPages   = this.aiePages.length;
+        this.currentPage  = 1;
+        this.changePage(this.currentPage);
+        this.haveNoPage   = false;
+    }
+    
+    autohyphen() {          // format will be 00-00-00-XXXXXX-000
+        var custval = document.getElementById('newCustNumber')["value"];
+        var len     = document.getElementById('newCustNumber')["value"]["length"];
+        if (len ==  2)    custval += '-';  else    
+        if (len ==  5)    custval += '-';  else    
+        if (len ==  8)    custval += '-';  else    
+        if (len == 15)    custval += '-'; 
+        document.getElementById('newCustNumber')["value"] = custval;
+    }
+
+}

@@ -1,0 +1,652 @@
+import { Component, OnInit, AfterViewChecked, ViewChild } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormControl, NgForm } from '@angular/forms';
+import { CurrencyPipe } from '@angular/common';
+import { RepairAieService } from './repair-aie.service';
+import { customer } from '../common-components/common-structures';
+import { vehicle } from '../common-components/common-structures';
+import { dc } from '../common-components/common-structures';
+import { id } from '../common-components/common-structures';
+import { CommonService } from '../common-components/common.service';
+import { LoadingBarComponent } from '../common-components/loading-bar/loading-bar.component';
+import { ModalDirective } from 'ngx-bootstrap/modal';
+import { PopoverModule } from 'ngx-bootstrap';
+import { repairAie } from './repair-Aie';
+import { repairAieExtended } from './repair-Aie';
+import { PagerComponent } from 'ngx-bootstrap/pagination';
+import { postData } from './repair-Aie';
+import { TagGetCustVehComponent } from '../tag-get-cust-veh/tag-get-cust-veh.component';
+import { TagGetCustVehService } from '../tag-get-cust-veh/tag-get-cust-veh.service';
+import { DataService } from '../common-components/data.service';
+
+
+interface Validator<T extends FormControl> {
+   (c:T): {[error: string]:any};
+}
+
+function validateAIEStatus(c: FormControl) {
+  return (c.value == "" || c.value == " " || c.value == "P" || c.value == "T" || c.value == "B" || c.value == "S") ? null : {
+    validateStatus: {
+      valid: false
+    }
+  };
+}
+function validateYesNo(c: FormControl) {
+  return (typeof c.value === "undefined" || !c.value || c.value == "" || c.value == " " || c.value == "Y" || c.value == "N") ? null : {
+    validateYesNo: {
+      valid: false
+    }
+  };
+}
+
+//this isn't used, but is an option to implement mutual exclusivity rules
+function validateSalesCode(c: FormControl) {
+    console.log("in validateSalesCode", c, "c.value is >" + c.value + "<");
+    console.log("c.parent is ", c.parent);
+    console.log("c.parent.get(costAcct) is ", c.parent.get('costAcct'));
+    console.log("c.parent.get(costAcct).value is ", c.parent.get('costAcct').value);
+    //return (c.value == "X1") ? { validateSalesCode: { valid: false }} : null ;
+}
+
+function sccaValidator (otherControlName: string) {
+
+  let thisControl: FormControl;
+  let otherControl: FormControl;
+  let salesCodeValue: String;
+  let costAcctValue: String;
+
+
+  return function sccaValidate (control: FormControl) {
+    //console.log("in matchOtherValidate - control is ", control);
+
+    if (!control.parent) {
+      //console.log("no parent - return null")
+      return null;
+    }
+
+    // Initializing the validator.
+    if (!thisControl) {
+      thisControl = control;
+      otherControl = control.parent.get(otherControlName) as FormControl;
+      if (!otherControl) {
+        throw new Error('matchOtherValidator(): other control is not found in parent group');
+      }
+      otherControl.valueChanges.subscribe(() => {
+        thisControl.updateValueAndValidity();
+        //console.log("othercontrol.valuechanges.subscribe fired");
+
+      });
+    }
+
+    if (!otherControl) {
+      //console.log("othercontrol does not exist - return null");
+      return null;
+    }
+
+    //if (otherControl.value !== thisControl.value) {
+    //  console.log("othercontrol.value is not equal to this.control.value", otherControl, thisControl);
+    //  return {
+    //    matchOther: true
+    //  };
+    //}
+    if (otherControlName == "costAcct") {
+      salesCodeValue = thisControl.value;
+      costAcctValue = otherControl.value;
+    } else {
+      salesCodeValue = otherControl.value;
+      costAcctValue = thisControl.value;
+    }
+
+    let err = {
+        mutualExclusiveError: {
+            salesCode: salesCodeValue,
+            disallowedCostAcct: costAcctValue
+        }    
+    }
+    let result = false;    
+    switch (salesCodeValue) {
+    //case "V3": //already defined below
+    case "X2": 
+    //case "U2": //already defined below
+    //case "U3": //already defined below
+      if (costAcctValue == "000") {
+        //console.log("sc - x2 / must be non empty but is " + finAcctValue + "-  invalid")
+        result = true;
+      }
+      break;
+    case "Q1":
+    case "A1":
+    case "A8":
+      if (costAcctValue != "000") {
+        //console.log("sc - Q1/A1/A8 / must be 000 but is " + finAcctValue + "-  invalid")
+        result = true;
+      }
+      break;
+    case "V3":
+      if (costAcctValue != "161") {
+        //console.log("sc - V3 / must be 161 but is " + finAcctValue + "-  invalid")
+        result = true;
+      }
+      break;
+    case "U2":
+    case "U3":
+      if (!(costAcctValue == "145" ||
+            costAcctValue == "170" ||
+            costAcctValue == "172" ||
+            costAcctValue == "180" ||
+            costAcctValue == "811")) {
+        //console.log("sc - U2/U3 / must be 145/170/172/180/811 but is " + finAcctValue + "-  invalid")
+        result = true;
+    }
+      break;
+    case "P1":
+      if (costAcctValue != "511") {
+        //console.log("sc - P1 / must be 511 but is " + finAcctValue + "-  invalid")
+        result = true;
+      }
+      break;
+    case "V4":
+      if (costAcctValue != "191") {
+        //console.log("sc - V4 / must be 191 but is " + finAcctValue + "-  invalid")
+        result = true;
+      }
+      break;      
+    }
+    if (result) otherControl.setErrors(err);
+    return result ? err : null;
+  }
+}
+
+
+@Component({
+  selector: 'app-repair-aie',
+  templateUrl: './repair-aie.component.html',
+  styleUrls: ['./repair-aie.component.css', '../app.component.css']
+})
+
+export class RepairAieComponent implements OnInit  {
+
+    @ViewChild(LoadingBarComponent) public loadingBarComponent: LoadingBarComponent;
+    @ViewChild(PopoverModule) public popoverModule: PopoverModule;
+    @ViewChild('genericModal') public genericModal: ModalDirective;
+    @ViewChild('paginationModule') public pager: PagerComponent;
+    @ViewChild(TagGetCustVehComponent) public tagGetCustAndVehComponent: TagGetCustVehComponent;
+    
+    startDate: string;
+    endDate: string;
+    customer;
+    vehicle;
+    data;
+    aieRepairForm;
+    repairSearchForm;
+    custDisplayForm;
+    optShowWhich;
+    errorMessage: string;
+    repReason;
+    repAmount: string = "";
+    showTable: boolean = false;
+
+    host: string;
+    customerLid: string;
+    customerName: string;
+    customerRegion: number;  
+    
+    constructor(
+        private repairAieService: RepairAieService,
+        private commonService: CommonService,
+        private formBuilder: FormBuilder,
+        private dataService: DataService
+        
+    ) { 
+        this.aieRepairForm = this.formBuilder.group({
+            //salesCode: new FormControl("X1"),
+            asrpRows: this.formBuilder.array([]),
+            modalDescriptionText: new FormControl(""),
+        })
+
+    }
+    
+    ngOnInit() {
+        this.repReason = "";
+        this.optShowWhich="optShowAll";
+        this.data = null;
+        this.vehicle = null;
+        this.customer = null;
+    }
+    ngAfterViewInit() {
+      //console.log('TagGetCustVehComponent', this.tagGetCustAndVehComponent);
+      //
+      //this.tagGetCustAndVehComponent.tagSearchForm.controls["agencyCl"].setValue("10");
+      //this.tagGetCustAndVehComponent.tagSearchForm.controls["tag"].setValue("0002L");
+      //this.tagGetCustAndVehComponent.findCustVehByTagSubmit(this.tagGetCustAndVehComponent.loadingBarComponent.loadingModal, this.tagGetCustAndVehComponent.tagSearchForm);
+      //console.log("done");
+
+        this.dataService.currentHostName.subscribe(host => this.host = host);
+        this.dataService.currentLid.subscribe(customerLid => this.customerLid = customerLid);
+        this.dataService.currentCustomerName.subscribe(customerName => this.customerName = customerName);
+        this.dataService.currentRegion.subscribe(customerRegion => this.customerRegion = customerRegion);
+
+    } 
+    
+    salesChanged(e, i) {
+        //console.log(e);
+        //console.log("Sales Changed target value", e.target.value, e);
+        this.asrpPage[i].salesCode = e.target.value;
+        
+    }
+    costAcctChanged(e, i) {
+        this.asrpPage[i].finCA = e.target.value;
+    }
+    
+    
+    //handle change from datarangepicker component
+    newDateRange(r) {
+        this.startDate = r.startDate.format("YYYYMMDD");
+        this.endDate = r.endDate.format("YYYYMMDD");
+    }
+    
+    //handle change from tagGetCustAndVeh component
+    newCustAndVeh(cstAndVeh) {
+        if(!cstAndVeh.customer) {
+            this.customer = {};
+            this.vehicle = {};
+        } else {
+            this.customer = cstAndVeh.customer;
+            this.vehicle = cstAndVeh.vehicle;
+        }
+    };
+    
+    //get act-no-summary and repair records from server
+    //asrps: repairAie[];
+    asrps: repairAieExtended[];
+    asrpPages = [];
+    asrpOriginal = [];
+    asrpPage = [];
+    currentPage: number;
+    totalPages: number;
+    startItem: number;
+    endItem: number;
+    totalItems: number;
+    itemsPerPage: number = 20;
+    
+    showAmounts() {
+        //console.log(this.asrpPage[0].aieAmt);
+        //console.log(this.asrpPage[1].aieAmt);
+        //console.log(this.asrpPage[2].aieAmt);
+        //console.log(this.asrpPage, this.asrps);    
+    }
+
+    haveNoPage: boolean = true;
+    getAsRpClick() {
+        this.loadingBarComponent.loadingModal.show();
+        //this is for development purposes only - hardcoded to not need to do two clicks on screen
+        //this.repairAieService.getAieRepairs('G100002L101209213206')
+        //console.log("this.vehicle", this.vehicle.vehDtTime);
+        //console.log("start and end", this.startDate, this.endDate);
+        //console.log("show which", this.optShowWhich);
+        //console.log("repair reason", this.repReason);
+        //console.log("amount", this.repAmount)
+        this.repairAieService.getAieRepairsCriteria(this.vehicle.vehDtTime, this.startDate, this.endDate, this.optShowWhich, this.repReason, this.repAmount)
+         .subscribe(
+           asrps => {
+               this.asrps = [];
+               this.asrpPages = [];
+               this.asrpOriginal = [];
+               this.asrpPage = [];
+               this.asrps = asrps;
+               for (let x of this.asrps) { 
+                    x.desc1 = "";
+                    x.desc2 = "";
+                    x.desc3 = "";
+                    x.desc4 = "";
+                    x.aieDesc = false;
+               }
+               this.totalItems = this.asrps.length;
+               this.getDCByClassTag();
+               this.getIDByClassTag();
+               this.paginate();
+               this.asrpOriginal = this.deepCopy(this.asrps);
+           },
+           error =>  {
+               this.asrps = [];
+               this.asrpPages = [];
+               this.asrpOriginal = [];
+               this.asrpPage = [];
+               this.loadingBarComponent.loadingModal.hide();
+               this.errorMessage = <any>error;
+               this.aieRepairForm.patchValue({message: this.errorMessage});
+           });
+    }
+    
+    dcs: dc[];
+    getDCByClassTag() {
+        this.repairAieService.getDCByClassTag(this.vehicle.vh_Agency_Cl, this.vehicle.vh_Tag)
+        .subscribe(
+           dcs => {
+               this.loadingBarComponent.loadingModal.hide();
+               this.dcs = dcs;
+               for (let d of dcs) {
+                 var asrec = this.asrps.filter(x => x.rpSequenceNo  == d.rpSeqNo);
+                 if (asrec.length == 1) {
+                     asrec[0].desc1 = d.desc1;
+                     asrec[0].desc2 = d.desc2;
+                     asrec[0].desc3 = d.desc3;
+                     asrec[0].desc4 = d.desc4;
+                     asrec[0].dc = d;
+                     asrec[0].aieDesc = true;
+                 } 
+               }
+               this.paginate();
+               this.asrpOriginal = this.deepCopy(this.asrps);
+           },
+           error =>  {
+               this.loadingBarComponent.loadingModal.hide();
+               this.errorMessage = <any>error;
+               this.aieRepairForm.patchValue({message: this.errorMessage});
+           });
+    }
+    
+    ids: id[];
+    getIDByClassTag() {
+        this.repairAieService.getIDByClassTag(this.vehicle.vh_Agency_Cl, this.vehicle.vh_Tag)
+        .subscribe(
+           ids => {
+               this.loadingBarComponent.loadingModal.hide();
+               this.ids = ids;
+               //console.log("this.ids in getIDByClassTag " + ids);
+               for (let i of ids) {
+                 var asrec = this.asrps.filter(x => x.rpSequenceNo  == i.id_rp_vyb_key);
+                 if (asrec.length == 1) {
+                    asrec[0].desc1 = i.id_desc_1;
+                    asrec[0].desc2 = i.id_desc_1;
+                    asrec[0].desc3 = i.id_desc_3;
+                    asrec[0].desc4 = i.id_desc_4;
+                    asrec[0].id = i;
+                    asrec[0].aieDesc = true;
+                 }
+               }
+               this.paginate();
+               this.asrpOriginal = this.deepCopy(this.asrps);
+           },
+           error =>  {
+               this.loadingBarComponent.loadingModal.hide();
+               this.errorMessage = <any>error;
+               this.aieRepairForm.patchValue({message: this.errorMessage});
+           });
+    }
+    show() {
+        //console.log("this.asrpPage[0].salesCode", this.asrpPage[0].salesCode);
+        //console.log("this.asrpPage[0].finCA", this.asrpPage[0].finCA);
+        //console.log("this.asrpPage[0].aieStatus",this.asrpPage[0].aieStatus); 
+        //console.log("this.aieRepairForm.controls.asrpRows.controls[0].controls.salesCode.value", this.aieRepairForm.controls.asrpRows.controls[0].controls.salesCode.value);
+            
+    }
+    toBillBack: repairAieExtended[] = [];
+    createBillBacks() {
+        //this.aieRepairForm.controls.asrpRows.controls[0].controls.salesCode.value
+        let i = 0;
+        let pd = new postData;
+        pd.customer = this.customer;
+        pd.vehicle = this.vehicle;
+
+        pd.userLid = this.customerLid;
+        pd.userRegion = this.customerRegion;
+        pd.userName = this.customerName;
+        pd.hostname = this.host;
+
+        this.toBillBack = [];
+        this.aieRepairForm.controls.asrpRows.controls.map( x => { 
+           if(x.controls.aieStatus.value == "S") {
+             this.asrpPage[i].aieAmt = x.controls.aieAmount.value;
+             pd.asrpRecords.push(this.asrpPage[i]);             
+           }
+           i++;
+
+        });
+        //createBillBacks(toBillBack: repairAieExtended): Observable<repairAieExtended[]> {
+        this.repairAieService.createBillBacks(pd)
+          .subscribe(
+            result => {
+              console.log("this.repairAieService.createBillBacks(pd) - in result", pd, result)
+            },
+            error => {
+              console.log("errrrrror", error);
+
+            });
+    }
+    clearScreen() {
+      //console.log("clear screen before asrps", this.asrps[0].salesCode, this.asrps[0].finCA  );
+      //console.log("clear screen before asrpOriginal", this.asrpOriginal[0].salesCode, this.asrpOriginal[0].finCA  );
+
+      this.asrps = this.deepCopy(this.asrpOriginal);
+      this.paginate();
+      //console.log("clear screen after", this.asrps[0].salesCode, this.asrps[0].finCA  );
+      //console.log("clear screen after asrpOriginal", this.asrpOriginal[0].salesCode, this.asrpOriginal[0].finCA  );
+        
+    }
+    changePage(p: number) {
+        //console.log("changing page to ", p);
+        this.currentPage = p;
+        this.asrpPage = this.asrpPages[this.currentPage - 1];
+        this.startItem = ((this.currentPage - 1) * this.itemsPerPage) + 1;
+        this.endItem = this.startItem + this.asrpPage.length - 1;
+        //if aieRepairForm (specifically the custom sales code component FormControl exists, reuse it - error if recreate
+        if (this.aieRepairForm.controls.asrpRows.controls.length > 0) {
+           var i = 0;
+           this.aieRepairForm.controls.asrpRows.controls.map( x=> {  
+               x.setValue({
+                   salesCode:   (!this.asrpPage[i].salesCode) ? "" : this.asrpPage[i].salesCode,
+                   costAcct:    (!this.asrpPage[i].finCA) ? "000" : this.asrpPage[i].finCA,
+                   aieDesc:     this.asrpPage[i].aieDesc,
+                   aieAmount:   this.asrpPage[i].aieAmt,
+                   aieAuto:     this.asrpPage[i].aieAuto,
+                   aieCredit:   "", //this.asrpPage[i].aieCredit, AIEcREDIT ISNT PASSED FROM SERVER-SIDE
+                   aieStatus:   this.asrpPage[i].aieStatus,
+               });
+               i++;
+           })
+           this.aieRepairForm.controls.modalDescriptionText.setValue("");
+        } else {
+            this.aieRepairForm = this.formBuilder.group({
+                asrpRows: this.formBuilder.array(
+                    this.asrpPage.map(x => this.formBuilder.group({
+                        salesCode:  [(!x.salesCode) ? "" : x.salesCode, [sccaValidator("costAcct")]],
+                        costAcct:   [(!x.finCA) ? "000" : x.finCA],
+                        aieDesc:    [x.aieDesc],
+                        aieAmount:  [x.aieAmount, [Validators.pattern('^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$')]],
+                        aieAuto:    [x.aieAuto, [validateYesNo]],
+                        aieCredit:  [x.aieCredit, [validateYesNo]],
+                        aieStatus:  [x.aieStatus, [validateAIEStatus]]
+                    }))
+                ),
+                modalDescriptionText: new FormControl(""),
+            })
+        }
+    }
+
+    //handle pagination change
+    pageChanged(e) {
+        if (this.aieRepairForm.dirty) {
+            this.modalFrom = "pageChanged";
+            this.modalNumParameter = e.page;
+            this.modalNumParameter2 = this.currentPage;
+            this.showAlertModal("Your page contains unsaved changed which may be lost if you navigate away. Click OK to continue, or cancel to stay.", "OkCancel");
+        } else {
+            this.changePage(e.page);
+        }
+        //console.log("after pageChanged");
+    }
+    deepCopy(obj) {
+        var copy;
+
+        // Handle the 3 simple types, and null or undefined
+        if (null == obj || "object" != typeof obj) return obj;
+
+        // Handle Date
+        if (obj instanceof Date) {
+            copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
+        }
+
+        // Handle Array
+        if (obj instanceof Array) {
+            copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                copy[i] = this.deepCopy(obj[i]);
+            }
+            return copy;
+        }
+
+        // Handle Object
+        if (obj instanceof Object) {
+            copy = {};
+            for (var attr in obj) {
+                if (obj.hasOwnProperty(attr)) copy[attr] = this.deepCopy(obj[attr]);
+            }
+            return copy;
+        }
+
+        throw new Error("Unable to copy obj! Its type isn't supported.");
+    }
+
+
+    paginate() {
+       if (this.totalItems > 0) {
+           
+           this.asrpPages = this.commonService.breakArray(this.itemsPerPage, this.asrps);
+           this.totalPages = this.asrpPages.length;
+           this.currentPage = 1;
+           this.changePage(this.currentPage);
+           this.haveNoPage = false;
+       } else {
+           this.asrpPages = [];
+           this.totalPages = 0
+           this.currentPage = 0;
+           this.haveNoPage = true;
+       }
+    }
+
+    //handle change of repair reason dropdown
+    //this function is a stub because the data is two-way bound to this.repReason
+    //and is provided inc ase something needs to be done if the choice changes.
+    updateRepairReason() {
+    }
+    
+    //toggleAieStatus(i: number) {
+    toggleAieStatus(row, i) {
+        if (row.aieStatus.length > 0) {
+            row.aieStatus = "";
+            this.aieRepairForm.controls.asrpRows.controls[i].controls.aieStatus.setValue("");
+            row.aieAmt = 0;
+        } else {
+            row.aieStatus = "S";
+            this.aieRepairForm.controls.asrpRows.controls[i].controls.aieStatus.setValue("S");
+            row.aieAmt = row.totAmtAuth; 
+        }
+    }
+    changeSelValue(e) {
+      console.log("changeSelValue changed!!", e)
+    }
+    
+    //don't use this anymore
+    assemblyClicked(a) {
+        //console.log("assembly clicked: ", a);
+        //console.log(this.popoverModule);
+    }
+
+    //don't use popover - now use modal
+    togglePopover(p, row) { //accept pop object AND element (row)
+        p.popover= row.desc1 + row.desc2 + row.desc3 + row.desc4 ;
+        p.toggle();    
+    }
+
+    activeRow: repairAieExtended;
+    showDescriptionModal(row, i) { 
+        //this comes in the opposite value - it has not yet propagated to the formControl item
+        if (!this.aieRepairForm.controls.asrpRows.controls[i].controls.aieDesc.value) {
+            this.activeRow = row;
+            this.aieRepairForm.controls["modalDescriptionText"].setValue(row.desc1 + row.desc2 + row.desc3 + row.desc4);
+            this.modalTitle = "AIE Justification";
+            this.modalDescription = "Please note the reason for the bill back below:";
+            this.modalMode = "Description";
+            this.modalButtons = "SubmitCancel";
+            this.genericModal.show();
+        } 
+    }
+
+    modalTitle: string;
+    modalDescription: string;
+    modalMode: string;
+    modalButtons: string;
+    modalFrom: string;
+    modalNumParameter: number;
+    modalNumParameter2: number;
+    modalStringParameter: string; 
+    modalCancelled: boolean = false;
+
+    showAlertModal(desc: string, mode?: string) {
+        if (this.modalCancelled) {
+          this.modalCancelled = false;
+        } else {
+          this.modalTitle = "Alert";
+          this.modalDescription = desc;
+          if (!mode) mode = "Ok";
+          this.modalMode = mode;
+          this.modalButtons = mode; 
+          //console.log("showing alert", desc, mode, this.genericModal);
+          this.genericModal.show();  
+        }
+    }
+    
+
+
+    
+    genericModalClick(whichButton): boolean {
+        this.genericModal.hide();
+
+        //console.log("hidden!!!!!", this.genericModal);
+        switch (whichButton) {
+        case 'save':
+            //disallow ', ", <, >,
+            //console.log("saving"); 
+            this.aieRepairForm.controls["modalDescriptionText"].value
+                .split('<').join('.')
+                .split('>').join('.')
+                .split("'").join('.')
+                .split('"').join('.');    
+            //break into 4x25
+            this.activeRow.desc1 = this.aieRepairForm.controls["modalDescriptionText"].value.substring(0,24);
+            this.activeRow.desc2 = this.aieRepairForm.controls["modalDescriptionText"].value.substring(25,49);
+            this.activeRow.desc3 = this.aieRepairForm.controls["modalDescriptionText"].value.substring(50,74);
+            this.activeRow.desc4 = this.aieRepairForm.controls["modalDescriptionText"].value.substring(75,99);
+            return true;
+            
+        case 'ok':
+            switch (this.modalFrom) {
+            case("pageChanged"):
+                this.changePage(this.modalNumParameter);
+                break;
+            case("search"):
+                this.getAsRpClick();
+                break;
+            default:
+            }
+                
+            return true;
+            
+        default:
+            switch (this.modalFrom) {
+            case("pageChanged"):
+                //console.log(this.pager);
+                this.modalCancelled = true;
+                this.pager.selectPage(this.modalNumParameter2);    
+                break;
+            case("search"):
+                //console.log("genericModalClick - default - search");
+                break;
+            default:    
+            }
+            return false;
+        }
+    }
+}

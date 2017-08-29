@@ -1,0 +1,110 @@
+export class AieMisc {
+  constructor(
+    public startDate: string = "",         // defined in daterangepicker
+    public endDate: string = "",           // defined in daterangepicker
+    public srchRadio: string = "",
+    public srchChk: string = "",
+    public srchAmt: number = 0,
+    public fct_sales_code: string = "",
+    public fct_cost_account: number = 0,
+    public fct_product_desc: string = "",
+    public fct_odometer: number = 0,         // scOdoRead
+    public fct_trans_date: number = 0,
+    public fct_po_number: string = "",
+    public fct_total_cost: number = 0,
+    public fct_aie_amount: number = 0,
+    public aie_credit: string = "",          // screen field not in DTO
+    public fct_aie_status: string = "",      // scSelect
+    public fct_key: number = 0,              // hidden fields
+    public fct_billback_desc: string = "",   // Split 100 into 4 X 25 for DC-DESC1-4
+    public fct_toUpdate: string = "",
+    public scNegative: string = "",          // screen field hidden not in DTO
+    public fct_orig_sales: string = "",      // screen field hidden not in DTO
+    public fct_orig_cost: number = 0,        // screen field hidden not in DTO
+    public fct_dc_update: string = "",       // screen field hidden not in DTO
+    public fct_orig_status: string = "",     // screen field hidden not in DTO
+    public fct_dc_found: string = "",        // screen field hidden not in DTO
+    public fct_vh_agency_cl: string = "",
+    public fct_vh_tag: string = "",
+    public fct_cu_region: number = 0,  
+    public fct_cu_boac: string = "",
+    public po_number: string = ""
+         
+    ) { }
+ };
+
+export class AieMiscExtended extends AieMisc {
+  constructor(
+    public startDate: string = "",
+    public endDate: string = "",   
+    public srchRadio: string = "",
+    public srchChk: string = "",
+    public srchAmt: number = 0,
+    public fct_sales_code: string = "",
+    public fct_cost_account: number = 0,
+    public fct_product_desc: string = "",
+    public fct_odometer: number = 0,          
+    public fct_trans_date: number = 0,
+    public fct_po_number: string = "",
+    public fct_total_cost: number = 0,
+    public fct_aie_amount: number = 0,
+    public aie_credit: string = "",           
+    public fct_aie_status: string = "",       
+    public fct_key: number = 0,               
+    public fct_billback_desc: string = "",    
+    public fct_toUpdate: string = "",
+    public scNegative: string = "",          
+    public fct_orig_sales: string = "",       
+    public fct_orig_cost: number = 0,         
+    public fct_dc_update: string = "",        
+    public fct_orig_status: string = "",      
+    public fct_dc_found: string = "",
+    public fct_vh_agency_cl: string = "",
+    public fct_vh_tag: string = "",
+    public fct_cu_Region: number = 0,  
+    public fct_cu_boac: string = "",
+    public po_number: string = "" 
+    ) { super(
+            startDate,  
+            endDate,    
+            srchRadio,
+            srchChk,
+            srchAmt,
+            fct_sales_code,
+            fct_cost_account,
+            fct_product_desc,
+            fct_odometer,
+            fct_trans_date,
+            fct_po_number,
+            fct_total_cost,
+            fct_aie_amount,
+            aie_credit,
+            fct_aie_status,
+            fct_key, 
+            fct_billback_desc,
+            fct_toUpdate,
+            scNegative,
+            fct_orig_sales,
+            fct_orig_cost,
+            fct_dc_update,
+            fct_orig_status,
+            fct_dc_found,
+            fct_vh_agency_cl,
+            fct_vh_tag,
+            fct_cu_Region,  
+            fct_cu_boac,
+            po_number 
+        );
+        this.desc1 = "";
+        this.desc2 = "";
+        this.desc3 = "";
+        this.desc4 = "";
+     }
+    public dc: any;
+    public id: any;
+    public desc1: string;
+    public desc2: string;
+    public desc3: string;
+    public desc4: string;
+    public aieDesc: any;
+}           

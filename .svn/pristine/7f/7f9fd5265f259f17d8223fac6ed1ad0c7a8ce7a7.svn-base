@@ -1,0 +1,38 @@
+<!--	
+		Here in the the HTML for the child. We use [(ngModel)] to two way
+		our selection to the the child variable.
+		
+		Next we use the built-in (ngModelChange) event emitter to listen
+		for a change in our model and trigger our three functions defined
+		in the child component which cascades a change to the varChange
+		(ex. "(regionChange)") listener in the parent component HTML.
+ -->
+<span style="color: #C00;">&nbsp;*&nbsp;</span>
+<label class="control-label">Zone: </label>
+&nbsp;
+<select class="form-control" id="idZone" name="idZone" #idZone="ngModel" [(ngModel)]="zone" 
+	(ngModelChange)="changeZone($event, loadingModal)" required>
+	<option [hidden]="true" [ngValue]="zoneSelect">Select</option>
+	<option *ngFor="let zone of zones">{{zone}}</option> 
+</select>
+&nbsp;&nbsp;
+
+<span style="color: #C00;">&nbsp;*&nbsp;</span>
+<label class="control-label">LID:</label>
+&nbsp;
+<select [disabled]="!idZone.valid" class="form-control" id="idLID" name="idLID" #idLID="ngModel" [(ngModel)]="lid"
+	(ngModelChange)="changeLID($event, loadingModal)" required>
+	<option [hidden]="true" [ngValue]="lidSelect">Select</option>
+	<option *ngFor="let lid of lids">{{lid}}</option>
+</select>
+&nbsp;&nbsp;
+
+<label class="control-label">Customer:&nbsp;</label>
+<input placeholder="00-00-00-XXXXXX-000" [disabled]="!idLID.valid" [(ngModel)]="customer" (ngModelChange)="changeCustomer($event, idCustomer.valid)"
+	[typeahead]="customers" class="form-control" id="idCustomer" name="idCustomer" #idCustomer="ngModel"
+	[typeaheadMinLength]="0" [typeaheadOptionsLimit]="10" pattern="^[0-9]{2}-[0-9]{2}-[0-9]{2}-[a-zA-Z0-9]{6}-[0-9]{3}$">
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<!-- Loading modal -->
+<app-loading-bar></app-loading-bar>
+

@@ -1,0 +1,20 @@
+<select	name="salesCode" class="form-control" style="max-width:100%;" 
+	[(ngModel)]="salesCode"
+	(ngModelChange)="change($event)">
+	    <option value=""></option>
+        <option value="A1">A1</option>
+        <option value="A8">A8</option>
+        <option value="D1">D1</option>
+        <option value="D2">D2</option>
+        <option value="N1">N1</option>
+        <option value="P1">P1</option>
+        <option value="Q1">Q1</option>
+        <option value="S1">S1</option>
+        <option value="U2">U2</option>
+        <option value="U3">U3</option>
+        <option value="V3">V3</option>
+        <option value="V4">V4</option>
+        <option value="X1">X1</option>
+        <option value="X2">X2</option>
+        <option value="X4">X4</option>
+</select>

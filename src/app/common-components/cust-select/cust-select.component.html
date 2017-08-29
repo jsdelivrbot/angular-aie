@@ -1,0 +1,47 @@
+<!--	
+		Here in the the HTML for the child. We use [(ngModel)] to two way
+		our selection to the the child variable.
+		
+		Next we use the built-in (ngModelChange) event emitter to listen
+		for a change in our model and trigger our three functions defined
+		in the child component which cascades a change to the varChange
+		(ex. "(regionChange)") listener in the parent component HTML.
+ -->
+<div class="form-group form-inline">
+	<label class="col-sm-5 control-label">
+   		<span style="color:#C00; margin-left:-9px;">*&nbsp;</span>Region:
+  	</label>
+  	<div class="col-sm-7">
+		<select class="form-control" id="idRegion" name="idRegion" #idRegion="ngModel" [(ngModel)]="region" 
+		(ngModelChange)="changeRegion($event, loadingModal)" required>
+		<option [hidden]="true" [ngValue]="regionSelect">Select</option>
+		<option *ngFor="let region of regions">{{region}}</option> 
+		</select>
+	</div>
+</div>
+<div class="form-group form-inline">
+	<label class="col-sm-5 control-label">
+   		<span style="color:#C00; margin-left:-9px;">*&nbsp;</span>FMC: 
+  	</label>
+  	<div class="col-sm-7">
+		<select [disabled]="!idRegion.valid" class="form-control" id="idFMC" name="idFMC" #idFMC="ngModel" [(ngModel)]="fmc"
+		(ngModelChange)="changeFMC($event, loadingModal)" required>
+		<option [hidden]="true" [ngValue]="fmcSelect">Select</option>
+		<option *ngFor="let fmc of fmcs">{{fmc}}</option>
+		</select>
+	</div>
+</div>
+<div class="form-group form-inline">
+	<label class="col-sm-5 control-label">
+   	<span style="color:#C00; margin-left:-9px;">*&nbsp;</span>Customer Number:
+  	</label>
+  	<div class="col-sm-7">
+		<input placeholder="00-00-00-000000-000" [disabled]="!idFMC.valid" [(ngModel)]="customer" (ngModelChange)="changeCustomer($event)"
+		[typeahead]="customers" class="form-control" id="idCustomer"
+		[typeaheadMinLength]="0" [typeaheadOptionsLimit]="10">
+	</div>
+</div>
+
+<!-- Loading modal -->
+<app-loading-bar></app-loading-bar>
+

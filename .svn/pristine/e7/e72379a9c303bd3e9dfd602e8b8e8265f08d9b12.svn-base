@@ -1,0 +1,110 @@
+<a id="content" name="content"></a>
+
+<div class="row">
+  <div>
+    &nbsp;
+  </div>
+
+  <h1>Hi {{currentUser}}!</h1>
+
+  <div class="panel panel-default">
+    <div class="panel-body mainmenubody">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div class="row">
+                <div align="center" class="col-md-12">
+                  <h1>Welcome to the AIE Decision Tool<br>
+                  &nbsp;</h1>
+                </div>
+
+
+                <div align="center" class="form-group form-group5 form-inline">
+                  <label class="control-label">Select LID:</label>&nbsp;
+                  <select class="form-control" id="idLid" [(ngModel)]="selectedLID" (ngModelChange)="changeLid($event)">
+					<option value =0>Select LID</option>
+					<option *ngFor="let lid of lids">{{lid}}</option>
+				  </select>
+                </div>
+
+
+                <div align="center" class="col-md-12">
+                  <h3>Select a module below to get started.</h3>
+                </div>
+
+
+                <div class="clearfix">
+                  &nbsp;
+                </div>
+              </div>
+
+
+              <div class="clearfix">
+                &nbsp;
+              </div>
+
+
+              <div align="center" class="col-md-12">
+                <div align="center" class="col-md-3 col-sm-4 thumbnail">
+                  <a href="decision/123"><img class="img-responsive" height="100" src="assets/images/decision.png" title="Select this icon for AIE Decision" width="100">
+
+                  <h4>AIE Decision</h4></a>
+                </div>
+
+
+                <div align="center" class="col-md-3 col-sm-4 thumbnail">
+                  <a href="sale"><img class="img-responsive" height="100" src="assets/images/sale.png" title="Select this icon for AIE Sale" width="100">
+
+                  <h4>Sale</h4></a>
+                </div>
+
+
+                <div align="center" class="col-md-3 col-sm-4 thumbnail">
+                  <a href="repair"><img class="img-responsive" height="100" src="assets/images/repair.png" title="Select this icon for AIE Repair" width="100">
+
+                  <h4>Repair</h4></a>
+                </div>
+
+
+                <div align="center" class="col-md-3 col-sm-4 thumbnail">
+                  <a href="misc"><img class="img-responsive" height="100" src="assets/images/misc.png" title="Select this icon for AIE Misc" width="100">
+
+                  <h4>Misc.</h4></a>
+                </div>
+
+
+                <div align="center" class="col-md-3 col-sm-4 thumbnail">
+                  <a href="single"><img class="img-responsive" height="100" src="assets/images/single.png" title="Select this icon for AIE Single" width="100">
+
+                  <h4>Single</h4></a>
+                </div>
+
+
+                <div align="center" class="col-md-3 col-sm-4 thumbnail">
+                  <a href="multiple"><img class="img-responsive" height="100" src="assets/images/multiple.png" title="Select this icon for AIE Multiple" width="100">
+
+                  <h4>Multiple</h4></a>
+                </div>
+
+
+                <div align="center" class="col-md-3 col-sm-4 thumbnail">
+                  <a href="fleet-card"><img class="img-responsive" height="100" src="assets/images/fleetcard.png" title="Select this icon for AIE fleet card" width="100">
+
+                  <h4>Fleet Card</h4></a>
+                </div>
+
+
+                <div align="center" class="col-md-3 col-sm-4 thumbnail">
+                  <a href="#"><img class="img-responsive" height="100" src="assets/images/reports.png" title="Select this icon for FSR reports" width="100">
+
+                  <h4>FSR Reports</h4></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

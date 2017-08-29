@@ -1,0 +1,5 @@
+<select	name="repairReason"	class="form-control" style="max-width:100%;" 
+	[(ngModel)]="repReason" 
+	(ngModelChange)="change($event)">
+	<option *ngFor="let reason of repList" [value]="reason.code">{{reason.code}} - {{reason.description}}</option>
+</select>

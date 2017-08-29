@@ -1,0 +1,374 @@
+
+<div class="container">
+<!-- <a name="content"></a> -->
+
+  	<div class="row">
+    	<ol class="breadcrumb">
+    		<li><a href="#"><span aria-hidden="true" class="glyphicon glyphicon-menu-hamburger" title="Main Menu"></span></a></li>
+      		<li><a href="#">AIE Decision Tool</a></li>
+      		<li>AIE Decision</li>
+    	</ol>
+
+    	<div class="panel panel-default">
+      		<div class="panel-heading" id="screenTitle">AIE Decision - Repair Class 1, 2, 3</div>
+
+      		<div class="panel-body">
+        		<div class="col-md-12" style="text-align:center">
+          			<div class="row">
+            			<div class="col-md-6" style="text-align:left; width:900px">
+              				<div class="form-group form-group5 form-inline" style="width: 900px">&nbsp;<br />
+                				<label class="control-label">Zone:</label>&nbsp;
+ 								<select class="form-control" id="idZone" [(ngModel)]="zone" (ngModelChange)="getLIDs()"> 
+ 									<option value=1>1</option>
+	                  				<option value=2>2</option>
+	                  				<option value=3>3</option>
+	                  				<option value=4>4</option>
+                				</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                				<label class="control-label">LID:</label>&nbsp;
+ 								<select class="form-control" id="idLid" [(ngModel)]="lid" (ngModelChange)="getCustomers()"> 
+									<option *ngFor="let lid of lids" [value]="lid"> {{lid}} </option>
+ 								</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                				<label class="control-label">Customer Number:&nbsp;</label>
+               					<input [(ngModel)]="customer" [typeahead]="customers" class="form-control" 
+               							id="idCustomer" [typeaheadMinLength]="0" [typeaheadOptionsLimit]="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	  							<button type="button" class="btn btn-dt2 btn-sm" (click)="searchAiedec()">Search</button> 
+              				</div>
+            			</div>
+            			
+			            <div *ngIf="!haveNoPage" style="text-align: right; width: auto; padding-right: 15px" id="idPagination">
+			            		Results: {{ startItem }}-{{ endItem }} of {{ totalItems }}
+			            	<br>
+			            	<pagination id="pagebuttons"  
+				            	[boundaryLinks]="true" 
+				            	[directionLinks]="false" 
+				            	[totalItems]="totalItems"
+				            	[maxSize]="5" 
+				            	[itemsPerPage]="itemsPerPage"
+				            	rotate="true"
+				            	[(ngModel)]="currentPage" 
+				            	class="pagination-sm"
+				            	previousText="&lsaquo;" 
+				            	nextText="&rsaquo;" 
+				            	firstText="&laquo;" 
+				            	lastText="&raquo;"
+				            	(pageChanged)="pageChanged($event)"
+			            		>
+			            	</pagination>
+			          	</div>
+			     	</div>
+					
+					<br>
+			       	<div class="table-responsive">
+  						<form [formGroup]="aieForm">
+  							<div>
+			    				<strong>Selecting "Save Bill Backs" will process the selected billbacks&nbsp;</strong> 
+				    			<button type="button" class="btn btn-dt2 btn-sm" (click)="submitAiedec()" id="savebbButton1">Save Bill Backs</button>
+				    			<button type="button" class="btn btn-dt2 btn-sm" (click)="clearscreen ()"                   >Clear Screen</button> 
+				    			<button type="button" class="btn btn-dt2 btn-sm" (click)="submitAiedec()" id="reviewButton1">Review Selected</button><br><br>
+				            </div>
+				            <table class="table table-striped table-bordered" id="table1">
+				              	<tr class="info" style="text-align:center"    id="tableheader">
+				              	    <th> </th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'vh_AgencyCl'   , 'sortway10' , 'column10'  )"  
+				                			  id="column10"  title="Sort descending" style="cursor: pointer">CL-Tag No.</a>
+				                		<input type="hidden" id="sortway10"  value="DSC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'cu_Boac'       , 'sortway20' , 'column20'  )"  
+				                			  id="column20"  title="Sort ascending"  style="cursor: pointer">BOAC</a>
+				                		<input type="hidden" id="sortway20"  value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'as_Mileage'    , 'sortway30' , 'column30'  )"   
+				                			  id="column30"  title="Sort ascending"  style="cursor: pointer">Mileage</a>
+				                		<input type="hidden" id="sortway30"  value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'rp_AssemblyLit', 'sortway40' , 'column40'  )"  
+				                			  id="column40"  title="Sort ascending"  style="cursor: pointer">Assembly Lit.</a>
+				                		<input type="hidden" id="sortway40"  value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'as_ActNo'      , 'sortway50' , 'column50'  )"  
+				                			  id="column50"  title="Sort ascending"  style="cursor: pointer">Repair ACT#</a>
+				                		<input type="hidden" id="sortway50"  value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'rp_RepairCl'   , 'sortway60' , 'column60'  )"  
+				                			  id="column60"  title="Sort ascending"  style="cursor: pointer">Class Code</a>
+				                		<input type="hidden" id="sortway60"  value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'rp_Reason'     , 'sortway70' , 'column70'  )"  
+				                			  id="column70"  title="Sort ascending"  style="cursor: pointer">Reason Code</a>
+				                		<input type="hidden" id="sortway70"  value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'as_DateAuth'   , 'sortway80' , 'column80'  )"  
+				                			  id="column80"  title="Sort ascending"  style="cursor: pointer">Transaction Date</a>
+				                		<input type="hidden" id="sortway80"  value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'rp_TotalEst'   , 'sortway90' , 'column90'  )"  
+				                			  id="column90"  title="Sort ascending"  style="cursor: pointer">Line Cost Total</a>
+				                		<input type="hidden" id="sortway90"  value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'rp_AieAmount'  , 'sortway100', 'column100' )"  
+				                			  id="column100" title="Sort ascending"  style="cursor: pointer">AIE Amount</a>
+				                		<input type="hidden" id="sortway100" value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'as_SalesCode'  , 'sortway110', 'column110' )"  
+				                			  id="column110" title="Sort ascending"  style="cursor: pointer">Sales Code</a>
+				                		<input type="hidden" id="sortway110" value="ASC">
+				                	</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'as_FinCA'      , 'sortway120', 'column120' )"  
+				                			  id="column120" title="Sort ascending"  style="cursor: pointer">Cost Acct.</a>
+				                		<input type="hidden" id="sortway120" value="ASC">
+				                	</th>
+				                	<th>Justification</th>
+				                	<th><a ng-href="" (click)="sortColumn( AIEDecisions, 'rp_AieStatus'  , 'sortway130', 'column130' )"  
+				                			  id="column130" title="Sort ascending"  style="cursor: pointer">AIE Status</a>
+				                		<input type="hidden" id="sortway130" value="ASC">
+				                	</th>
+				              	</tr>
+				              	<tr *ngFor="let AIEDecision of aiePage, let i = index" id="tablerow" name="tablerow">
+				                	<td style="vertical-align: middle">
+				                		<input type="checkbox" name="tagCheckbox" id="tagCheckbox" style="transform: scale(1.3)">
+				                		<input type="hidden"   name="updStatus"   id="updStatus"  >
+				                	</td>
+				                	<td style="vertical-align: middle; cursor: pointer" nowrap id="tagComment">  
+<!-- 				                	<a ng-href="" (click)="repaircommentsmodal.show()"  -->
+				                		<a ng-href="" (click)="togglePopover(pop, AIEDecision)"  
+				                			title="Click tag to view Repair Comments">
+				                			<span popover triggers="" #pop="bs-popover">{{AIEDecision.vh_AgencyCl}}-{{AIEDecision.vh_Tag}}</span>
+				                		</a>
+				                		<input type="hidden" name="agencyCl" id="agencyCl" value="{{AIEDecision.vh_AgencyCl}}">
+				                		<input type="hidden" name="tag"      id="tag"      value="{{AIEDecision.vh_Tag}}"     >
+				                	</td>				                
+					                <td style="vertical-align: middle;">{{AIEDecision.cu_Boac}}
+					                	<input type="hidden" name="boac" value="{{AIEDecision.cu_Boac}}"></td>
+					                <td style="vertical-align: middle;">{{AIEDecision.as_Mileage}}</td>
+					                <td style="vertical-align: middle; cursor: pointer; text-align: left;" nowrap>
+<!-- 					                <a ng-href="" (click)="saveDesc(i); assemblymodal.show();" title="Click to see Description">   -->
+					                	<a ng-href="" (click)="getDesc(i); assemblymodal.show();" title="Click to see Description" name="assylit" id="assylit">  
+					                								    {{AIEDecision.rp_AssemblyLit}}</a>&nbsp;
+										<input type="hidden" id="descChgd" name="descChgd" value="">
+										<input type="hidden" id="descSave" name="descSave" value="">
+									</td>
+					                <td style="vertical-align: middle" >{{AIEDecision.as_ActNo}}
+					                	<input type="hidden" id="actNo" name="actNo" value="{{AIEDecision.as_ActNo}}">
+					                	<input type="hidden" name="actdttime" value="{{AIEDecision.as_ActDtTime}}">
+					                </td>  
+					                <td style="vertical-align: middle" >{{AIEDecision.rp_RepairCl}}
+					                	<input type="hidden" name="repairCl" value="{{AIEDecision.rp_RepairCl}}"></td>
+					                <td style="vertical-align: middle" >{{AIEDecision.rp_Reason}}</td>
+					                <td style="vertical-align: middle" >{{AIEDecision.as_DateAuth | myDate | date:"MM/dd/yyyy"}}</td>
+					                <td style="vertical-align: middle; text-align: right">{{AIEDecision.rp_TotalEst | currency:'USD':true}}</td>
+					                <td style="vertical-align: middle">
+					                	<input type="text"   name="aieamount"    id="aieamount" class="form-control" 
+					                				style="width: 100px; text-align: right" placeholder="0.00"   
+					                			   	maxlength="8" value="{{AIEDecision.rp_AieAmount | number: '1.2'}}">
+					                	<input type="hidden" name="rpRegion"     id="rpRegion"     value="{{AIEDecision.rp_Region}}">
+										<input type="hidden" name="rpSequenceNo" id="rpSequenceNo" value="{{AIEDecision.rp_SequenceNo}}">
+					                </td>
+					            	<td style="vertical-align: middle">
+              							<app-sales-code-select [(salesCode)]="AIEDecision.as_SalesCode"></app-sales-code-select>
+<!-- 					                	<select class="form-control" id="salescode" style="width: auto" value="{{AIEDecision.as_SalesCode}}"> -->
+<!-- 							 				<option value="X2">X2</option> -->
+<!-- 				                		</select> -->
+				                	</td>
+				                	<td style="vertical-align: middle">
+							            <app-cost-acct-select [(costAcct)]="AIEDecision.as_FinCA"></app-cost-acct-select>
+<!-- 				                		<select class="form-control" id="costacct" style="width: auto" value="{{AIEDecision.as_FinCA}}"> -->
+<!-- 						 				  	<option value="145">145</option> -->
+<!-- 				                		</select> -->
+				                	</td>
+					                <td style="vertical-align: middle"> 
+<!-- 							        <app-justification-select 						// DOESN'T WORK; SELECTION AFFECTS ALL ROWS -->
+<!-- 							           	[(justification)]     = "justification" -->
+<!-- 							           	(justificationChange) = "aiejustmodal.show()"  -->
+<!-- 						            	justType = "decision123"  -->
+<!-- 							        > -->
+						                
+					                	<select class="form-control" id="justification" name="justification"  
+						                		(click) = "justifDropdown()" (change)= "justifChange(i)"> 
+ 									    	<option value=""  >- Select -</option>
+ 						                  	<option value="01">AIE needs billed</option>
+ 									        <option value="02">AIE different agency</option>
+						                </select>
+						                <input type="hidden" name="justifReason01" >
+						                <input type="hidden" name="justifReason02" >
+						                <input type="hidden" name="newcustno"      >
+						                <input type="hidden" name="newcustdatetime">
+				                	</td>
+					                <td name="aiestatus" id="aiestatus"  style="vertical-align: middle">{{AIEDecision.rp_AieStatus}}</td>
+					                
+								    <!-- Assembly Modal (Description details) 			should be inside Form tag -->
+									<div bsModal #assemblymodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">  
+										<div class="modal-dialog">
+											<div class="modal-content" style="width: 500px">
+												<div class="modal-header">
+													<button type="button" class="close pull-right" (click)="assemblymodal.hide()" aria-label="Close">
+														<span aria-hidden="true">&times;</span></button>
+													<h4 class="modal-title" style="text-align:left">Description details</h4>
+												</div>
+												<div class="modal-bodyCCD">
+													<p style="text-align:left">
+														<strong>Please enter the Description details (maximum allowed 100 characters).</strong><br><br>
+														<textarea class="form-control" rows="3" maxlength="100" name="desc1234" id="desc1234" 
+															style="text-align:left"></textarea>
+													</p>
+												</div>
+												<div class="modal-footer" style="text-align: center;">
+													<button type="button" class="btn btn-primary" (click)="assemblymodal.hide(); submitDesc(i);">OK</button>
+													<button type="button" class="btn btn-primary" (click)="assemblymodal.hide(); cancelDesc(i);">Cancel</button>
+													<button type="button" class="btn btn-primary" (click)="clearDesc(i)">Clear Data (click OK when done)</button>
+												</div>						
+											</div>
+										</div>
+									</div>
+					                
+				             	</tr>
+			            	</table>
+
+							<input type="hidden" name= "justificationModal" id="justificationModal" (click)="aiejustmodal.show()">
+							<!-- AIE Justification Modal 					should be inside Form tag -->
+							<div bsModal #aiejustmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close pull-right" (click)="aiejustmodal.hide()" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+											<h4 class="modal-title">AIE Justification Comments</h4>
+										</div>
+										<div class="modal-bodyCCD">
+											<p>
+												<strong>Please note the reason for the bill back below:</strong>	
+												<textarea class="form-control" rows="3" maxlength="100" name="justifReason" id="justifReason"></textarea>
+											</p>
+											<p id="custnoEntry">
+												<label class="control-label">Change to Customer Number:&nbsp;</label> 
+												<input type="text"   name="newCustNumber" id="newCustNumber" class="form-control" 
+													   maxlength="19" (keyup)="autohyphen()" placeholder="00-00-00-XXXXXX-000">
+<!-- 											<input type="hidden" name="newCustDateTime"> -->
+											</p>
+											<button type="button" class="btn btn-primary" data-dismiss="modal" 
+												(click)="submitJustif();">OK</button>
+											<button type="button" class="btn btn-primary" 
+												(click)="aiejustmodal.hide();">Cancel</button>
+										</div><br>
+									</div>
+								</div>
+							</div>
+			            								
+						</form>
+			     	</div>
+			 	</div>
+
+			 	<div class="col-md-12" style="text-align:center" id="bottombuttons">
+			    	<strong>Selecting "Save Bill Backs" will process the selected billbacks&nbsp;</strong> 
+			    	<button type="button" class="btn btn-dt2 btn-sm" (click)="submitAiedec()" id="savebbButton2">Save Bill Backs</button>
+			    	<button type="button" class="btn btn-dt2 btn-sm" (click)="clearscreen ()"                   >Clear Screen</button> 
+			    	<button type="button" class="btn btn-dt2 btn-sm" (click)="submitAiedec()" id="reviewButton2">Review Selected</button><br><br>
+			 	</div>
+			</div>
+		</div>
+  	</div>
+  	
+	<!-- /.container -->
+
+
+	<!--  Modal HTML section -->
+
+    <!-- Search Modal -->
+	<div bsModal #searchmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
+		<div class="modal-dialog">
+			<div class="modal-content" style="width: 300px">
+				<div class="modal-header">
+					<button type="button" class="close pull-right" (click)="searchmodal.hide()" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">Search Confirmation</h4>
+				</div><br>
+				<div class="modal-bodyCCD">
+					<p style="text-align: center"><strong>Are you sure you want to SEARCH again? </strong></p>
+					<p style="text-align: center"><strong>Any UNSAVED CHANGES will be LOST.</strong></p>
+				</div>
+				<div class="modal-footer" style="text-align: center;">
+					<button type="button" class="btn btn-primary" data-dismiss="modal" 
+							(click)="searchmodal.hide(); getAIEDecRepairs();">YES</button>
+					<button type="button" class="btn btn-primary" (click)="searchmodal.hide()">NO</button>
+				</div>
+			</div>
+		</div>
+	</div>	
+
+    <!-- Clear Screen Modal -->
+	<div bsModal #clearscreenmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
+		<div class="modal-dialog">
+			<div class="modal-content" style="width: 300px">
+				<div class="modal-header">
+					<button type="button" class="close pull-right" (click)="clearscreenmodal.hide()" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">Clear Screen Confirmation</h4>
+				</div><br>
+				<div class="modal-bodyCCD">
+					<p style="text-align: center"><strong>Are you sure you want to <br><br>CLEAR the SCREEN? </strong></p>
+					<p style="text-align: center"><strong>Any UNSAVED CHANGES will be LOST.          </strong></p>
+				</div>
+				<div class="modal-footer" style="text-align: center;">
+					<button type="button" class="btn btn-primary" data-dismiss="modal" 
+							(click)="clearscreenmodal.hide(); initScreen();">YES</button>
+					<button type="button" class="btn btn-primary" (click)="clearscreenmodal.hide()">NO</button>
+				</div>
+			</div>
+		</div>
+	</div>	
+
+    <!-- Save Billbacks Modal -->
+	<div bsModal #savebillbacksmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
+		<div class="modal-dialog">
+			<div class="modal-content" style="width: 400px">
+				<div class="modal-header">
+					<button type="button" class="close pull-right" (click)="savebillbacksmodal.hide()" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title">Save or Review Confirmation</h4>
+				</div><br>
+				<div class="modal-bodyCCD">
+					<p style="text-align: center">
+						<strong>Are you sure you want to <br><br> SAVE BILL BACKS or REVIEW SELECTED?<br><br>
+								If YES, selected rows will be submitted for processing, <br>you cannot navigate to another page, need to click Search again.				
+						</strong>
+					</p>
+				</div>
+				<div class="modal-footer" style="text-align: center;">
+					<button type="button" class="btn btn-primary" data-dismiss="modal"  
+							(click)="savebillbacksmodal.hide(); submitAiedecContinue();">YES</button>
+					<button type="button" class="btn btn-primary" (click)="savebillbacksmodal.hide()">NO</button>
+				</div>
+			</div>
+		</div>
+	</div>	
+
+<!--     Review Selected Modal -->
+<!-- 	<div bsModal #reviewselectedmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}"> -->
+<!-- 		<div class="modal-dialog"> -->
+<!-- 			<div class="modal-content" style="width: 300px"> -->
+<!-- 				<div class="modal-header"> -->
+<!-- 					<button type="button" class="close pull-right" (click)="reviewselectedmodal.hide()" aria-label="Close"> -->
+<!-- 						<span aria-hidden="true">&times;</span> -->
+<!-- 					</button> -->
+<!-- 					<h4 class="modal-title">Review Selected Confirmation</h4> -->
+<!-- 				</div><br> -->
+<!-- 				<div class="modal-bodyCCD"> -->
+<!-- 					<p style="text-align: center"><strong>Are you sure you want to<br><br>REVIEW the SELECTED Repairs? </strong></p> -->
+<!-- 				</div> -->
+<!-- 				<div class="modal-footer" style="text-align: center;"> -->
+<!-- 					<button type="button" class="btn btn-primary" data-dismiss="modal"  -->
+<!-- 							(click)="reviewselectedmodal.hide(); reviewSelectedAiedec();">YES</button> -->
+<!-- 					<button type="button" class="btn btn-primary" (click)="reviewselectedmodal.hide()">NO</button> -->
+<!-- 				</div> -->
+<!-- 			</div> -->
+<!-- 		</div> -->
+<!-- 	</div>	 -->
+
+
+	<!-- Loading modal -->
+	<app-loading-bar></app-loading-bar>
+	
+</div>

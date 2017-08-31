@@ -22,18 +22,19 @@ import { PagerComponent } from 'ngx-bootstrap/pagination';
   templateUrl: './sale-aie.component.html',
   styleUrls: ['./sale-aie.component.css']
 })
-    
+
 export class SaleAieComponent implements OnInit {
 
     /*
    * @ViewChild allows you to directly access an instance of a child component.
    * This will allow you to access any this.defined variables of the child
    * as well.
-   * 
+   *
    * @ViewChild can also allow you to directly access local variables from
    * the view/html. And example can be seen in LoadingBarComponent.
    */
     @ViewChild(LoadingBarComponent) public loadingBarComponent: LoadingBarComponent;
+    @ViewChild('loadingModal') public loadingModal:ModalDirective;
     @ViewChild('paginationModule') public pager: PagerComponent;
     isOn: boolean;
     saleAieForm;
@@ -62,7 +63,7 @@ export class SaleAieComponent implements OnInit {
     private saleAieScreen: SaleAieRecords;
     private saleAieUpdObjects: SaleAieRecords[] = [];
     private securityRecord : SecurityRecord;
-   
+
 
     constructor(
         private saleAieService: SaleAieService,
@@ -79,7 +80,7 @@ export class SaleAieComponent implements OnInit {
         this.saleAieForm = this.formBuilder.group({
             saRows: this.formBuilder.array([])
         })
-        //  
+        //
         this.vsrForm = this.formBuilder.group({
             vsrRows: this.formBuilder.array([])
         })
@@ -94,7 +95,7 @@ export class SaleAieComponent implements OnInit {
     hasEditAccess: boolean =false;
     currentSecurityRecord: SecurityRecord;
     userPermUpd: boolean = false;
-    //end data service variables  
+    //end data service variables
 
     saleAieRecords: SaleAieRecords[];
     vsrs: VehSaRepairs[];
@@ -124,9 +125,9 @@ export class SaleAieComponent implements OnInit {
         this.region = this.customerRegion.toString();
         this.getAllRegionRecords();
         //testing only
-        
+
         this.getSaleRecords("N");
-        //testing only end        
+        //testing only end
         this.initViewThis();
         this.repairClassKey = "";
         this.agencyCl = "";
@@ -145,8 +146,8 @@ export class SaleAieComponent implements OnInit {
         this.dataService.currentRegion.subscribe(customerRegion => this.customerRegion = customerRegion);
         this.dataService.hasEditAccess.subscribe(hasEditAccess => this.hasEditAccess = hasEditAccess);
         this.dataService.currentSecurityRecord.subscribe(currentSecurityRecord=> this.currentSecurityRecord = currentSecurityRecord);
-         
-    
+
+
         console.log("host:"+ this.host);
 //        console.log("customerLid:"+ this.customerLid);
 //        console.log("customerName:"+ this.customerName);
@@ -154,9 +155,9 @@ export class SaleAieComponent implements OnInit {
 //        console.log("hasEditAccess:" + this.hasEditAccess);
 //        console.log("securityRecord:"+ this.currentSecurityRecord);
         if ( null != this.currentSecurityRecord ) {
-            if( "X" ==this.currentSecurityRecord.lvl1Perm || 
+            if( "X" ==this.currentSecurityRecord.lvl1Perm ||
                 "X" ==this.currentSecurityRecord.lvl5Perm ||
-                "X" ==this.currentSecurityRecord.lvl7Perm || 
+                "X" ==this.currentSecurityRecord.lvl7Perm ||
                 "X" ==this.currentSecurityRecord.lvl8Perm )
                 this.userPermUpd=true;
             else
@@ -201,7 +202,7 @@ export class SaleAieComponent implements OnInit {
             vhBlkbookLoad: [''],
             //            vsrRecords: this.formBuilder.array([
             //                                    this.initLineItem(),
-            //                                     ]), 
+            //                                     ]),
             //transient variables
             vsrItemIds: [''],
             vsrBillBackFlag: [false],
@@ -299,7 +300,7 @@ export class SaleAieComponent implements OnInit {
         this.totalItems = 0;
         this.saleAiePages = null;
         this.totalPages = 0;
-        this.currentPage = 1;        
+        this.currentPage = 1;
         this.haveNoPage = true;
         //end initialize page
         this.saleAieService.getSaleNumbers(this.region)
@@ -390,7 +391,7 @@ export class SaleAieComponent implements OnInit {
     // setScreenFlags sets all database values into screen values, e.g. Y to true, etc
     setScreenFlags(saleAieRecords) {
         for (let saleAieRecord of saleAieRecords) {
-            
+
             saleAieRecord.blackBookFlag = false;
             if (saleAieRecord.ssBillBack > " ") {
                 saleAieRecord.billBackFlag = true;
@@ -399,7 +400,7 @@ export class SaleAieComponent implements OnInit {
                 saleAieRecord.blackBookFlag = true;
             }
             if (saleAieRecord.ssBbELossSrc == "" || saleAieRecord.ssBbELossSrc == " ")
-                saleAieRecord.ssBbELossSrc = "F"; // set Default to F (Fair market value) 
+                saleAieRecord.ssBbELossSrc = "F"; // set Default to F (Fair market value)
             saleAieRecord.actCostTotal = 0;
             saleAieRecord.estCostTotal = 0;
             let actCostTotal = 0;
@@ -408,13 +409,13 @@ export class SaleAieComponent implements OnInit {
             let allFieldsDisable = false;
 
             if (saleAieRecord.ssBillBack == "B" ||  // Billed back
-                saleAieRecord.ssBillBack == "F" ||  // Failed 
+                saleAieRecord.ssBillBack == "F" ||  // Failed
                 saleAieRecord.ssBillBack == "R")     // Recommended
                // saleAieRecord.ssBillBack == "S") // Selected
                 // saleAieRecord.ssBillBack == "P") // pending cycle
                 allFieldsDisable = true;
             if (!this.userPermUpd)
-                allFieldsDisable=true;    
+                allFieldsDisable=true;
             saleAieRecord.allFieldsDisable = allFieldsDisable;
             //console.log("saleAieRecord.allFieldsEnable:" + saleAieRecord.allFieldsDisable)
             //related vsr record
@@ -432,7 +433,7 @@ export class SaleAieComponent implements OnInit {
                     }
                     if (vsrRecord.billBack == "Y") {
                         if (vsrRecord.estManual == "" || vsrRecord.estManual == " " ||
-                            vsrRecord.estManual == "A") { // || vsrRecord.estManual == "E" 
+                            vsrRecord.estManual == "A") { // || vsrRecord.estManual == "E"
                             actCostTotal += (vsrRecord.laborCost + vsrRecord.partsCost);
                         }
                         else {
@@ -466,13 +467,13 @@ export class SaleAieComponent implements OnInit {
                 saleAieRecord.estAllTotal = +(saleAieRecord.ssBbOther + saleAieRecord.ssBbManVal);
                 saleAieRecord.estLossTotal = +saleAieRecord.ssBbManVal;
             }
-            
+
             if (null == saleAieRecord.estLossTotal)
             saleAieRecord.estLossTotal=0;
         }
         return saleAieRecords;
 
-    }  //end setScreenFlags()       
+    }  //end setScreenFlags()
 
 
     // when dropdown region selected, this will trigger to load list of sale # for the selected region in dropdown
@@ -482,7 +483,7 @@ export class SaleAieComponent implements OnInit {
         this.region = newRegion;
         this.getSaleRecords("Y");
     }
-    //when dropdown saleNo selected, this will trigger to loads vehicles for the selected saleNo 
+    //when dropdown saleNo selected, this will trigger to loads vehicles for the selected saleNo
     changeSaleNo(newSaleNo) {
        // console.log("get sasySale # on saleNo change sale-Aie.Component.ts:" + newSaleNo);
         this.saleNo = newSaleNo;
@@ -511,20 +512,20 @@ export class SaleAieComponent implements OnInit {
             for (let i = 0; i < this.saleAiePage.length; i++) {
                 let saveFieldVsrUpds: SaveFieldVsrUpd[] = [];
                 let saveFieldSaUpd = new SaveFieldSaUpd(0, '', '', '', 0, 0, '', '', '', '', 0, '', '', 0, '', '', 0, '', '', '', 0, 0, '', saveFieldVsrUpds, this.stringArray, false, false, false, false, false, false, false, false, 0, false, 0, 0, '', '', false, 0, 0, 0, 0, false);
-    
+
                 saveFieldSaUpd.ss_Region = this.saleAiePage[i].ss_Region;
                 saveFieldSaUpd.ssSaleNo = this.saleAiePage[i].ssSaleNo;
                 saveFieldSaUpd.ss_Agency_Cl = this.saleAiePage[i].ss_Agency_Cl;
                 saveFieldSaUpd.ss_Tag = this.saleAiePage[i].ss_Tag;
                 saveFieldSaUpd.billBackFlag = this.saleAiePage[i].billBackFlag;
-    
+
                 saveFieldSaUpd.ssBbOther = this.saleAiePage[i].ssBbOther;
                 saveFieldSaUpd.vsrBillBackFlag = this.saleAiePage[i].vsrBillBackFlag;
                 saveFieldSaUpd.ssBbManVal = this.saleAiePage[i].ssBbManVal;
                 saveFieldSaUpd.ssBbELossSrc = this.saleAiePage[i].ssBbELossSrc;
                 saveFieldSaUpd.ssBbManValDsc = this.saleAiePage[i].ssBbManValDsc;
                 saveFieldSaUpd.ssBbOtherDesc = this.saleAiePage[i].ssBbOtherDesc;
-    
+
                 //console.log("*********", saveFieldSaUpd.ssBbOther + "  " + this.saleAiePage[i].ssBbOther);
                 if (this.saleAiePage[i].vsrRecords != null) {
                     for (let j = 0; j < this.saleAiePage[i].vsrRecords.length; j++) {
@@ -583,8 +584,8 @@ export class SaleAieComponent implements OnInit {
 
         if (null != this.saleAiePage)
             this.endItem = this.startItem + this.saleAiePage.length - 1;
-        //  console.log("Before change page saleAiePage:"+ JSON.stringify(this.saleAiePage)); 
-        //console.log("change page saleAiePage:"+ JSON.stringify(this.saleAiePage)); 
+        //  console.log("Before change page saleAiePage:"+ JSON.stringify(this.saleAiePage));
+        //console.log("change page saleAiePage:"+ JSON.stringify(this.saleAiePage));
     }
 
     //handle pagination change
@@ -600,7 +601,7 @@ export class SaleAieComponent implements OnInit {
         }
     }
 
-    //delete VSR record    
+    //delete VSR record
     deleteVsr(vsrDelete) {
         this.loadingBarComponent.loadingModal.show();
         //console.log("sale-aie.component deleteVsr() saleNo:" + vsrDelete.vsr_Sale + " agyCl:" + vsrDelete.vsr_Agency_Cl + " tag:" + vsrDelete.vsr_Tag + "itemId:" + vsrDelete.vsr_Item_Id);
@@ -688,7 +689,7 @@ export class SaleAieComponent implements OnInit {
             });
 
     }
-    // reloads the page after update happened     
+    // reloads the page after update happened
     reloadPageAfterUpdate() {
 
        // console.log("reloadPageAfterUpdate () this.saleNo:" + this.saleNo + " current page:" + this.currentPage);
@@ -802,8 +803,8 @@ export class SaleAieComponent implements OnInit {
 
     }
     showFromSelectedTag() {
-        //this.loadingBarComponent.loadingModal.show();  
-           
+        //this.loadingBarComponent.loadingModal.show();
+
         if (null != this.saleAieRecordsSave && this.saleAieRecordsSave.length>0) {
             this.saleAieRecords = this.saleAieRecordsSave;
             let startTagList;
@@ -822,8 +823,8 @@ export class SaleAieComponent implements OnInit {
             this.message = "Select the sale # from dropdown then search the tag :" + "G" + this.agencyCl.toUpperCase() + "-"+ this.tag.toUpperCase();
             alert(this.message);
             document.getElementById('idAgencyCl').focus();
-        }            
-            
+        }
+
         // this.loadingBarComponent.loadingModal.hide();
     }
 
@@ -832,7 +833,7 @@ export class SaleAieComponent implements OnInit {
     refreshAndSetPage(selectedPage) {
         this.currentPage=selectedPage;
         this.reloadPageAfterUpdate()
-        this.message="Changes dropped and navigated to the selected page"; 
+        this.message="Changes dropped and navigated to the selected page";
     } //clearAneload()
 
 
@@ -854,7 +855,7 @@ export class SaleAieComponent implements OnInit {
                 if (this.saleAiePage[i].vsrRecords[k].billBackFlag) {
                     if (this.saleAiePage[i].vsrRecords[k].estManual == "" ||
                         this.saleAiePage[i].vsrRecords[k].estManual == " " ||
-                        this.saleAiePage[i].vsrRecords[k].estManual == "A") { // || vsrRecord.estManual == "E" 
+                        this.saleAiePage[i].vsrRecords[k].estManual == "A") { // || vsrRecord.estManual == "E"
                         actCostTotal += (this.saleAiePage[i].vsrRecords[k].laborCost +
                             this.saleAiePage[i].vsrRecords[k].partsCost);
                     }
@@ -871,24 +872,24 @@ export class SaleAieComponent implements OnInit {
         let array = this.saleAieForm.get('saRows') as FormArray;
         let group = array.at(i) as FormGroup;
         let bbOtherVal = 0;
-        
+
         if (null == group.controls['ssBbOther'].value || "" == group.controls['ssBbOther'].value)
             bbOtherVal=0;
-        else 
+        else
         if (null != group.controls['ssBbOther'].value)
            bbOtherVal = parseFloat(group.controls['ssBbOther'].value.toString().replace(",",""));
-        
+
         let bbELossSrcVal = group.controls['ssBbELossSrc'].value;
-        
+
         let bbManVal = 0;
         if (null == group.controls['ssBbManVal'].value || "" == group.controls['ssBbManVal'].value)
             bbManVal=0;
-        else 
+        else
         if(null != group.controls['ssBbManVal'].value)
            bbManVal = parseFloat(group.controls['ssBbManVal'].value.toString().replace(",",""));
-        
+
         this.saleAiePage[i].estAllTotal = +(estCostTotal + bbOtherVal);
-        
+
         if (bbELossSrcVal == "F") {
             this.saleAiePage[i].estAllTotal = +(estCostTotal + (+bbOtherVal));
             this.saleAiePage[i].estLossTotal = +(this.saleAiePage[i].vhFairMktVal - this.saleAiePage[i].vhSoldProceeds)
@@ -905,10 +906,10 @@ export class SaleAieComponent implements OnInit {
             this.saleAiePage[i].estAllTotal = +bbOtherVal + bbManVal;
             this.saleAiePage[i].estLossTotal= +bbManVal;
         }
-        
+
         if (null == this.saleAiePage[i].estAllTotal)
             this.saleAiePage[i].estAllTotal=0.00;
-        
+
         if (vsrBillBackChecked) {
             this.saleAiePage[i].vsrBillBackFlag = true;
             //            console.log("Value of vsrBillBackFlag row " + i + " : " + group.controls['vsrBillBackFlag'].value);
@@ -924,7 +925,7 @@ export class SaleAieComponent implements OnInit {
 
     createVsrEdit(saleAieCur, i) {
         //alert("createVsrEdit() i:"+ i);
-        
+
         this.message="";
         let foundVehicle: boolean = true;
         if (null === saleAieCur.vhVin17) {
@@ -952,7 +953,7 @@ export class SaleAieComponent implements OnInit {
             let numVal = group.controls['newPartsCost'].value.toString().replace(",","");
             if (numVal== null || numVal ==" ")
                 numVal=0;
-            
+
 //            let regex = /^[+-]?[0-9]{1,3}(?:,?[0-9]{0,3})*(?:\.[0-9]{0,2})?$/; //number with 2 decimal places or value zero
             if (!isNaN(numVal)) {
                 document.getElementsByName('newPartsCost')[0]["style"]["background-color"] = "#fff";
@@ -1000,7 +1001,7 @@ export class SaleAieComponent implements OnInit {
                 return false;
             }
             else
-            if ((userDefDsc.toLowerCase().indexOf('"') > -1) || 
+            if ((userDefDsc.toLowerCase().indexOf('"') > -1) ||
                 (userDefDsc.toLowerCase().indexOf('<') > -1) ||
                 (userDefDsc.toLowerCase().indexOf('/>') > -1) ||
                 (userDefDsc.toLowerCase().indexOf('<script') > -1)) {
@@ -1115,10 +1116,10 @@ export class SaleAieComponent implements OnInit {
                bbOther=0;
             else
                bbOther= group.controls['ssBbOther'].value.toString().replace(",","");
-            
+
             if (bbOther==null || bbOther ==" ")
             bbOther=0;
-            
+
             if (!isNaN(bbOther)) {
                 document.getElementsByName('ssBbOther')[i]["style"]["background-color"] = "#fff";
                 document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
@@ -1135,17 +1136,17 @@ export class SaleAieComponent implements OnInit {
             }
 
             let bbElossSrcval = group.controls['ssBbELossSrc'].value;
-            
+
             let rowOpened = document.getElementsByName('ssBbManValDsc').length;// if one of the row is clicked on tag and opened then you get 1 other zero.
             let bbManVal;
             if (null == group.controls['ssBbManVal'].value)
                 bbManVal = 0
             else
                 bbManVal = group.controls['ssBbManVal'].value.toString().replace(",","");
-            
+
             let bbManValDsc = group.controls['ssBbManValDsc'].value;
-            
-            if ((bbManValDsc.toLowerCase().indexOf('"') > -1) || 
+
+            if ((bbManValDsc.toLowerCase().indexOf('"') > -1) ||
                 (bbManValDsc.toLowerCase().indexOf('<') > -1) ||
                 (bbManValDsc.toLowerCase().indexOf('/>') > -1) ||
                 (bbManValDsc.toLowerCase().indexOf('<script') > -1)) {
@@ -1160,18 +1161,18 @@ export class SaleAieComponent implements OnInit {
                 }
                 //document.getElementById('ssBbOther')[i].focus();
                 return false;
-            }        
+            }
             else {
                 document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
-                if (rowOpened ==1) 
+                if (rowOpened ==1)
                   document.getElementsByName('ssBbManValDsc')[0]["style"]["background-color"] = "#fff";
             }
-                   
+
            // alert("group.controls['ssBbManValDsc'].value:" + group.controls['ssBbManValDsc'].value + "for Tag: " + group.controls['ss_Agency_Cl'].value +"-" + group.controls['ss_Tag'].value);
             if (bbElossSrcval == "M" && (bbManValDsc.length==0) || bbManValDsc == " " || bbManValDsc == "  ") {
                 this.toggleView(i);
                 this.viewThis[i]=true;
-                this.message = "Manual Value Description required when Manual Value is used to determine bill-back total" + 
+                this.message = "Manual Value Description required when Manual Value is used to determine bill-back total" +
                         " for Tag: " + group.controls['ss_Agency_Cl'].value +"-" + group.controls['ss_Tag'].value;
                 document.getElementsByName('tagRow')[i]["style"]["background-color"] = "lightcoral";
                 alert(this.message);
@@ -1190,7 +1191,7 @@ export class SaleAieComponent implements OnInit {
             if (!isNaN(bbManVal)) {
                 if (rowOpened ==1) {
                    document.getElementsByName('ssBbManVal')[0]["style"]["background-color"] = "#fff"; // only one Manual Value field visible, so us [0]
-                   document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";            
+                   document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
                 }
             }
             else {
@@ -1208,11 +1209,11 @@ export class SaleAieComponent implements OnInit {
             }
             // Other Cost Description
             let bbOtherDesc = group.controls['ssBbOtherDesc'].value.trim();
-            
+
             if (bbOther>0 && bbOtherDesc.length == 0) {
                 this.toggleView(i);
                 this.viewThis[i]=true;
-                this.message = "Other Cost Description required when Other Cost Value is used to determine bill-back total" + 
+                this.message = "Other Cost Description required when Other Cost Value is used to determine bill-back total" +
                         " for Tag: " + group.controls['ss_Agency_Cl'].value +"-" + group.controls['ss_Tag'].value;
                 document.getElementsByName('tagRow')[i]["style"]["background-color"] = "lightcoral";
                 alert(this.message);
@@ -1224,11 +1225,11 @@ export class SaleAieComponent implements OnInit {
                 return false;
             }
             else {
-                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";                
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
                 if (rowOpened ==1)
                     document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "#fff"; // only one Other cost Value field visible, so us [0]
             }
-            
+
             if ((bbOtherDesc.toLowerCase().indexOf('"') > -1) ||
                 (bbOtherDesc.toLowerCase().indexOf('<') > -1) ||
                 (bbOtherDesc.toLowerCase().indexOf('/>') > -1) ||
@@ -1242,12 +1243,12 @@ export class SaleAieComponent implements OnInit {
                 if (rowOpened ==1)
                 document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "lightcoral"; // only one Manual Value field visible, so us [0]
                 return false;
-            }        
+            }
             else {
                 document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
                 if (rowOpened ==1)
                     document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "#fff";
-            } 
+            }
         } // for loop
         this.updateSSVsrRecords(aieBillBackModal);
     }
@@ -1274,7 +1275,7 @@ export class SaleAieComponent implements OnInit {
             saleAieScreen.ss_Agency_Cl = group.controls['ss_Agency_Cl'].value;
             saleAieScreen.ss_Tag = group.controls['ss_Tag'].value;
             saleAieScreen.ssSaleNo = this.saleAiePage[i].ssSaleNo;
-            
+
             saleAieScreen.billBackFlag = group.controls['billBackFlag'].value;
             // alert("saleAieScreen.billBackFlag:"+ saleAieScreen.billBackFlag + " i:" + i);
             if (saleAieScreen.billBackFlag == null)
@@ -1287,10 +1288,10 @@ export class SaleAieComponent implements OnInit {
             }
             if (null == group.controls['ssBbOther'].value)
                 saleAieScreen.ssBbOther=0
-            else           
+            else
                 saleAieScreen.ssBbOther = parseFloat(group.controls['ssBbOther'].value.toString().replace(",","")); // Need to add + to get the value as number otherwise you will get string
             saleAieScreen.vsrBillBackFlag = group.controls['vsrBillBackFlag'].value;
-            
+
             if (null == group.controls['ssBbManVal'].value)
                 saleAieScreen.ssBbOther=0
             else
@@ -1372,7 +1373,7 @@ export class SaleAieComponent implements OnInit {
                 let message = "";
                 console.log("Successfully updated: " + result["_body"]);
 
-                if (result["_body"] = "SUCCESS") {//Return value Received from FmsDAO 
+                if (result["_body"] = "SUCCESS") {//Return value Received from FmsDAO
                     message = "Selected vehicle sale repair record updated successfully";
                     this.reloadPageAfterUpdate();
                     this.highlightUpdatedRows(this.saleAieUpdObjects);
@@ -1404,7 +1405,7 @@ export class SaleAieComponent implements OnInit {
     }
     checkForChanges() {
         this.sasySaleUpdateCount=0;
-        
+
         let saleAieScreens: SaleAieRecords[] = [];
         let saleAieScreen;
 
@@ -1421,7 +1422,7 @@ export class SaleAieComponent implements OnInit {
             saleAieScreen.ss_Agency_Cl = group.controls['ss_Agency_Cl'].value;
             saleAieScreen.ss_Tag = group.controls['ss_Tag'].value;
             saleAieScreen.ssSaleNo = this.saleAiePage[i].ssSaleNo;
-            
+
             saleAieScreen.billBackFlag = group.controls['billBackFlag'].value;
             if (saleAieScreen.billBackFlag == null)
             saleAieScreen.billBackFlag=false;
@@ -1475,7 +1476,7 @@ export class SaleAieComponent implements OnInit {
                     }
                 }
             }
-                
+
             if ((saleAieScreen.billBackFlag != this.saveFieldSaUpds[i].billBackFlag) ||
                 (saleAieScreen.ssBbOther != this.saveFieldSaUpds[i].ssBbOther) ||
                 (saleAieScreen.vsrBillBackFlag != this.saveFieldSaUpds[i].vsrBillBackFlag) ||
@@ -1486,15 +1487,15 @@ export class SaleAieComponent implements OnInit {
                 saleAieScreen.ssToUpdate = true;
                // console.log("update found at row " + i);
             }
-           
+
             if (saleAieScreen.ssToUpdate || vsrUpdateFound) {
                 this.sasySaleUpdateCount++;
                 break;
             }
-            
+
         }
        // console.log("updated records:", saleAieScreens);
-        
+
     } // end of checkForChanges()
-    
+
 }

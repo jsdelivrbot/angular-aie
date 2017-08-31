@@ -17,6 +17,7 @@ import { postData } from './repair-Aie';
 import { TagGetCustVehComponent } from '../tag-get-cust-veh/tag-get-cust-veh.component';
 import { TagGetCustVehService } from '../tag-get-cust-veh/tag-get-cust-veh.service';
 import { DataService } from '../common-components/data.service';
+import {dateRange} from "../daterange/daterange";
 
 
 interface Validator<T extends FormControl> {
@@ -100,12 +101,12 @@ function sccaValidator (otherControlName: string) {
         mutualExclusiveError: {
             salesCode: salesCodeValue,
             disallowedCostAcct: costAcctValue
-        }    
+        }
     }
-    let result = false;    
+    let result = false;
     switch (salesCodeValue) {
     //case "V3": //already defined below
-    case "X2": 
+    case "X2":
     //case "U2": //already defined below
     //case "U3": //already defined below
       if (costAcctValue == "000") {
@@ -149,7 +150,7 @@ function sccaValidator (otherControlName: string) {
         //console.log("sc - V4 / must be 191 but is " + finAcctValue + "-  invalid")
         result = true;
       }
-      break;      
+      break;
     }
     if (result) otherControl.setErrors(err);
     return result ? err : null;
@@ -170,7 +171,7 @@ export class RepairAieComponent implements OnInit  {
     @ViewChild('genericModal') public genericModal: ModalDirective;
     @ViewChild('paginationModule') public pager: PagerComponent;
     @ViewChild(TagGetCustVehComponent) public tagGetCustAndVehComponent: TagGetCustVehComponent;
-    
+
     startDate: string;
     endDate: string;
     customer;
@@ -188,15 +189,16 @@ export class RepairAieComponent implements OnInit  {
     host: string;
     customerLid: string;
     customerName: string;
-    customerRegion: number;  
-    
+    customerRegion: number;
+    myDateRange: dateRange;
+
     constructor(
         private repairAieService: RepairAieService,
         private commonService: CommonService,
         private formBuilder: FormBuilder,
         private dataService: DataService
-        
-    ) { 
+
+    ) {
         this.aieRepairForm = this.formBuilder.group({
             //salesCode: new FormControl("X1"),
             asrpRows: this.formBuilder.array([]),
@@ -204,7 +206,7 @@ export class RepairAieComponent implements OnInit  {
         })
 
     }
-    
+
     ngOnInit() {
         this.repReason = "";
         this.optShowWhich="optShowAll";
@@ -230,25 +232,25 @@ export class RepairAieComponent implements OnInit  {
         console.log("this.dataService.currentCustomerName.subscribe(customerName => this.customerName = customerName);", this.customerName);
         console.log("this.dataService.currentRegion.subscribe(customerRegion => this.customerRegion = customerRegion);", this.customerRegion);
 
-    } 
-    
+    }
+
     salesChanged(e, i) {
         //console.log(e);
         //console.log("Sales Changed target value", e.target.value, e);
         this.asrpPage[i].salesCode = e.target.value;
-        
+
     }
     costAcctChanged(e, i) {
         this.asrpPage[i].finCA = e.target.value;
     }
-    
-    
+
+
     //handle change from datarangepicker component
     newDateRange(r) {
         this.startDate = r.startDate.format("YYYYMMDD");
         this.endDate = r.endDate.format("YYYYMMDD");
     }
-    
+
     //handle change from tagGetCustAndVeh component
     newCustAndVeh(cstAndVeh) {
         if(!cstAndVeh.customer) {
@@ -259,7 +261,7 @@ export class RepairAieComponent implements OnInit  {
             this.vehicle = cstAndVeh.vehicle;
         }
     };
-    
+
     //get act-no-summary and repair records from server
     //asrps: repairAie[];
     asrps: repairAieExtended[];
@@ -272,12 +274,12 @@ export class RepairAieComponent implements OnInit  {
     endItem: number;
     totalItems: number;
     itemsPerPage: number = 20;
-    
+
     showAmounts() {
         //console.log(this.asrpPage[0].aieAmt);
         //console.log(this.asrpPage[1].aieAmt);
         //console.log(this.asrpPage[2].aieAmt);
-        //console.log(this.asrpPage, this.asrps);    
+        //console.log(this.asrpPage, this.asrps);
     }
 
     haveNoPage: boolean = true;
@@ -298,7 +300,7 @@ export class RepairAieComponent implements OnInit  {
                this.asrpOriginal = [];
                this.asrpPage = [];
                this.asrps = asrps;
-               for (let x of this.asrps) { 
+               for (let x of this.asrps) {
                     x.desc1 = "";
                     x.desc2 = "";
                     x.desc3 = "";
@@ -321,7 +323,7 @@ export class RepairAieComponent implements OnInit  {
                this.aieRepairForm.patchValue({message: this.errorMessage});
            });
     }
-    
+
     dcs: dc[];
     getDCByClassTag() {
         this.repairAieService.getDCByClassTag(this.vehicle.vh_Agency_Cl, this.vehicle.vh_Tag)
@@ -338,7 +340,7 @@ export class RepairAieComponent implements OnInit  {
                      asrec[0].desc4 = d.desc4;
                      asrec[0].dc = d;
                      asrec[0].aieDesc = true;
-                 } 
+                 }
                }
                this.paginate();
                this.asrpOriginal = this.deepCopy(this.asrps);
@@ -349,7 +351,7 @@ export class RepairAieComponent implements OnInit  {
                this.aieRepairForm.patchValue({message: this.errorMessage});
            });
     }
-    
+
     ids: id[];
     getIDByClassTag() {
         this.repairAieService.getIDByClassTag(this.vehicle.vh_Agency_Cl, this.vehicle.vh_Tag)
@@ -381,9 +383,9 @@ export class RepairAieComponent implements OnInit  {
     show() {
         //console.log("this.asrpPage[0].salesCode", this.asrpPage[0].salesCode);
         //console.log("this.asrpPage[0].finCA", this.asrpPage[0].finCA);
-        //console.log("this.asrpPage[0].aieStatus",this.asrpPage[0].aieStatus); 
+        //console.log("this.asrpPage[0].aieStatus",this.asrpPage[0].aieStatus);
         //console.log("this.aieRepairForm.controls.asrpRows.controls[0].controls.salesCode.value", this.aieRepairForm.controls.asrpRows.controls[0].controls.salesCode.value);
-            
+
     }
     toBillBack: repairAieExtended[] = [];
     createBillBacks() {
@@ -399,10 +401,10 @@ export class RepairAieComponent implements OnInit  {
         pd.hostname = this.host;
 
         this.toBillBack = [];
-        this.aieRepairForm.controls.asrpRows.controls.map( x => { 
+        this.aieRepairForm.controls.asrpRows.controls.map( x => {
            if(x.controls.aieStatus.value == "S") {
              this.asrpPage[i].aieAmt = x.controls.aieAmount.value;
-             pd.asrpRecords.push(this.asrpPage[i]);             
+             pd.asrpRecords.push(this.asrpPage[i]);
            }
            i++;
 
@@ -426,7 +428,7 @@ export class RepairAieComponent implements OnInit  {
       this.paginate();
       //console.log("clear screen after", this.asrps[0].salesCode, this.asrps[0].finCA  );
       //console.log("clear screen after asrpOriginal", this.asrpOriginal[0].salesCode, this.asrpOriginal[0].finCA  );
-        
+
     }
     changePage(p: number) {
         //console.log("changing page to ", p);
@@ -437,7 +439,7 @@ export class RepairAieComponent implements OnInit  {
         //if aieRepairForm (specifically the custom sales code component FormControl exists, reuse it - error if recreate
         if (this.aieRepairForm.controls.asrpRows.controls.length > 0) {
            var i = 0;
-           this.aieRepairForm.controls.asrpRows.controls.map( x=> {  
+           this.aieRepairForm.controls.asrpRows.controls.map( x=> {
                x.setValue({
                    salesCode:   (!this.asrpPage[i].salesCode) ? "" : this.asrpPage[i].salesCode,
                    costAcct:    (!this.asrpPage[i].finCA) ? "000" : this.asrpPage[i].finCA,
@@ -517,7 +519,7 @@ export class RepairAieComponent implements OnInit  {
 
     paginate() {
        if (this.totalItems > 0) {
-           
+
            this.asrpPages = this.commonService.breakArray(this.itemsPerPage, this.asrps);
            this.totalPages = this.asrpPages.length;
            this.currentPage = 1;
@@ -536,7 +538,7 @@ export class RepairAieComponent implements OnInit  {
     //and is provided inc ase something needs to be done if the choice changes.
     updateRepairReason() {
     }
-    
+
     //toggleAieStatus(i: number) {
     toggleAieStatus(row, i) {
         if (row.aieStatus.length > 0) {
@@ -546,13 +548,13 @@ export class RepairAieComponent implements OnInit  {
         } else {
             row.aieStatus = "S";
             this.aieRepairForm.controls.asrpRows.controls[i].controls.aieStatus.setValue("S");
-            row.aieAmt = row.totAmtAuth; 
+            row.aieAmt = row.totAmtAuth;
         }
     }
     changeSelValue(e) {
       console.log("changeSelValue changed!!", e)
     }
-    
+
     //don't use this anymore
     assemblyClicked(a) {
         //console.log("assembly clicked: ", a);
@@ -562,11 +564,11 @@ export class RepairAieComponent implements OnInit  {
     //don't use popover - now use modal
     togglePopover(p, row) { //accept pop object AND element (row)
         p.popover= row.desc1 + row.desc2 + row.desc3 + row.desc4 ;
-        p.toggle();    
+        p.toggle();
     }
 
     activeRow: repairAieExtended;
-    showDescriptionModal(row, i) { 
+    showDescriptionModal(row, i) {
         //this comes in the opposite value - it has not yet propagated to the formControl item
         if (!this.aieRepairForm.controls.asrpRows.controls[i].controls.aieDesc.value) {
             this.activeRow = row;
@@ -576,7 +578,7 @@ export class RepairAieComponent implements OnInit  {
             this.modalMode = "Description";
             this.modalButtons = "SubmitCancel";
             this.genericModal.show();
-        } 
+        }
     }
 
     modalTitle: string;
@@ -586,7 +588,7 @@ export class RepairAieComponent implements OnInit  {
     modalFrom: string;
     modalNumParameter: number;
     modalNumParameter2: number;
-    modalStringParameter: string; 
+    modalStringParameter: string;
     modalCancelled: boolean = false;
 
     showAlertModal(desc: string, mode?: string) {
@@ -597,15 +599,15 @@ export class RepairAieComponent implements OnInit  {
           this.modalDescription = desc;
           if (!mode) mode = "Ok";
           this.modalMode = mode;
-          this.modalButtons = mode; 
+          this.modalButtons = mode;
           //console.log("showing alert", desc, mode, this.genericModal);
-          this.genericModal.show();  
+          this.genericModal.show();
         }
     }
-    
 
 
-    
+
+
     genericModalClick(whichButton): boolean {
         this.genericModal.hide();
 
@@ -613,19 +615,19 @@ export class RepairAieComponent implements OnInit  {
         switch (whichButton) {
         case 'save':
             //disallow ', ", <, >,
-            //console.log("saving"); 
+            //console.log("saving");
             this.aieRepairForm.controls["modalDescriptionText"].value
                 .split('<').join('.')
                 .split('>').join('.')
                 .split("'").join('.')
-                .split('"').join('.');    
+                .split('"').join('.');
             //break into 4x25
             this.activeRow.desc1 = this.aieRepairForm.controls["modalDescriptionText"].value.substring(0,24);
             this.activeRow.desc2 = this.aieRepairForm.controls["modalDescriptionText"].value.substring(25,49);
             this.activeRow.desc3 = this.aieRepairForm.controls["modalDescriptionText"].value.substring(50,74);
             this.activeRow.desc4 = this.aieRepairForm.controls["modalDescriptionText"].value.substring(75,99);
             return true;
-            
+
         case 'ok':
             switch (this.modalFrom) {
             case("pageChanged"):
@@ -636,20 +638,20 @@ export class RepairAieComponent implements OnInit  {
                 break;
             default:
             }
-                
+
             return true;
-            
+
         default:
             switch (this.modalFrom) {
             case("pageChanged"):
                 //console.log(this.pager);
                 this.modalCancelled = true;
-                this.pager.selectPage(this.modalNumParameter2);    
+                this.pager.selectPage(this.modalNumParameter2);
                 break;
             case("search"):
                 //console.log("genericModalClick - default - search");
                 break;
-            default:    
+            default:
             }
             return false;
         }

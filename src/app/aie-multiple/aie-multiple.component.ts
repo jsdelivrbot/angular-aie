@@ -14,6 +14,7 @@ import { AieMultBaarTemp } from './aie-multiple';
 import { CommonService } from '../common-components/common.service';
 import { LoadingBarComponent } from '../common-components/loading-bar/loading-bar.component';
 import { DataService } from '../common-components/data.service';
+import {ModalDirective} from "ngx-bootstrap";
 
 @Component({
   selector: 'app-aie-multiple',
@@ -21,7 +22,7 @@ import { DataService } from '../common-components/data.service';
   styleUrls: ['./aie-multiple.component.css']
 })
 export class AieMultipleComponent implements OnInit {
-
+@ViewChild('loadingModal') public loadingModal: ModalDirective;
 @ViewChild(LoadingBarComponent) public loadingBarComponent: LoadingBarComponent;
 
     constructor(
@@ -48,26 +49,26 @@ export class AieMultipleComponent implements OnInit {
     userPermLvl7: string;
     userPermLvl8: string;
     userPermLvl9: string;
-    
+
     inRegion: number = 0;
     inFmc: number = 0;
     inSubFmc: number = 0;
     inBoac: string = "";
     inSerial: number = 0;
     inCustomer: string = "";
-    
+
     saveRegion: number = 0;
     saveFmc: number = 0;
     saveSubFmc: number = 0;
     saveBoac: string = "";
     saveSerial: number = 0;
     saveCustomer: string = "";
-    
+
     tempRegion: number = 0;
     tempFmc: number = 0;
-    inCustRegion: number = 0; 
+    inCustRegion: number = 0;
     inCustFmc: number = 0;
-    
+
     inResult: any;
     errorMessage: string;
     sysStatus: string ="";
@@ -158,8 +159,8 @@ export class AieMultipleComponent implements OnInit {
               ,inAmtPerTag: new FormControl(0.00)
               ,tagRows: new FormControl(this.tagRows)
         });
-      
-      this.dataService.currentSecurityRecord.subscribe(           
+
+      this.dataService.currentSecurityRecord.subscribe(
           currentSecurityRecord =>  {
               this.userLID = currentSecurityRecord.lid;
               this.userRegion = currentSecurityRecord.region;
@@ -168,18 +169,18 @@ export class AieMultipleComponent implements OnInit {
               this.userPermLvl5 = currentSecurityRecord.lvl5Perm;
               this.userPermLvl7 = currentSecurityRecord.lvl7Perm;
               this.userPermLvl8 = currentSecurityRecord.lvl8Perm;
-          }); 
+          });
 
-      this.getAllRegionRecords(); 
+      this.getAllRegionRecords();
 
       this.inSelectDelectAll = false;
       this.noOfTagsSelected = 0;
       this.inSalesCode = "";
       this.inCostAcct = "";
-      
+
       if ( !( this.userPermLvl1 == "X" || this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
-           this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen"; 
-      } 
+           this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen";
+      }
       else {
           this.sysStatus = "Select Customer and click 'Get Tags'";
       }
@@ -217,13 +218,13 @@ export class AieMultipleComponent implements OnInit {
     getCustFmcRecords(loadingModal) {
         this.loadingBarComponent.loadingModal.show();
         console.log("AieMultiple Component getCustFmcRecords() this.region:"+ this.inRegion);
-        
+
         this.inCustomer = '';
         this.fmcs = [];
         this.customers = [];
         this.clearFields();
         document.getElementById('idCustomer')['value'] = '';
-        
+
         this.AieMultipleService.getCustFmcRecords(this.inRegion.toString())
              .subscribe(
                fmcs => {
@@ -260,36 +261,36 @@ export class AieMultipleComponent implements OnInit {
 
     getCustomerVehTags(loadingModal) {
         console.log("AieMultiples: B4 this.AieMultipleService.getAieMultiples call " );
-  
+
         console.log("AieMultiples: getCustomerVehTags this.inRegion:", this.inRegion );
         console.log("AieMultiples: getCustomerVehTags this.inFmc:", this.inFmc );
-        
+
         if ( ! ( this.inRegion > 0 ) ) {
             alert ("ERROR - Please select a Region and FMC to retrieve Tags");
             return false;
         }
-        
-        
-        this.inCustRegion = Number(this.inCustomer.substr(0,2)); 
-        this.inCustFmc = Number(this.inCustomer.substr(3,2)); 
-        
+
+
+        this.inCustRegion = Number(this.inCustomer.substr(0,2));
+        this.inCustFmc = Number(this.inCustomer.substr(3,2));
+
         console.log("AieMultiples: getCustomerVehTags this.inCustRegion:", this.inCustRegion );
-        console.log("AieMultiples: getCustomerVehTags this.inCustFmc:", this.inCustFmc );       
-        
+        console.log("AieMultiples: getCustomerVehTags this.inCustFmc:", this.inCustFmc );
+
         if ( ( this.inCustRegion != this.inRegion ) ||
              ( this.inCustFmc != this.inFmc ) ) {
             alert ("ERROR - Customer Region/FMC different from Region/FMC selected");
             return false;
         }
-        
-        console.log("AieMultiples: getCustomerVehTags this.inCustomer length:", this.inCustomer.length ); 
-        
+
+        console.log("AieMultiples: getCustomerVehTags this.inCustomer length:", this.inCustomer.length );
+
         if (this.inCustomer.length < 19) {
             alert ("ERROR - 19 Character Customer Number expected");
             return false;
         }
 
-        this.inRegion = Number(this.inCustomer.substr(0,2));     
+        this.inRegion = Number(this.inCustomer.substr(0,2));
         this.inFmc = Number(this.inCustomer.substr(3,2));
         this.inSubFmc = Number(this.inCustomer.substr(6,2));
         this.inBoac = this.inCustomer.substr(9,6);
@@ -315,17 +316,17 @@ export class AieMultipleComponent implements OnInit {
 //                (this.saveBoac > ' ') &&
 //                (this.saveSerial > 0) ) {
 //                alert ("ERROR - Customer Number changed. Please retrieve Tags again before update.");
-//                this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
-//                this.saveBoac = this.saveCustomer = "";  
+//                this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;
+//                this.saveBoac = this.saveCustomer = "";
 //                return false; }
 //           else {
 //              alert ("ERROR - Please retrieve Tags again before update.");
-//              this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
-//              this.saveBoac = this.saveCustomer = "";  
+//              this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;
+//              this.saveBoac = this.saveCustomer = "";
 //              return false;
 //           }
-//        }        
-        
+//        }
+
             console.log("AieMultiples: Region:" + this.inRegion  );
             console.log("AieMultiples: FMC:" + this.inFmc  );
             console.log("AieMultiples: subFMC:" + this.inSubFmc  );
@@ -397,14 +398,14 @@ export class AieMultipleComponent implements OnInit {
 //                       this.aieMultVehs[0].vh_Tag_Checked = true;
 //                       this.tagRows = this.commonServise.breakArray(this.maxColumns,this.aieMultVehs);
                         this.selectMsg = "Select Tag(s) to process:";
-                       
-                        this.saveRegion   =   this.inRegion;  
-                        this.saveFmc      =   this.inFmc;     
-                        this.saveSubFmc   =   this.inSubFmc;  
-                        this.saveBoac     =   this.inBoac;    
-                        this.saveSerial   =   this.inSerial;  
+
+                        this.saveRegion   =   this.inRegion;
+                        this.saveFmc      =   this.inFmc;
+                        this.saveSubFmc   =   this.inSubFmc;
+                        this.saveBoac     =   this.inBoac;
+                        this.saveSerial   =   this.inSerial;
                         this.saveCustomer =   this.inCustomer;
-                       
+
                         this.inCu_Cst_Dt_Time = this.data.Customer.cu_Cst_Dt_Time;
                         this.inContact = this.data.Customer.contact;
                         this.inPhoneAc = this.data.Customer.phoneAc;
@@ -557,7 +558,7 @@ export class AieMultipleComponent implements OnInit {
         if ( newFmc.length > 1 ) {
            console.log("FMC 1:" + newFmc[0]     );
            this.inFmc = newFmc[0];
-        } 
+        }
         else {
            this.inFmc = newFmc;
         }
@@ -657,28 +658,28 @@ export class AieMultipleComponent implements OnInit {
            alert("Your current permission levels do not allow you to perform update functions on this screen");
            return false;
         }
-        
+
         console.log("AieMultiples: getCustomerVehTags this.inRegion:", this.inRegion );
         console.log("AieMultiples: getCustomerVehTags this.inFmc:", this.inFmc );
-        
-        this.inCustRegion = Number(this.inCustomer.substr(0,2)); 
-        this.inCustFmc = Number(this.inCustomer.substr(3,2)); 
-        
+
+        this.inCustRegion = Number(this.inCustomer.substr(0,2));
+        this.inCustFmc = Number(this.inCustomer.substr(3,2));
+
         console.log("AieMultiples: getCustomerVehTags this.inCustRegion:", this.inCustRegion );
-        console.log("AieMultiples: getCustomerVehTags this.inCustFmc:", this.inCustFmc );       
-        
-        
+        console.log("AieMultiples: getCustomerVehTags this.inCustFmc:", this.inCustFmc );
+
+
         if (this.inCustomer.length < 19) {
             alert ("ERROR - 19 Character Customer Number expected");
             return false;
         }
-        
+
         if ( ( this.inCustRegion != this.inRegion ) ||
              ( this.inCustFmc != this.inFmc ) ) {
             alert ("ERROR - Customer Region/FMC different from Region/FMC selected");
             return false;
         }
-        
+
         this.tempAmtPerTag = 0.0;
 
         this.inRegion = Number(this.inCustomer.substr(0,2));
@@ -707,13 +708,13 @@ export class AieMultipleComponent implements OnInit {
                 (this.saveBoac > ' ') &&
                 (this.saveSerial > 0) ) {
                 alert ("ERROR - Customer Number changed. Please retrieve Tags again before update.");
-                this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
-                this.saveBoac = this.saveCustomer = "";  
+                this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;
+                this.saveBoac = this.saveCustomer = "";
                 return false; }
            else {
               alert ("ERROR - Please retrieve Tags again before update.");
-              this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
-              this.saveBoac = this.saveCustomer = "";  
+              this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;
+              this.saveBoac = this.saveCustomer = "";
               return false;
            }
         }
@@ -730,7 +731,7 @@ export class AieMultipleComponent implements OnInit {
             document.getElementById('inSelectDelectAll').focus();
             return false;
         }
-        
+
         if ( ! (this.inBillBackOrCredit > '') )
         {
             alert ("ERROR - Must select Bill Back Or Credit");
@@ -759,7 +760,7 @@ export class AieMultipleComponent implements OnInit {
             }
         }
 
-         
+
         if ( this.inCostAcct == '160' || this.inCostAcct == '161' )
         {
             this.inSalesCode = 'V3' ;
@@ -769,39 +770,39 @@ export class AieMultipleComponent implements OnInit {
                 this.inSalesCode = 'V3' ;
                 this.inCostAcct  = '161' ;
             }
-        
+
         if ( ! (this.inSalesCode > '') )
         {
             alert ("ERROR - Must select Sales Code");
             document.getElementById('salesCode').focus;
             return false;
         }
-        
+
         if ( this.inSalesCode == 'D1' || this.inSalesCode == 'D2' )
         {
-           if ( ! (this.userPermLvl1 == "X" || this.userPermLvl2 == "X") )   
+           if ( ! (this.userPermLvl1 == "X" || this.userPermLvl2 == "X") )
            {
             alert ("ERROR - ONLY CO-Admin and CO-Support can user Sales Codes D1 and D2");
             document.getElementById('salesCode').focus;
             return false;
            }
         }
-        
+
         if ( ! (this.inCostAcct > '') )
         {
-            if ( this.inSalesCode == "U2" || this.inSalesCode == "U3" || this.inSalesCode == "V3" || this.inSalesCode == "X2" ) 
+            if ( this.inSalesCode == "U2" || this.inSalesCode == "U3" || this.inSalesCode == "V3" || this.inSalesCode == "X2" )
             {
             alert ("ERROR - Cost Acct MANDATORY for the Sales Code selected");
             document.getElementById('costAcct').focus();
             return false;
-            }        
+            }
         }
-        
+
         if ( this.inSalesCode == "A1" || this.inSalesCode == "A8" || this.inSalesCode == "Q1" ) {
            if ( this.inCostAcct > '' ) {
               alert ("ERROR - Cost Acct NOT ALLOWED for the Sales Code selected");
               document.getElementById('costAcct').focus();
-              return false;               
+              return false;
            }
         }
         else  if ( this.inSalesCode == "V3" ) {
@@ -819,25 +820,25 @@ export class AieMultipleComponent implements OnInit {
               }
         }
         else {
-              if ( ! ( this.inCostAcct == '145' || this.inCostAcct == '170' || this.inCostAcct == '171' || this.inCostAcct == '172' || this.inCostAcct == '180' || 
+              if ( ! ( this.inCostAcct == '145' || this.inCostAcct == '170' || this.inCostAcct == '171' || this.inCostAcct == '172' || this.inCostAcct == '180' ||
                        this.inCostAcct == '190' || this.inCostAcct == '191' || this.inCostAcct == '511' || this.inCostAcct == '611' || this.inCostAcct == '711' ||
                        this.inCostAcct == '712' || this.inCostAcct == '811'
-                     ) 
+                     )
                  ) {
                     alert ("ERROR - " + this.inCostAcct + " is NOT A VALID Cost Acct for the Sales Code selected - " + this.inSalesCode);
                     document.getElementById('costAcct').focus();
                     return false;
               }
         }
-        
+
         if ( this.inSalesCode == "P1" ) {
             if (! ( this.inCostAcct == '511') ) {
-                alert ("ERROR - Sale Code 'P1' can only be used with Cost Acct '511' ");    
+                alert ("ERROR - Sale Code 'P1' can only be used with Cost Acct '511' ");
                 document.getElementById('costAcct').focus();
                 return false;
             }
         }
-        
+
         if ( this.inCostAcct == '511')  {
            if ( ! ( this.inSalesCode == "P1" ) ) {
                     alert ("ERROR - Cost Acct '511' can only be used with Sale Code 'P1' ");
@@ -845,15 +846,15 @@ export class AieMultipleComponent implements OnInit {
                     return false;
             }
         }
-        
+
         if ( this.inSalesCode == "V4" ) {
             if (! ( this.inCostAcct == '191') ) {
-                alert ("ERROR - Sale Code 'V4' can only be used with Cost Acct '191' ");    
+                alert ("ERROR - Sale Code 'V4' can only be used with Cost Acct '191' ");
                 document.getElementById('costAcct').focus();
                 return false;
             }
         }
-        
+
         if ( this.inCostAcct == '191')  {
            if ( ! ( this.inSalesCode == "V4" ) ) {
                     alert ("ERROR - Cost Acct '191' can only be used with Sale Code 'V4' ");
@@ -868,24 +869,24 @@ export class AieMultipleComponent implements OnInit {
             document.getElementById('inDesc').focus();
             return false;
         }
-        
+
         this.tempDesc = this.inDesc.toLowerCase();
-        
+
         if (this.tempDesc.indexOf('<') > -1) {
            if (this.tempDesc.indexOf('script') > -1) {
                    alert ("ERROR - Description can not contain the character sequence - '<' and 'script' ");
                    document.getElementById('inDesc').focus();
                    return false;
             }
-        }    
-        
+        }
+
         if (this.tempDesc.indexOf('>') > -1) {
            if (this.tempDesc.indexOf('script') > -1) {
                    alert ("ERROR - Description can not contain the character sequence - 'script' and '>' ");
                    document.getElementById('inDesc').focus();
                    return false;
             }
-        }  
+        }
 
         if ( isNaN(this.inAmtToAllocate) )
         {
@@ -926,7 +927,7 @@ export class AieMultipleComponent implements OnInit {
             this.inAmtPerTag =  this.tempAmtPerTag;
             this.inAmtPerTag =  Math.round(this.inAmtPerTag*100)/100;
         }
-        
+
         if (this.inAmtPerTag < 5.00) {
            alert ("ERROR - Amount Per Tag must be minimum $5.00");
            document.getElementById('inAmtPerTag').focus();
@@ -1005,15 +1006,15 @@ export class AieMultipleComponent implements OnInit {
                      else {
                          this.sysStatus = "UPDATE ERROR => " + this.inResult.message ;
                      }
-                     this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
-                     this.saveBoac = this.saveCustomer = "";                        
+                     this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;
+                     this.saveBoac = this.saveCustomer = "";
                      this.loadingBarComponent.loadingModal.hide();
                },
                error => {
                            this.sysStatus = "UPDATE ERROR" + error.errorMessage;
                            console.log("Msg Received=>" + error.errorMessage);
-                           this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
-                           this.saveBoac = this.saveCustomer = "";                     
+                           this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;
+                           this.saveBoac = this.saveCustomer = "";
                            this.loadingBarComponent.loadingModal.hide();
                }     );
 //        this.loadingBarComponent.loadingModal.hide();
@@ -1027,14 +1028,14 @@ export class AieMultipleComponent implements OnInit {
         this.inSubFmc = 0;
         this.inBoac = '';
         this.inSerial = 0;
-        
+
         this.ngOnInit();
         this.regions = [];
         this.fmcs = [];
         this.customers = [];
         this.inCustomer = '';
         document.getElementById('idFmc')['value'] = "";
-        
+
         this.inBillBackOrCredit = '';
         this.inBillBack = '';
         this.inCredit = '';
@@ -1048,12 +1049,12 @@ export class AieMultipleComponent implements OnInit {
         document.getElementsByName('inBillBackOrCredit')[1]["value"] = "";
         document.getElementsByName('inBillBackOrCredit')[0]["checked"] = false;
         document.getElementsByName('inBillBackOrCredit')[1]["checked"] = false;
-    
+
         if ( !( this.userPermLvl1 == "X" || this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
            this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen";
         }
 
-//      console.log("this.aieMultVehs.length:", JSON.stringify(this.aieMultVehs.length) ); 
+//      console.log("this.aieMultVehs.length:", JSON.stringify(this.aieMultVehs.length) );
 //      this.aieMultVehs.splice(0);
         this.totalItems  = 0;
         // build   tagsForThisPage
@@ -1066,13 +1067,13 @@ export class AieMultipleComponent implements OnInit {
         this.haveNoPage = false;
 
     }
-    
+
     clearFields () {
-        
-       
+
+
         this.customers = [];
         this.inCustomer = '';
-        
+
         this.inBillBackOrCredit = '';
         this.inBillBack = '';
         this.inCredit = '';
@@ -1085,12 +1086,12 @@ export class AieMultipleComponent implements OnInit {
         document.getElementsByName('inBillBackOrCredit')[1]["value"] = "";
         document.getElementsByName('inBillBackOrCredit')[0]["checked"] = false;
         document.getElementsByName('inBillBackOrCredit')[1]["checked"] = false;
-    
+
         if ( !( this.userPermLvl1 == "X" || this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
            this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen";
         }
 
-//      console.log("this.aieMultVehs.length:", JSON.stringify(this.aieMultVehs.length) ); 
+//      console.log("this.aieMultVehs.length:", JSON.stringify(this.aieMultVehs.length) );
 //      this.aieMultVehs.splice(0);
         this.totalItems  = 0;
         // build   tagsForThisPage
@@ -1101,7 +1102,7 @@ export class AieMultipleComponent implements OnInit {
         this.startItem = this.endItem = this.totalPages = 0;
         this.currentPage = 1;
         this.haveNoPage = false;
-        
+
     }
 
 }

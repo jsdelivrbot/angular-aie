@@ -14,11 +14,11 @@
        <label class="control-label">FSR Lid:&nbsp;</label> <strong>{{userLID}} </strong>&nbsp;&nbsp;&nbsp;&nbsp;
       Miscellaneous AIE's - without ACT #'s
     </div>
-    
+
     <div class="panel-body" align="center" style="color:red">
       <strong> {{sysStatus}} </strong>
     </div>
-    
+
     <div class="panel-body">
       <div class="col-md-12" style="text-align:center">
         <div class="row">
@@ -68,13 +68,13 @@
               </div>
 
               <div class="col-md-12">
-                <label><button type="update" id="idSelectBtn" class="btn btn-dt2 btn-sm" (click)="getMiscRecords(loadingModal)">
+                <label><button type="update" id="idSelectBtn" class="btn btn-dt2 btn-sm" (click)="getMiscRecords()">
                     <label>Submit</label></button>
                 </label>
               </div>
             </div>
           </div>
- 
+
           <div class="col-md-6" style="text-align:left">
             &nbsp;
           </div>
@@ -203,7 +203,7 @@
         <strong>Clicking "Save Bill Backs" will process the selected billbacks&nbsp;</strong>
         <button type="update" class="btn btn-dt2 btn-sm" id ="saveBtn" (click)="saveBillBacksMisc()" >Save Bill Backs</button>
 <!--         <a href="/misc"><button type="clear" class="btn btn-dt2 btn-sm"  id ="clearBtn" >Clear Screen</button></a> -->
-        <button type="clear" class="btn btn-dt2 btn-sm" name ="undoBtn" id ="undoBtn" (click)="getMiscRecords(loadingModal)">Clear</button>
+        <button type="clear" class="btn btn-dt2 btn-sm" name ="undoBtn" id ="undoBtn" (click)="getMiscRecords()">Clear</button>
 
       </div>
     </div>

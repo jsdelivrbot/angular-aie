@@ -7,6 +7,7 @@ import { LoadingBarComponent } from '../common-components/loading-bar/loading-ba
 import { TagGetCustVehService } from './tag-get-cust-veh.service';
 import { customer } from '../common-components/common-structures';
 import { vehicle } from '../common-components/common-structures';
+import {ModalDirective} from "ngx-bootstrap";
 
 @Component({
     selector: 'app-tag-get-cust-veh',
@@ -15,9 +16,11 @@ import { vehicle } from '../common-components/common-structures';
 })
 
 export class TagGetCustVehComponent implements OnInit {
-        
+
+    @ViewChild('loadingModal') public loadingModal: ModalDirective;
+
     @ViewChild(LoadingBarComponent) public loadingBarComponent: LoadingBarComponent;
-    
+
     @Output() updateCustAndVehicle = new EventEmitter();
     customer: customer;
     emptyCustomer: customer;
@@ -25,15 +28,15 @@ export class TagGetCustVehComponent implements OnInit {
     emptyVehicle: vehicle;
     data;
     tagSearchForm;
-    
+
     constructor(private TagGetCustVehService: TagGetCustVehService) { }
-  
+
     ngOnInit() {
         this.emptyCustomer = new customer("", 0, "", "", "", 0, 0, 0, "", 0, "", "", 0, "", "", "", "", "");
-        this.emptyVehicle = new vehicle("", "", "", "", 0, "", "", "", "", 0, 0, 0, 0, 0, "", "", "", "", "", 0, "", 0);
+        this.emptyVehicle = new vehicle("", "", "", "", 0, "", "", "", "","", 0, 0, 0, 0, 0, "", "", "", "", "",0, "", 0);
         this.customer = this.emptyCustomer;
         this.vehicle = this.emptyVehicle;
-        
+
         this.tagSearchForm = new FormGroup({
             agencyCl: new FormControl("", Validators.compose([
                 Validators.required
@@ -42,12 +45,12 @@ export class TagGetCustVehComponent implements OnInit {
             tag: new FormControl("", Validators.compose([
                 Validators.required
                 ,Validators.pattern('[0-9]{4}[A-Za-z0-9]{1}')
-            ]))    
+            ]))
         });
         this.tagSearchForm.valueChanges
             .subscribe( form => {
-                if (!this.tagSearchForm.valid && 
-                    this.tagSearchForm.controls.agencyCl.value.length == 2 && 
+                if (!this.tagSearchForm.valid &&
+                    this.tagSearchForm.controls.agencyCl.value.length == 2 &&
                     this.tagSearchForm.controls.tag.value.length == 5) {
                     //this.errorString = "Tag must be in the format G##-####X";
                     alert("Tag must be in the format G##-####X");
@@ -56,10 +59,10 @@ export class TagGetCustVehComponent implements OnInit {
                 }
             })
     }
-    
+
     errorMessage: string;
     errorString: string = "";
-    
+
     public clearFields() {
         //console.log(this.tagSearchForm);
         this.tagSearchForm.controls["agencyCl"].setValue("");
@@ -77,7 +80,7 @@ export class TagGetCustVehComponent implements OnInit {
         this.TagGetCustVehService.getCustVeh(f.controls["agencyCl"].value, f.controls["tag"].value)
             .subscribe(
                 data => {
-                    if (!data.customer) { 
+                    if (!data.customer) {
                         //console.log("back from api - Customer is undefined");
                         this.errorString = "Tag not found.";
                         this.data = {};

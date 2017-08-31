@@ -40,6 +40,10 @@ export class AieSingleComponent implements OnInit {
     userPermLvl1: string;
     userPermLvl2: string;
     inboac:string;
+    fundCdBOAC: string;
+    bldgNo: string;
+    projNo: string;
+    desc1: string;
 
 
     //customer = new String("");
@@ -49,23 +53,23 @@ export class AieSingleComponent implements OnInit {
     aieSingle = new DataCollector("","", 0, 0, 0, "", "", "", "", "", "", "", 0, "", "", "", "", 0, 0);
     formErrors = [];
 
-    constructor(private aieSingleService: AieSingleService, 
+    constructor(private aieSingleService: AieSingleService,
     private dataService: DataService) { }
 
     ngOnInit() {
 //        //Getting lid from dataService ??
-//        this.dataService.currentSecurityRecord.subscribe(           
+//        this.dataService.currentSecurityRecord.subscribe(
 //          currentSecurityRecord =>  {
 //              this.userLid = currentSecurityRecord.lid;
 //              //this.userRegion = currentSecurityRecord.region;
 //              this.userPermLvl1 = currentSecurityRecord.lvl1Perm;
 //              this.userPermLvl2 = currentSecurityRecord.lvl2Perm;
-//              }); 
+//              });
 //        this.dataService.currentLid.subscribe(customerLid => this.userLid = customerLid);
 //        console.info("Customer Lid : "+this.userLid +" userPermLvl1:"+this.userPermLvl1 +" userPermLvl2:"+this.userPermLvl2);
 //        this.aieSingle.lid = this.userLid;
 //        console.info("selected Lid : "+this.aieSingle.lid);
-                
+
         }
 
     ngOnChanges() {
@@ -90,13 +94,13 @@ export class AieSingleComponent implements OnInit {
         this.message.length = 0;
 
         //Getting lid from dataService ??
-        this.dataService.currentSecurityRecord.subscribe(           
+        this.dataService.currentSecurityRecord.subscribe(
           currentSecurityRecord =>  {
               this.userLid = currentSecurityRecord.lid;
               //this.userRegion = currentSecurityRecord.region;
               this.userPermLvl1 = currentSecurityRecord.lvl1Perm;
               this.userPermLvl2 = currentSecurityRecord.lvl2Perm;
-              }); 
+              });
         this.dataService.currentLid.subscribe(customerLid => this.userLid = customerLid);
         console.info("Customer Lid : "+this.userLid +" userPermLvl1:"+this.userPermLvl1 +" userPermLvl2:"+this.userPermLvl2);
         this.aieSingle.lid = this.userLid;
@@ -125,8 +129,8 @@ export class AieSingleComponent implements OnInit {
 
         let agencyClass = null !== formValues.dc_class ? formValues.dc_class : "";
 
-        this.aieSingle.dc_class = agencyClass;         
-    
+        this.aieSingle.dc_class = agencyClass;
+
         let desc = formValues.desc1;
 
         if (desc.length > 75) {
@@ -148,7 +152,7 @@ export class AieSingleComponent implements OnInit {
         let serializedForm = JSON.stringify(this.aieSingle);
         //debug message
         console.debug("AieSingle Request " + serializedForm);
-        
+
         this.aieSingleService.saveAieSingle(serializedForm)
             .subscribe(
             result => {
@@ -158,12 +162,12 @@ export class AieSingleComponent implements OnInit {
                     this.clear();
                     this.message.push("AIESINGLE RECORD SUCCESSFULLY ADDED ");
                     console.log("Message: " + this.message);
-                    
+
                 }else{
                     //this.message.push(result.message.split('=')[1]);
                     this.message.push(result.message);
                 }
-                
+
             },
             error => {
                 this.errorMessage = <any>error;
@@ -185,11 +189,11 @@ export class AieSingleComponent implements OnInit {
         this.costAcct = "";
         this.customer = "";
         this.aieSingle.desc1 ="";
-        
+
         //clear any msg
         this.message.length = 0;
         console.log("Content Cleared");
-        
+
     }
 
 //    costAcctChangeBrodCast(costAcct) {
@@ -220,21 +224,21 @@ export class AieSingleComponent implements OnInit {
 //        {
 //            alert("PLEASE ENTER SALES CODE");
 //            return false;
-//            } 
+//            }
 //        if(this.salesCode == "D1" || this.salesCode == "D2")
 //        {
 //            if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
 //                {
 //                    alert("ONLY CO ADMIN & CO-SUPPORT CAN USE D1 OR D2 SALES CODES");
-//                    return false;                    
+//                    return false;
 //                }
 //            }
-//        switch (salesCode) 
+//        switch (salesCode)
 //        {
 //            //case "V3": //already defined below
 //            case "X2":
 //                //case "U2": //already defined below
-//                //case "U3": //already defined        
+//                //case "U3": //already defined
 //                if (costAcct == "") this.message.push("Sales Code X1 ==> No Cost Acct ");
 //                //this.aieSingleForm.costAcct="";
 //                break;
@@ -271,14 +275,14 @@ export class AieSingleComponent implements OnInit {
 //                if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
 //                {
 //                    this.message.push("Only CO Admin & CO-Support can use D1 and D2");
-//                    return false;                    
+//                    return false;
 //                }
 //                break;
 //            case "D2":
 //                if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
 //                {
 //                    this.message.push("Only CO Admin & CO-Support can use D1 and D2");
-//                    return false;                    
+//                    return false;
 //                }
 //                break;
 //            default:
@@ -328,34 +332,34 @@ export class AieSingleComponent implements OnInit {
             return false;
             //this.message.push(" Invalid Tag format ");
         }
-        
+
         if (this.aieSingle.salesCd === null || this.aieSingle.salesCd.trim() === '')
         {
             alert("PLEASE ENTER SALES CODE");
             return false;
-        } 
+        }
         if(this.aieSingle.salesCd == "D1" || this.aieSingle.salesCd == "D2")
         {
             if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
                 {
                     alert("ONLY CO ADMIN & CO-SUPPORT CAN USE D1 OR D2 SALES CODES");
-                    return false;                    
+                    return false;
                 }
             }
- 
+
 
         if (null === aieSingleForm.desc1 || aieSingleForm.desc1.trim() === "") {
             alert("PLEASE ENTER DESCRIPTION");
             return false;
             //this.message.push("Enter Descritpion ");
         }
-               
+
         if(aieSingleForm.desc1.indexOf('"')> -1 || aieSingleForm.desc1.indexOf("<script")> -1)
         {
             alert("DESCRIPTION DETAILS CONTAIN INVALID CHARACTERS");
             return false;
         }
-        
+
         if (null == aieSingleForm.dolAmt || 0 == aieSingleForm.dolAmt )
         {
             alert("PLEASE ENTER AMOUNT");
@@ -372,7 +376,7 @@ export class AieSingleComponent implements OnInit {
             alert("AMOUNT CAN'T BE MORE THAN 99,999.99");
             return false;
             }
-        
+
         this.inboac = this.customer.split("-", 5)[3];
         if ( this.inboac.substring(0,2) === "47" )
         {
@@ -381,7 +385,7 @@ export class AieSingleComponent implements OnInit {
                 alert("FUNDCODE CAN NOT BE EMPTY FOR ENTERED BOAC");
                 return false;
             }
-            
+
         }
 
 

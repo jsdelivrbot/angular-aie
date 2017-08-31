@@ -55,7 +55,7 @@
                 <div class="form-group form-group5 form-inline" style="text-align:left">
                   <app-repair-reason
                   	[(repReason)]="repReason"
-                  	(updateRepairReason)="updateRepairReason($event)"
+                  	(updateRepairReason)="updateRepairReason()"
                   ></app-repair-reason>
                 </div>
 
@@ -68,7 +68,7 @@
 
               <div class="col-md-12">
                 <label>
-                	<button type="button" class="btn btn-dt2 btn-sm" (click)="getAsRpClick(loadingModal)">
+                	<button type="button" class="btn btn-dt2 btn-sm" (click)="getAsRpClick()">
                 		<label>Submit</label>
                 	</button>
                 </label>

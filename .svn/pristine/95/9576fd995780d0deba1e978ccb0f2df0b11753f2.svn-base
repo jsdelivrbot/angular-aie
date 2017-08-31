@@ -1,0 +1,217 @@
+<a name="content" id="content"></a>
+
+<div class="row">
+  <ol class="breadcrumb">
+    <li><a href="#"></a></li>
+
+    <li><a routerLink="/home">AIE Decision Tool</a></li>
+
+    <li>AIE Misc</li>
+  </ol>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+       <label class="control-label">FSR Lid:&nbsp;</label> <strong>{{userLID}} </strong>&nbsp;&nbsp;&nbsp;&nbsp;
+      Miscellaneous AIE's - without ACT #'s
+    </div>
+    
+    <div class="panel-body" align="center" style="color:red">
+      <strong> {{sysStatus}} </strong>
+    </div>
+    
+    <div class="panel-body">
+      <div class="col-md-12" style="text-align:center">
+        <div class="row">
+
+          <app-tag-get-cust-veh
+             (updateCustAndVehicle)="newCustAndVeh($event)"
+          ></app-tag-get-cust-veh>
+
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div style="background-color:#d9edf7; width:100%; padding:5px 0px 5px 15px; font-weight: bold; text-align:center; margin-bottom:10px">
+                 <strong> Choose Your Report Options </strong>
+              </div>
+
+              <div class="col-md-4">
+                  <div style="background-color:#d9edf7; width:100%; padding:5px 0px 5px 15px; font-weight: bold; text-align:left; margin-bottom:10px">
+                    Select Date Range
+                  </div>
+                	<app-daterange
+						(updateDateRange)="newDateRange($event)"
+						[dr]="myDateRange"
+                	></app-daterange>
+              </div>
+
+              <div class="col-md-4">
+                <div style="background-color:#d9edf7; width:100%; padding:5px 0px 5px 15px; font-weight: bold; text-align:left; margin-bottom:10px">
+                   Select Report Options
+                </div>
+
+                    <p style="text-align:left"><input type="radio" name="srchRadio" [(ngModel)] = "srchRadio" required id="allCharges"  value="A">&nbsp;&nbsp;<label class="control-label">Show All Charges</label></p>
+                    <p style="text-align:left"><input type="radio" name="srchRadio" [(ngModel)] = "srchRadio" required id="fuelCharges" value="F">&nbsp;&nbsp;<label class="control-label">Show Only Fuel Charges</label></p>
+                    <p style="text-align:left"><input type="radio" name="srchRadio" [(ngModel)] = "srchRadio" required id="carWashes"   value="W">&nbsp;&nbsp;<label class="control-label">Show Only Car Washes</label></p>
+                    <p style="text-align:left; margin-left:50px"><strong>And</strong></p>
+                    <p style="text-align:left"><input type="checkbox" class="checkbox checkbox-inline" name="srchChk"  id="srchChk" [(ngModel)] ="srchChk" />&nbsp;&nbsp;<label class="control-label">Show Only Charges Available for Billback</label></p>
+
+              </div>
+
+              <div class="col-md-4">
+                <div style="background-color:#d9edf7; width:100%; padding:5px 0px 5px 15px; font-weight: bold; text-align:left; margin-bottom:10px">
+                   Search amount:
+                </div>
+
+                <div class="form-group form-group5 form-inline" style="text-align:left">
+                  <label>Enter Dollar Amount or Search on $&nbsp;
+                      <input type="text" name="srchAmt" [(ngModel)]="srchAmt" id="srchAmt"  size="8" maxlength="8" class="form-control" value= 0.00  (change)="srchAmtChanged()" /></label>
+                </div>
+              </div>
+
+              <div class="col-md-12">
+                <label><button type="update" id="idSelectBtn" class="btn btn-dt2 btn-sm" (click)="getMiscRecords(loadingModal)">
+                    <label>Submit</label></button>
+                </label>
+              </div>
+            </div>
+          </div>
+ 
+          <div class="col-md-6" style="text-align:left">
+            &nbsp;
+          </div>
+
+          <div *ngIf="!haveNoPage" class="col-md-6" style="text-align: right;">
+            Results: {{ startItem }}-{{ endItem }} of {{ totalItems }}
+            <br>
+            <pagination
+            	[boundaryLinks]="true"
+            	[directionLinks]="false"
+            	[totalItems]="totalItems"
+            	[maxSize]="5"
+            	[itemsPerPage]="itemsPerPage"
+            	rotate="true"
+            	[(ngModel)]="currentPage"
+            	class="pagination-sm"
+            	previousText="&lsaquo;"
+            	nextText="&rsaquo;"
+            	firstText="&laquo;"
+            	lastText="&raquo;"
+            	(pageChanged)="pageChanged($event)"
+            >
+            </pagination>
+          </div>
+        </div>
+
+      <form  [formGroup]="miscForm">
+
+        <div class="table-responsive" id="accordion" role="tablist" aria-multiselectable="true">
+
+          <table formArrayName="miscRows" class="table table-striped table-bordered">
+             <tr class="info" style="text-align:center">
+                  <th><span style="color: #C00;">*&nbsp;</span>Sales Code / Cost Acct.</th>
+	              <th>Description</th>
+                  <th>Odometer Reading</th>
+                  <th>Transaction Date</th>
+                  <th>PO #</th>
+                  <th>Transaction Amount</th>
+                  <th><span style="color: #C00;">*&nbsp;</span>AIE Amount</th>
+                  <th>Credit AIE</th>
+                  <th><span style="color: #C00;">*&nbsp;</span>AIE Status</th>
+                 <!-- <th>fct_key</th> -->
+              </tr>
+
+
+              <tr *ngFor="let misc of miscPage; let i = index" [formGroupName]="i">
+<!--                  <td><app-sales-code-select [(salesCode)]= "misc.fct_sales_code" (change)="salesChanged($event,i);    misc.fct_sales_code = $event.target.value" ></app-sales-code-select> </td>  -->
+
+<!--                  <td><app-cost-acct-select  [(costAcct)] = "misc.fct_cost_account"  (change)="costAcctChanged($event,i); misc.fct_cost_account  = $event.target.value" ></app-cost-acct-select></td>  -->
+
+                 <td> <app-sales-cost-select [isTable]="true" [lvl1Perm] = "lvl1Perm"  [lvl2Perm] = "lvl2Perm" [(salesCode)]="misc.fct_sales_code" [(costAccount)]="misc.fct_cost_account"></app-sales-cost-select> </td>
+
+                 <td> <a ng-href="" (click)="saveDesc(misc, i); aiedescModal.show();" title="Click to display Data Collector/Income Detail descriptions">{{misc.fct_product_desc}}</a></td>
+                 <td>{{misc.fct_odometer}}</td>
+                 <td>{{misc.fct_trans_date | myDate | date:"MM/dd/yyyy"}}</td>
+                 <td>{{misc.fct_po_number}}</td>
+                 <td>{{misc.fct_total_cost}}</td>
+                 <td> <input type="text" formControlName="fct_aie_amount" class="form-control" name ="fct_aie_amount"  id="fct_aie_amount" size = "9" maxlength="9" value="{{misc.fct_aie_amount | number: '1.2'}}" style="text-align:right" (change)="aieAmtChanged(i)" /></td>
+                 <td> <input type="text" formControlName="aie_credit"     class="form-control" name ="aie_credit"      id="aie_credit"     size = "1" maxlength="1" style="text-align:center" value ="{{misc.aie_credit}}" (click)="toggleAieCredit(misc, i)"/></td>  <!-- IF FCT-AIE-STATUS = "T" => Y else Space -->
+                 <td> <input type="text" formControlName="fct_aie_status" class="form-control" size = "1" maxlength="1" style="text-align:center" name ="fct_aie_status" id="fct_aie_status"  (click)="toggleAieStatus(misc,i)"/></td>
+                  <input type="hidden" name ="fct_key"  id="fct_key"   size = "10" maxlength="15" style="text-align:center" value="{{misc.fct_key}}"/>
+                  <input type="hidden" name ="fct_orig_sales" id="fct_orig_sales" size = "2"  maxlength="2" value="{{misc.fct_orig_sales}}"/>
+                  <input type="hidden" name ="fct_orig_cost" id="fct_cost-acct"   size = "3"  maxlength="3" value="{{misc.fct_orig_cost}}" />
+                  <input type="hidden" name ="fct_desc_upd" id="fct_desc_upd"   size = "1"  maxlength="1"   style="text-align:center" value="{{misc.fct_desc_upd}}"/>
+                  <input type="hidden" name="scNegative" id="scNegative" size="1" maxlength="1" value ="{{misc.scNegative}}"/>
+
+                  <input type="hidden" name ="fct_toUpdate"  id="fct_toUpdate"  size = "1"  maxlength="1"   style="text-align:center" value="{{misc.fct_toUpdate}}"/>
+                  <input type="hidden" formControlName="fct_billback_desc" class="form-control" name ="fct_billback_desc"    id="fct_billback_desc"    size = "10" maxlength="100" style="text-align:center" value="{{misc.fct_billback_desc}}"/>
+                  <input type="hidden" formControlName="fct_orig_status"   class="form-control" name ="fct_orig_status"  id="fct_orig_status"  size = "1" maxlength="1" style="text-align:center" value="{{misc.fct_orig_status}}"/>
+                  <input type="hidden" formControlName="fct_dc_found"      class="form-control" name ="fct_dc_found"     id="fct_dc_found"     size = "1" maxlength="1" style="text-align:center" value="{{misc.fct_dc_found}}"/>
+                  <input type="hidden" formControlName="fct_vh_agency_cl"  class="form-control" name ="fct_vh_agency_cl" id="fct_vh_agency_cl" size = "3" maxlength="3" style="text-align:center" value="{{misc.fct_vh_agency_cl}}"/>
+                  <input type="hidden" formControlName="fct_vh_tag"        class="form-control" name ="fct_vh_tag"       id="fct_vh_tag"       size = "5" maxlength="5" style="text-align:center" value="{{misc.fct_vh_tag}}"/>
+                  <input type="hidden" formControlName="fct_cu_region"     class="form-control" name ="fct_cu_region"    id="fct_cu_region"    size = "2" maxlength="2" style="text-align:center" value="{{misc.fct_cu_region}}"/>
+                  <input type="hidden" formControlName="fct_cu_boac"       class="form-control" name ="fct_cu_boac"      id="fct_cu_boac"      size = "6" maxlength="6" style="text-align:center" value="{{misc.fct_cu_region}}"/>
+                  <input type="hidden" name ="po_number"      id="po_number"      size = "8" maxlength="8" style="text-align:center" value="{{misc.fct_po_number}}"/>
+               <!--  Modal HTML section  This modal has to be within the *ngFor="let misc of miscPage; let i = index" so that index can be uesd -->
+
+   	              <input type="hidden" id="aiedescModal" (click)="aiedescModal.show()">
+
+                	<div bsModal #aiedescModal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
+		              <div class="modal-dialog">
+			           <div class="modal-content">
+				         <div class="modal-header">
+					       <button type="button" class="close pull-right" (click)="aiedescModal.hide()" aria-label="Close">
+						     <span aria-hidden="true">&times;</span>
+					       </button>
+					       <h4 class="modal-title">AIE Description details.</h4>
+				         </div>
+				         <div class="modal-bodyCCD">
+					      <p>
+					       <strong>Please enter the Description details (maximum allowed 100 characters).</strong> <br>	<br>
+						   <textarea class="form-control" rows="3" maxlength="100" name="idModalDesc" id="idModalDesc" value="{{misc.fct_billback_desc}}" #billBackDesc></textarea>
+					      </p>
+				         </div>
+				         <div class="modal-footer" style="text-align: center;">
+					      <button type="button" class="btn btn-primary" (click)="submitDesc(misc, i);  aiedescModal.hide();">Submit</button>
+					      <button type="button" class="btn btn-primary" (click)="clearModalDesc(misc, i); aiedescModal.hide();">Clear</button>
+					      <button type="button" class="btn btn-primary" (click)="aiedescModal.hide()">Cancel</button>
+				         </div>
+			           </div>
+		             </div>
+	               </div>
+               </tr>
+
+            <!--  *ngIf="!miscPage || miscPage.length() == 0" -->
+                <tr *ngIf="haveNoPage">
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+<!--                   <td></td> -->
+                </tr>
+
+          </table>
+        </div>
+
+        </form>
+      </div>
+
+      <div class="col-md-12" style="text-align:center">
+        <strong>Clicking "Save Bill Backs" will process the selected billbacks&nbsp;</strong>
+        <button type="update" class="btn btn-dt2 btn-sm" id ="saveBtn" (click)="saveBillBacksMisc()" >Save Bill Backs</button>
+<!--         <a href="/misc"><button type="clear" class="btn btn-dt2 btn-sm"  id ="clearBtn" >Clear Screen</button></a> -->
+        <button type="clear" class="btn btn-dt2 btn-sm" name ="undoBtn" id ="undoBtn" (click)="getMiscRecords(loadingModal)">Clear</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Loading modal -->
+  <app-loading-bar></app-loading-bar>
+
+
+

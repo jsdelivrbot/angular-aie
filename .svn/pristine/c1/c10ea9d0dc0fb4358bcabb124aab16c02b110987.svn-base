@@ -1,0 +1,268 @@
+<div class="container">
+  <a name="content" id="content"></a>
+
+  <div class="row">
+    <ol class="breadcrumb">
+       <li>
+         <a href="#"><span aria-hidden="true" class="glyphicon glyphicon-menu-hamburger" title="Main Menu"></span></a>
+      </li>
+      <li><a routerLink="/home">AIE Decision Tool</a></li>
+      <li>AIE Multiple</li>
+    </ol>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        AIE Multiple
+      </div>
+
+      <div class="panel-body">
+        <!-- left column-->
+
+        <div class="col-md-12" style="text-align:center">
+
+          <div class="row">
+
+            <div class="col-md-6" style="text-align:left">
+              <div class="form-group form-group5 form-inline">
+                &nbsp;<br />
+                <label class="control-label">Select Region, FMC and Customer Number:&nbsp;</label>
+              </div>
+           </div>
+
+        <div style="text-align:left">
+
+        <div>
+
+        <div class="col-md-12" >
+            <div class="form-group form-group5 form-inline" style="width: 800px">&nbsp;<br />
+             <label class="control-label">Region:&nbsp;</label>
+               <select class="form-control" id="idRegion" name="idRegion" [(ngModel)]="inRegion"  (ngModelChange)="changeRegion($event, loadingModal); " #idRegion="ngModel" required>
+				<option [hidden]="true" [ngValue]="regions">Select</option>
+				<option *ngFor="let region of regions">{{region.rg_Region}}</option>
+			  </select>&nbsp;&nbsp;
+			  <label class="control-label">FMC:&nbsp;</label>
+               <select class="form-control" id="idFmc" name="idFmc" [(ngModel)]="inFmc"  (ngModelChange)="changeFmc($event, loadingModal)" #idFmc="ngModel" required>
+				<option [hidden]="true" [ngValue]="fmcs">Select</option>
+				<option *ngFor="let fmc of fmcs">{{fmc}}</option>
+			  </select>&nbsp;&nbsp;
+
+			  <label class="control-label">Customer:&nbsp;</label>
+              <input placeholder="00-00-00-XXXXXX-000" [(ngModel)]="inCustomer" (ngModelChange)="changeCustomer($event)"
+	                 [typeahead]="customers" class="form-control" id="idCustomer" size="20" maxlength="19"
+	                 [typeaheadMinLength]="0" [typeaheadOptionsLimit]="10" name="idCustomer" [disabled]="idFmc.value < 0"  #idCustomer = "ngModel" required  > &nbsp; 
+	      	  <button type="button" class="btn btn-dt2 btn-sm" [disabled]="(!idCustomer.valid) || (idRegion < 0) || (idFmc.value < 0) " (click)="getCustomerVehTags(loadingModal)">Get Tags</button>
+            </div>
+         </div>
+
+  	 	<table border="0" cellpadding="0" cellspacing="0" width="100%">
+		    <tr height='01' >
+		    	<td align='top'><strong>
+			    	&nbsp; &nbsp;
+			</strong></td>
+			</tr>
+		    <tr>
+		    	<td align='top'  style="color:red"   ><strong>
+			    	&nbsp; &nbsp; {{ sysStatus }}
+			    </strong></td>
+			</tr>
+			<tr height='10' >
+		    	<td align='top'><strong>
+			    	&nbsp; &nbsp;
+			</strong></td>
+			</tr>
+		</table>
+
+   <div class="col-md-12" style="text-align:left; height: 5px;">&nbsp;</div>
+
+</div>
+
+<form [formGroup]="aieMultipleForm"  >
+
+<div class="col-md-12">
+
+          <div class="col-md-12" style="text-align:left; height: 2px;">&nbsp;
+          </div>
+
+          <div class="col-md-12" style="text-align:left; height: 30px;">
+            <span style=
+            "color:#C00; margin-left:-9px;">*&nbsp;</span><label>Required fields.</label>
+          </div>
+
+          <div class="col-md-6" style="text-align:left">
+            <div class="form-group2 form-inline">
+              <span style="color:#C00; margin-left:-9px;">*&nbsp;</span>
+              <label data-toggle="tooltip" title="Bill Back">Bill Back</label>&nbsp;
+              <input type="radio" id="inBillBack" name="inBillBackOrCredit"  value="B"
+                     [checked]="false" [ngModelOptions]="{standalone: true}" [(ngModel)]="inBillBackOrCredit"  />
+              &nbsp;&nbsp;&nbsp;OR&nbsp;&nbsp;<label>Credit&nbsp;</label>
+              <input type="radio" id="inCredit" name="inBillBackOrCredit"  value="C"
+                     [checked]="false" [ngModelOptions]="{standalone: true}" [(ngModel)]="inBillBackOrCredit"  />
+            </div>
+
+            <div class="form-group2 form-inline">
+              <label><span style=
+              "color:#C00; margin-left:-9px;">&nbsp;</span>
+              <label data-toggle="tooltip" title="Tags selected">Number of Tags Selected: &nbsp; {{noOfTagsSelected}}</label>
+              &nbsp; </label>
+            </div>
+
+            <div class="form-group2 form-inline">
+              <label data-toggle="tooltip" title="Enter Fund Code">Fund Code:</label>&nbsp;
+              <input type="text" class="form-control" id="inFundCode" formControlName="inFundCode" [value]='inFundCode' (input)="inFundCode=$event.target.value.toUpperCase()"
+                     placeholder="Fund Code" size="6" maxlength="2"  />&nbsp;
+            </div>
+
+            <div class="form-group2 form-inline">
+              <label data-toggle="tooltip" title=
+              "Enter Account 1">Account 1:</label> &nbsp;
+              <input type="text" class="form-control" formControlName="inAcct1" [value]='inAcct1' (input)="inAcct1=$event.target.value.toUpperCase()"  id="acct1"
+                     placeholder="Account 1" size="8" maxlength="8" />&nbsp;&nbsp;
+              <label data-toggle="tooltip" title=
+              "Enter Account 1">Account 2:</label> &nbsp;
+              <input type="text" class="form-control" formControlName="inAcct2" [value]='inAcct2' (input)="inAcct2=$event.target.value.toUpperCase()"   id="acct2"
+                     placeholder="Account 2" size="8" maxlength="8" />
+            </div>
+          </div><!-- right column -->
+
+          <div class="col-md-6" style="text-align:left">
+          <app-sales-cost-select [isTable]="false" [(salesCode)]="inSalesCode" [(costAccount)]="inCostAcct"></app-sales-cost-select>
+<!--             <div class="form-group2 form-inline">
+              <span style=
+              "color:#C00;"> &nbsp;*&nbsp;</span><label>Sales Code:</label>
+                  <select	name="salesCode" id="salesCode" class="form-control" style="max-width:100%;" [value]="inSalesCode" (input)="inSalesCode=$event.target.value.toUpperCase()">
+	                 <option></option>
+	                 <option>A1</option>
+	                 <option>A8</option>
+	                 <option>D1</option>
+	                 <option>N1</option>
+	                 <option>P1</option>
+	                 <option>Q1</option>
+	                 <option>S1</option>
+	                 <option>U2</option>
+	                 <option>U3</option>
+	                 <option>V3</option>
+	                 <option>V4</option>
+	                 <option>X1</option>
+	                 <option>X2</option>
+	                 <option>X4</option>
+                 </select>
+            </div>
+
+            <div class="form-group2 form-inline">
+              <span style=
+              "color:#C00;">&nbsp;*&nbsp;</span><label data-toggle="tooltip"
+              title="Select cost account">Cost Account:</label>
+                 <select	name="costAcct" id="costAcct" class="form-control" style="max-width:100%;" [value]="inCostAcct" (input)="inCostAcct=$event.target.value.toUpperCase()">
+	               <option></option>
+	               <option>145</option>
+	               <option>160</option>
+	               <option>161</option>
+	               <option>170</option>
+	               <option>171</option>
+	               <option>172</option>
+	               <option>180</option>
+	               <option>190</option>
+	               <option>191</option>
+	               <option>511</option>
+	               <option>611</option>
+	               <option>711</option>
+	               <option>712</option>
+	               <option>811</option>
+                 </select>
+            </div> -->
+
+            <div class="form-group2 form-inline">
+              <span style=
+              "color:#C00;">&nbsp;*&nbsp;</span><label data-toggle="tooltip"
+              title="Enter description">Description:</label>
+              <input type="text" class="form-control" formControlName="inDesc" id="inDesc" placeholder="Enter description"
+               size="60" maxlength="100" [value]='inDesc' (input)="inDesc=$event.target.value.toUpperCase()"
+              />
+            </div>
+
+            <div class="form-group2 form-inline">
+              <span style=
+              "color:#C00;">&nbsp;*&nbsp;</span><label data-toggle="tooltip" title="Enter description">Amount to Allocate:</label>
+              <input type="text" class="form-control" formControlName="inAmtToAllocate" id="inAmtToAllocate" placeholder="$00.00" size="8" maxlength="12"
+              [value]='inAmtToAllocate' (input)="inAmtToAllocate=$event.target.value.toUpperCase()"/>
+              &nbsp;&nbsp;OR&nbsp;&nbsp;<label data-toggle="tooltip" title="Enter description">Amount Per Tag ($5 min.):</label>
+              <input type="text" class="form-control" formControlName="inAmtPerTag" id="inAmtPerTag" placeholder="$00.00" size="8" maxlength="8"
+              [value]='inAmtPerTag' (input)="inAmtPerTag=$event.target.value.toUpperCase()"/>
+            </div>
+          </div>
+
+          <div class="col-md-12" style="text-align:left; height:20px;">&nbsp;</div>
+
+          <div *ngIf="endItem > 50" class="col-md-12" >
+
+          <div class="col-md-12" style="text-align:center">
+            <button type="submit" class="btn btn-dt2 btn-sm" (click)="updCustomerVehTags(loadingModal)">Submit</button>
+            &nbsp;&nbsp;<button type="clear" class="btn btn-dt2 btn-sm" (click)="clearPage(loadingModal)">Clear</button>
+          </div>
+
+          </div>
+
+          <div *ngIf="totalItems > 0" class="col-md-12" style="text-align: right;">
+            <table width="100%">
+            <tr>
+            <td style="text-align: left; vertical-align: bottom;      ">
+            <p><strong>&nbsp;{{ selectMsg }}&nbsp;</strong></p>
+            </td>
+            <td>
+            Customer Tags: {{ startItem }}-{{ endItem }} of {{ totalItems }}
+            <br>
+            <pagination
+            	[boundaryLinks]="true"
+            	[directionLinks]="false"
+            	[totalItems]="totalItems"
+            	[maxSize]="5"
+            	[itemsPerPage]="itemsPerPage"
+            	rotate="true"
+            	[(ngModel)]="currentPage"
+            	[ngModelOptions]="{standalone: true}"
+            	class="pagination-sm"
+            	previousText="&lsaquo;"
+            	nextText="&rsaquo;"
+            	firstText="&laquo;"
+            	lastText="&raquo;"
+            	(pageChanged)="pageChanged($event)"
+            >
+            </pagination>
+            </td>
+            </tr>
+            </table>
+          </div>
+
+          <div *ngIf="totalItems > 0" class="col-md-12" >
+
+            <p style="text-align:left">
+               <input type="checkbox" name="inSelectDelectAll" id="inSelectDelectAll" [checked]="inSelectDelectAll" [value]='inSelectDelectAll'  (change)="selectAllChange($event.target.checked); "     />&nbsp;&nbsp;<label>Select/Deselect All</label>
+            </p>
+
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered">
+                <tr *ngFor="let x of tagRows; let i=index">
+                    <td *ngFor="let y of x; let j=index">
+                       &nbsp; <input type="checkbox" id="tag-{{i}}-{{j}}"   [checked]="y.vh_Tag_Checked" [value]='y.vh_Tag_Checked' (change)="y.vh_Tag_Checked = !y.vh_Tag_Checked; tagSelectChange(y); " />
+                       &nbsp;&nbsp;{{ y.vh_Agency_Cl }}-{{ y.vh_Tag }}
+                    </td>
+                </tr>
+               </table>
+            </div>
+          </div>
+
+          <div class="col-md-12" style="text-align:center">
+            <button type="submit" class="btn btn-dt2 btn-sm" [disabled]="(!idCustomer.valid) || (idRegion < 0) || (idFmc.value < 0)" (click)="updCustomerVehTags(loadingModal)">Submit</button>
+            &nbsp;&nbsp;<button type="clear" class="btn btn-dt2 btn-sm" (click)="clearPage(loadingModal)">Clear</button>
+          </div>
+</div>
+
+</form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-loading-bar></app-loading-bar>

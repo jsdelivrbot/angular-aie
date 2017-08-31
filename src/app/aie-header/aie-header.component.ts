@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonService } from '../common-components/common.service';
 import { DataService } from '../common-components/data.service';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-aie-header',
@@ -11,7 +12,8 @@ import { DataService } from '../common-components/data.service';
 export class AieHeaderComponent implements OnInit {
   constructor(
         private commonService: CommonService,
-        private dataService: DataService
+        private dataService: DataService,
+        private router: Router
   ) { }
 
 //data service variables
@@ -30,6 +32,12 @@ export class AieHeaderComponent implements OnInit {
       isLogged = true;
     }
     return isLogged;
+  }
+
+  logout() {
+    // remove user from local storage to log user out
+    localStorage.removeItem('currentUser');
+    this.router.navigate(['/logout']);
   }
 
   ngOnInit() {

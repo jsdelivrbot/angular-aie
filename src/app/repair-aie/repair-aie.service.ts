@@ -5,11 +5,11 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/toPromise';
-
-import { repairAieExtended } from './repair-aie';
+ 
+import { repairAieExtended } from './repair-Aie';
 import { dc } from '../common-components/common-structures';
 import { id } from '../common-components/common-structures';
-import { postData } from './repair-aie';
+import { postData } from './repair-Aie';
 
 @Injectable()
 export class RepairAieService {
@@ -17,13 +17,13 @@ export class RepairAieService {
     private headers = new Headers({'Content-Type': 'application/json'});
 
     constructor(private http: Http) { }
-
+    
     getAieRepairs(vehDtTime: string): Observable<repairAieExtended[]> {
         //console.log("getAieRepairs for vehDtTime >" + vehDtTime + "<");
         let params: URLSearchParams = new URLSearchParams();
         params.set("vehDtTime", vehDtTime);
         this.options.search = params;
-
+        
         return this.http.get('RepairAIE/', this.options)
             .map(this.extractData)
             .catch(this.handleError);
@@ -45,19 +45,19 @@ export class RepairAieService {
         params.set("repAmount", amount);
         //console.log(params);
         this.options.search = params;
-
+        
         return this.http.get('RepairAIE/', this.options)
             .map(this.extractData)
             .catch(this.handleError);
     }
-
+    
     getDCByClassTag(agencyCl: string, tag: string): Observable<dc[]> {
         //console.log("getDC for class and tag >" + agencyCl + "-" + tag + "<");
         let params: URLSearchParams = new URLSearchParams();
         params.set("agencyCl", agencyCl);
         params.set("tag", tag);
         this.options.search = params;
-
+        
         let dcs = this.http.get('common/DCollector/', this.options)
             .map(this.extractData)
             .catch(this.handleError);
@@ -71,7 +71,7 @@ export class RepairAieService {
         params.set("agencyCl", agencyCl);
         params.set("tag", tag);
         this.options.search = params;
-
+        
         let ids = this.http.get('common/IDetail/', this.options)
             .map(this.extractData)
             .catch(this.handleError);
@@ -80,8 +80,8 @@ export class RepairAieService {
 
     }
 
-
-
+    
+    
     createBillBacks(toBillBack: postData): Observable<Boolean> {
         console.log("updating", toBillBack);
         //postData.
@@ -98,14 +98,14 @@ export class RepairAieService {
         console.log("body: ", body || { });
         return body;
     }
-
+    
     private extractSingleObject(res: Response) {
         let body = res.json();
         console.log("body: ", body || { });
         return body || { };
     }
-
-
+    
+    
     private handleError(error: any): Promise<any> {
           console.error('An error occurred', error); // for demo purposes only
           return Promise.reject(error.message || error);

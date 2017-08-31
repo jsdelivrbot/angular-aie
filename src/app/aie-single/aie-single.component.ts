@@ -13,6 +13,7 @@ import { SalesCodeSelectComponent } from '../common-components/sales-code-select
 import { CustomerSelectComponent } from '../common-components/cust-select/cust-select.component';
 import { createCounterRangeValidator } from '../common-components/sales/sales.component';
 import { DataService } from '../common-components/data.service';
+import { SalesCostSelectComponent } from '../common-components/sales-cost-select/sales-cost-select.component';
 
 
 @Component({
@@ -24,8 +25,8 @@ import { DataService } from '../common-components/data.service';
 
 export class AieSingleComponent implements OnInit {
 
-    @ViewChild('salesCdSelector') salesCdSelector;
-    @ViewChild('costAcctSelector') costAcctSelector;
+//    @ViewChild('salesCdSelector') salesCdSelector;
+//    @ViewChild('costAcctSelector') costAcctSelector;
 
     aieSingleForm;
     salesCode: string;
@@ -52,18 +53,18 @@ export class AieSingleComponent implements OnInit {
     private dataService: DataService) { }
 
     ngOnInit() {
-        //Getting lid from dataService ??
-        this.dataService.currentSecurityRecord.subscribe(           
-          currentSecurityRecord =>  {
-              this.userLid = currentSecurityRecord.lid;
-              //this.userRegion = currentSecurityRecord.region;
-              this.userPermLvl1 = currentSecurityRecord.lvl1Perm;
-              this.userPermLvl2 = currentSecurityRecord.lvl2Perm;
-              }); 
-        this.dataService.currentLid.subscribe(customerLid => this.userLid = customerLid);
-        console.info("Customer Lid : "+this.userLid +" userPermLvl1:"+this.userPermLvl1 +" userPermLvl2:"+this.userPermLvl2);
-        this.aieSingle.lid = this.userLid;
-        console.info("selected Lid : "+this.aieSingle.lid);
+//        //Getting lid from dataService ??
+//        this.dataService.currentSecurityRecord.subscribe(           
+//          currentSecurityRecord =>  {
+//              this.userLid = currentSecurityRecord.lid;
+//              //this.userRegion = currentSecurityRecord.region;
+//              this.userPermLvl1 = currentSecurityRecord.lvl1Perm;
+//              this.userPermLvl2 = currentSecurityRecord.lvl2Perm;
+//              }); 
+//        this.dataService.currentLid.subscribe(customerLid => this.userLid = customerLid);
+//        console.info("Customer Lid : "+this.userLid +" userPermLvl1:"+this.userPermLvl1 +" userPermLvl2:"+this.userPermLvl2);
+//        this.aieSingle.lid = this.userLid;
+//        console.info("selected Lid : "+this.aieSingle.lid);
                 
         }
 
@@ -88,7 +89,21 @@ export class AieSingleComponent implements OnInit {
 
         this.message.length = 0;
 
-        if(this.validateSalesCode(formValues.salesCd, formValues.costAcct) === false) return false;
+        //Getting lid from dataService ??
+        this.dataService.currentSecurityRecord.subscribe(           
+          currentSecurityRecord =>  {
+              this.userLid = currentSecurityRecord.lid;
+              //this.userRegion = currentSecurityRecord.region;
+              this.userPermLvl1 = currentSecurityRecord.lvl1Perm;
+              this.userPermLvl2 = currentSecurityRecord.lvl2Perm;
+              }); 
+        this.dataService.currentLid.subscribe(customerLid => this.userLid = customerLid);
+        console.info("Customer Lid : "+this.userLid +" userPermLvl1:"+this.userPermLvl1 +" userPermLvl2:"+this.userPermLvl2);
+        this.aieSingle.lid = this.userLid;
+        console.info("selected Lid : "+this.aieSingle.lid);
+
+
+        //if(this.validateSalesCode(formValues.salesCd, formValues.costAcct) === false) return false;
         if(this.validateFormFields(formValues) === false) return false;
 
         console.log("On Submit " + this.message.length + " Msg: " + this.message);
@@ -115,19 +130,19 @@ export class AieSingleComponent implements OnInit {
         let desc = formValues.desc1;
 
         if (desc.length > 75) {
-            this.aieSingle.desc1 = desc.substring(0, 25);
-            this.aieSingle.desc2 = desc.substring(25, 50);
-            this.aieSingle.desc3 = desc.substring(50, 75);
-            this.aieSingle.desc4 = desc.substring(75, 100);
+            this.aieSingle.desc1 = desc.substring(0, 25).toUpperCase();
+            this.aieSingle.desc2 = desc.substring(25, 50).toUpperCase();
+            this.aieSingle.desc3 = desc.substring(50, 75).toUpperCase();
+            this.aieSingle.desc4 = desc.substring(75, 100).toUpperCase();
         } else if (desc.length > 50 && desc.length <= 75) {
-            this.aieSingle.desc1 = desc.substring(0, 25);
-            this.aieSingle.desc2 = desc.substring(25, 50);
-            this.aieSingle.desc3 = desc.substring(50, 75);
+            this.aieSingle.desc1 = desc.substring(0, 25).toUpperCase();
+            this.aieSingle.desc2 = desc.substring(25, 50).toUpperCase();
+            this.aieSingle.desc3 = desc.substring(50, 75).toUpperCase();
         } else if (desc.length > 25 && desc.length <= 50) {
-            this.aieSingle.desc1 = desc.substring(0, 25);
-            this.aieSingle.desc2 = desc.substring(25, 50);
+            this.aieSingle.desc1 = desc.substring(0, 25).toUpperCase();
+            this.aieSingle.desc2 = desc.substring(25, 50).toUpperCase();
         } else if (desc.length > 0 && desc.length <= 25) {
-            this.aieSingle.desc1 = desc.substring(0, 25);
+            this.aieSingle.desc1 = desc.substring(0, 25).toUpperCase();
         }
 
         let serializedForm = JSON.stringify(this.aieSingle);
@@ -154,7 +169,7 @@ export class AieSingleComponent implements OnInit {
                 this.errorMessage = <any>error;
                 //log error
                 console.error(this.errorMessage);
-                this.message.push("COULD NOT SAVE SIESINGLE RECORD" + this.errorMessage);
+                this.message.push("COULD NOT SAVE SIESINGLE RECORD");
 
             });
     }
@@ -168,29 +183,32 @@ export class AieSingleComponent implements OnInit {
         this.fmc = 0;
         this.custNo = "";
         this.costAcct = "";
+        this.customer = "";
+        this.aieSingle.desc1 ="";
+        
         //clear any msg
         this.message.length = 0;
         console.log("Content Cleared");
         
     }
 
-    costAcctChangeBrodCast(costAcct) {
-        let salesCd = "";
-        console.log("in costAcctChangeBroadCost: Cost Acct: " + costAcct + " sales Code from model " + this.aieSingle.salesCd);
-        salesCd = this.aieSingleService.getSalesCodeForCostAcct(costAcct, this.aieSingle.salesCd);
-        console.log("in costAcctChangeBroadCost: Sales Code: " + salesCd);
-        this.salesCdSelector.salesCode = salesCd;
-        this.aieSingle.salesCd = salesCd;
-    }
-
-    salesCodeChangeBrodCast(salesCd) {
-        let costAcct = "";
-        console.log("in salesCodeChangeBrodCost: salesCd:  " + salesCd);
-        costAcct = this.aieSingleService.getCostAcctForSalesCode(salesCd, this.aieSingle.costAcct);
-        console.log("in salesCodeChangeBrodCost: costAcct: " + costAcct);
-        this.costAcctSelector.costAcct = costAcct;
-        if(null != costAcct && costAcct !== "") this.aieSingle.costAcct = Number(costAcct);
-    }
+//    costAcctChangeBrodCast(costAcct) {
+//        let salesCd = "";
+//        console.log("in costAcctChangeBroadCost: Cost Acct: " + costAcct + " sales Code from model " + this.aieSingle.salesCd);
+//        salesCd = this.aieSingleService.getSalesCodeForCostAcct(costAcct, this.aieSingle.salesCd);
+//        console.log("in costAcctChangeBroadCost: Sales Code: " + salesCd);
+//        this.salesCdSelector.salesCode = salesCd;
+//        this.aieSingle.salesCd = salesCd;
+//    }
+//
+//    salesCodeChangeBrodCast(salesCd) {
+//        let costAcct = "";
+//        console.log("in salesCodeChangeBrodCost: salesCd:  " + salesCd);
+//        costAcct = this.aieSingleService.getCostAcctForSalesCode(salesCd, this.aieSingle.costAcct);
+//        console.log("in salesCodeChangeBrodCost: costAcct: " + costAcct);
+//        this.costAcctSelector.costAcct = costAcct;
+//        if(null != costAcct && costAcct !== "") this.aieSingle.costAcct = Number(costAcct);
+//    }
 
     validateSalesCode(salesCode, costAcct) {
         console.log("validaton check", salesCode, costAcct);
@@ -198,68 +216,81 @@ export class AieSingleComponent implements OnInit {
         //    if(null == salesCode && salesCode.trim() === ""){
         //        this.message.push("Sales Code is Required");
         //    }
+//        if (null == this.salesCode)
+//        {
+//            alert("PLEASE ENTER SALES CODE");
+//            return false;
+//            } 
+//        if(this.salesCode == "D1" || this.salesCode == "D2")
+//        {
+//            if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
+//                {
+//                    alert("ONLY CO ADMIN & CO-SUPPORT CAN USE D1 OR D2 SALES CODES");
+//                    return false;                    
+//                }
+//            }
+//        switch (salesCode) 
+//        {
+//            //case "V3": //already defined below
+//            case "X2":
+//                //case "U2": //already defined below
+//                //case "U3": //already defined        
+//                if (costAcct == "") this.message.push("Sales Code X1 ==> No Cost Acct ");
+//                //this.aieSingleForm.costAcct="";
+//                break;
+//            case "Q1":
+//            case "A1":
+//            case "A8":
+//
+//                if (costAcct != "") this.message.push("Sales Code Q1, A1, A8 ==> No Cost Acct ");
+//                //this.aieSingleForm.costAcct="";
+//                break;
+//            case "V3":
+//
+//                if (costAcct != "161") this.message.push("Sales Code V3 can only be used with Cost Acct 161");
+//                //this.aieSingleForm.costAcct="161";
+//                break;
+//            case "U2":
+//            case "U3":
+//                if (!(costAcct == "145" ||
+//                    costAcct == "170" ||
+//                    costAcct == "172" ||
+//                    costAcct == "180" ||
+//                    costAcct == "811")) this.message.push("For Sales Code U2, U3 Cost Acct" + costAcct + " is not valid");
+//                break;
+//            case "P1":
+//
+//                if (costAcct != "511") this.message.push("Sales Code P1 can only be used with cost account 511");
+//                //this.aieSingleForm.costAcct="511";
+//                break;
+//            case "V4":
+//                if (costAcct != "191") this.message.push("Sales Code V4 ==> Cost Acct 191");
+//                //this.aieSingleForm.costAcct="191";
+//                break;
+//            case "D1":
+//                if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
+//                {
+//                    this.message.push("Only CO Admin & CO-Support can use D1 and D2");
+//                    return false;                    
+//                }
+//                break;
+//            case "D2":
+//                if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
+//                {
+//                    this.message.push("Only CO Admin & CO-Support can use D1 and D2");
+//                    return false;                    
+//                }
+//                break;
+//            default:
+//                alert("PLEASE SELECT SALES CODE");
+//                return false;
+//                //this.message.push("SALES CODE IS REQUIRED");
+//                //break;
+//                //return false;
 
-        switch (salesCode) {
-            //case "V3": //already defined below
-            case "X2":
-                //case "U2": //already defined below
-                //case "U3": //already defined        
-                if (costAcct == "") this.message.push("Sales Code X1 ==> No Cost Acct ");
-                //this.aieSingleForm.costAcct="";
-                break;
-            case "Q1":
-            case "A1":
-            case "A8":
-
-                if (costAcct != "") this.message.push("Sales Code Q1, A1, A8 ==> No Cost Acct ");
-                //this.aieSingleForm.costAcct="";
-                break;
-            case "V3":
-
-                if (costAcct != "161") this.message.push("Sales Code V3 can only be used with Cost Acct 161");
-                //this.aieSingleForm.costAcct="161";
-                break;
-            case "U2":
-            case "U3":
-                if (!(costAcct == "145" ||
-                    costAcct == "170" ||
-                    costAcct == "172" ||
-                    costAcct == "180" ||
-                    costAcct == "811")) this.message.push("For Sales Code U2, U3 Cost Acct" + costAcct + " is not valid");
-                break;
-            case "P1":
-
-                if (costAcct != "511") this.message.push("Sales Code P1 can only be used with cost account 511");
-                //this.aieSingleForm.costAcct="511";
-                break;
-            case "V4":
-                if (costAcct != "191") this.message.push("Sales Code V4 ==> Cost Acct 191");
-                //this.aieSingleForm.costAcct="191";
-                break;
-            case "D1":
-                if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
-                {
-                    this.message.push("Only CO Admin & CO-Support can use D1 and D2");
-                    return false;                    
-                }
-                break;
-            case "D2":
-                if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
-                {
-                    this.message.push("Only CO Admin & CO-Support can use D1 and D2");
-                    return false;                    
-                }
-                break;
-            default:
-                alert("PLEASE SELECT SALES CODE");
-                return false;
-                //this.message.push("SALES CODE IS REQUIRED");
-                //break;
-                //return false;
-
-        }
+//        }
         console.log("validaton check: ");
-        //this.message.push(result);
+       // this.message.push(result);
     }
 
     validateFormFields(aieSingleForm) {
@@ -297,19 +328,28 @@ export class AieSingleComponent implements OnInit {
             return false;
             //this.message.push(" Invalid Tag format ");
         }
-
-        var amtRegExp = new RegExp('^[0-9]{0,7}(\.[0-9]{0,2})?$');
-        if (!amtRegExp.test(aieSingleForm.dolAmt)) {
-            alert("INVALID AMOUNT");
+        
+        if (this.aieSingle.salesCd === null || this.aieSingle.salesCd.trim() === '')
+        {
+            alert("PLEASE ENTER SALES CODE");
             return false;
-            //this.message.push("Invalid Amount ");
-        }
+        } 
+        if(this.aieSingle.salesCd == "D1" || this.aieSingle.salesCd == "D2")
+        {
+            if (this.userPermLvl1 != "X" || this.userPermLvl2 != "X")
+                {
+                    alert("ONLY CO ADMIN & CO-SUPPORT CAN USE D1 OR D2 SALES CODES");
+                    return false;                    
+                }
+            }
+ 
 
         if (null === aieSingleForm.desc1 || aieSingleForm.desc1.trim() === "") {
             alert("PLEASE ENTER DESCRIPTION");
             return false;
             //this.message.push("Enter Descritpion ");
         }
+               
         if(aieSingleForm.desc1.indexOf('"')> -1 || aieSingleForm.desc1.indexOf("<script")> -1)
         {
             alert("DESCRIPTION DETAILS CONTAIN INVALID CHARACTERS");
@@ -321,6 +361,17 @@ export class AieSingleComponent implements OnInit {
             alert("PLEASE ENTER AMOUNT");
             return false;
         }
+        var amtRegExp = new RegExp('^[0-9]{0,7}(\.[0-9]{0,2})?$');
+        if (!amtRegExp.test(aieSingleForm.dolAmt)) {
+            alert("INVALID AMOUNT");
+            return false;
+            //this.message.push("Invalid Amount ");
+        }
+        if (aieSingleForm.dolAmt > 99999.99)
+        {
+            alert("AMOUNT CAN'T BE MORE THAN 99,999.99");
+            return false;
+            }
         
         this.inboac = this.customer.split("-", 5)[3];
         if ( this.inboac.substring(0,2) === "47" )

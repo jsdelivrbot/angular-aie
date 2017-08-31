@@ -155,7 +155,8 @@ export class SaleAieComponent implements OnInit {
 //        console.log("securityRecord:"+ this.currentSecurityRecord);
         if ( null != this.currentSecurityRecord ) {
             if( "X" ==this.currentSecurityRecord.lvl1Perm || 
-                "X" ==this.currentSecurityRecord.lvl2Perm || 
+                "X" ==this.currentSecurityRecord.lvl5Perm ||
+                "X" ==this.currentSecurityRecord.lvl7Perm || 
                 "X" ==this.currentSecurityRecord.lvl8Perm )
                 this.userPermUpd=true;
             else
@@ -438,6 +439,8 @@ export class SaleAieComponent implements OnInit {
                             estCostTotal += (vsrRecord.laborCost + vsrRecord.partsCost);
                         }
                     }
+                    if (vsrRecord.estManual == "E" || vsrRecord.estManual == " ") // Automatic billback (not allowed to delete these est repairs)
+                        vsrRecord.deleteButtonDisable = true;
                     if ((!this.userPermUpd) || (allFieldsDisable)) {
                         vsrRecord.deleteButtonDisable = true;
                         vsrRecord.billBackCheckBoxDisable = true;
@@ -1118,11 +1121,15 @@ export class SaleAieComponent implements OnInit {
             
             if (!isNaN(bbOther)) {
                 document.getElementsByName('ssBbOther')[i]["style"]["background-color"] = "#fff";
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
             }
             else {
+                this.toggleView(i);
+                this.viewThis[i]=true;
                 this.message="Other cost value is incorrect: " + bbOther;
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "lightcoral";
                 alert(this.message);
-                document.getElementById('ssBbOther')[i].focus();
+                //document.getElementById('ssBbOther')[i].focus();
                 document.getElementsByName('ssBbOther')[i]["style"]["background-color"] = "lightcoral";
                 return false;
             }
@@ -1142,80 +1149,105 @@ export class SaleAieComponent implements OnInit {
                 (bbManValDsc.toLowerCase().indexOf('<') > -1) ||
                 (bbManValDsc.toLowerCase().indexOf('/>') > -1) ||
                 (bbManValDsc.toLowerCase().indexOf('<script') > -1)) {
+                this.toggleView(i);
+                this.viewThis[i]=true;
                 this.message='Manual Value Description contains invalid characters: Quote ("), begin tag (<), end tag (/>) or <script';
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "lightcoral";
                 alert(this.message);
                 if (rowOpened ==1) {
                     document.getElementById('ssBbManValDsc').focus();
                     document.getElementsByName('ssBbManValDsc')[0]["style"]["background-color"] = "lightcoral"; // only one Manual Value field visible, so us [0]
                 }
+                //document.getElementById('ssBbOther')[i].focus();
                 return false;
             }        
-            else
-                if(rowOpened ==1)
-                    document.getElementsByName('ssBbManValDsc')[0]["style"]["background-color"] = "#fff"; 
+            else {
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
+                if (rowOpened ==1) 
+                  document.getElementsByName('ssBbManValDsc')[0]["style"]["background-color"] = "#fff";
+            }
+                   
            // alert("group.controls['ssBbManValDsc'].value:" + group.controls['ssBbManValDsc'].value + "for Tag: " + group.controls['ss_Agency_Cl'].value +"-" + group.controls['ss_Tag'].value);
             if (bbElossSrcval == "M" && (bbManValDsc.length==0) || bbManValDsc == " " || bbManValDsc == "  ") {
+                this.toggleView(i);
+                this.viewThis[i]=true;
                 this.message = "Manual Value Description required when Manual Value is used to determine bill-back total" + 
                         " for Tag: " + group.controls['ss_Agency_Cl'].value +"-" + group.controls['ss_Tag'].value;
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "lightcoral";
                 alert(this.message);
                 if (rowOpened ==1) {
                     document.getElementById('ssBbManValDsc').focus();
                     document.getElementsByName('ssBbManValDsc')[0]["style"]["background-color"] = "lightcoral"; // only one Manual Value field visible, so us [0]
                 }
+                //document.getElementById('ssBbOther')[i].focus();
                 return false;
             }
-            else
-                if(rowOpened ==1)
-                    document.getElementsByName('ssBbManValDsc')[0]["style"]["background-color"] = "#fff"; // only one Manual Value field visible, so us [0]
-            
-            if (!isNaN(bbManVal)) {
+            else {
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
                 if (rowOpened ==1)
+                    document.getElementsByName('ssBbManValDsc')[0]["style"]["background-color"] = "#fff"; // only one Manual Value field visible, so us [0]
+            }
+            if (!isNaN(bbManVal)) {
+                if (rowOpened ==1) {
                    document.getElementsByName('ssBbManVal')[0]["style"]["background-color"] = "#fff"; // only one Manual Value field visible, so us [0]
+                   document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";            
+                }
             }
             else {
-
                 this.initViewThis();
                 this.viewThis[i] = true;
                 this.message = "Manual value is incorrect:" + bbManVal + " for Tag: " + group.controls['ss_Agency_Cl'].value +"-" + group.controls['ss_Tag'].value;
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "lightcoral";
                 alert(this.message);
                 if (rowOpened ==1) {
                     document.getElementById('ssBbManVal').focus();
                     document.getElementsByName('ssBbManVal')[0]["style"]["background-color"] = "lightcoral";
                 }
+               // document.getElementById('ssBbOther')[i].focus();
                 return false;
             }
             // Other Cost Description
             let bbOtherDesc = group.controls['ssBbOtherDesc'].value.trim();
             
             if (bbOther>0 && bbOtherDesc.length == 0) {
+                this.toggleView(i);
+                this.viewThis[i]=true;
                 this.message = "Other Cost Description required when Other Cost Value is used to determine bill-back total" + 
                         " for Tag: " + group.controls['ss_Agency_Cl'].value +"-" + group.controls['ss_Tag'].value;
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "lightcoral";
                 alert(this.message);
                 if (rowOpened ==1) {
                     document.getElementById('ssBbOtherDesc').focus();
                     document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "lightcoral"; // only one Other cost Value field visible, so us [0]
                 }
+               // document.getElementById('ssBbOther')[i].focus();
                 return false;
             }
-            else
-                if(rowOpened ==1)
+            else {
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";                
+                if (rowOpened ==1)
                     document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "#fff"; // only one Other cost Value field visible, so us [0]
+            }
             
             if ((bbOtherDesc.toLowerCase().indexOf('"') > -1) ||
                 (bbOtherDesc.toLowerCase().indexOf('<') > -1) ||
                 (bbOtherDesc.toLowerCase().indexOf('/>') > -1) ||
                 (bbOtherDesc.toLowerCase().indexOf('<script') > -1)) {
+                this.toggleView(i);
+                this.viewThis[i]=true;
                 this.message='Other Costs Description contains invalid characters: Quote ("), begin tag (<), end tag (/>) or <script';
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "lightcoral";
                 alert(this.message);
-                if (rowOpened ==1) {
-                    document.getElementById('ssBbOtherDesc').focus();
-                    document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "lightcoral"; // only one Manual Value field visible, so us [0]
-                }
+                document.getElementById('ssBbOther')[i].focus();
+                if (rowOpened ==1)
+                document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "lightcoral"; // only one Manual Value field visible, so us [0]
                 return false;
             }        
-            else
-                if(rowOpened ==1)
-                    document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "#fff"; 
+            else {
+                document.getElementsByName('tagRow')[i]["style"]["background-color"] = "#eee";
+                if (rowOpened ==1)
+                    document.getElementsByName('ssBbOtherDesc')[0]["style"]["background-color"] = "#fff";
+            } 
         } // for loop
         this.updateSSVsrRecords(aieBillBackModal);
     }

@@ -2,7 +2,7 @@
 <div class="row">
   <ol class="breadcrumb">
     <li><a href="#"></a></li>
-    <li><a href="#">AIE Decision Tool</a></li>
+    <li><a routerLink="/home">AIE Decision Tool</a></li>
     <li>AIE Repair</li>
   </ol>
 
@@ -14,7 +14,7 @@
     <div class="panel-body">
       <div class="col-md-12" style="text-align:center">
         <div class="row">
-        
+
           <app-tag-get-cust-veh (updateCustAndVehicle)="newCustAndVeh($event)"></app-tag-get-cust-veh>
 
           <div class="panel panel-default">
@@ -82,23 +82,23 @@
 	          	Row(s) below are not valid
 	          </alert>
           </div>
-          
+
           <div *ngIf="!haveNoPage" class="col-md-2" style="text-align: right;">
             Results: {{ startItem }}-{{ endItem }} of {{ totalItems }}
             <br>
             <pagination
-            	#paginationModule 
-            	[boundaryLinks]="true" 
-            	[directionLinks]="false" 
+            	#paginationModule
+            	[boundaryLinks]="true"
+            	[directionLinks]="false"
             	[totalItems]="totalItems"
-            	[maxSize]="5" 
+            	[maxSize]="5"
             	[itemsPerPage]="itemsPerPage"
             	rotate="true"
-            	[ngModel]="currentPage" 
+            	[ngModel]="currentPage"
             	class="pagination-sm"
-            	previousText="&lsaquo;" 
-            	nextText="&rsaquo;" 
-            	firstText="&laquo;" 
+            	previousText="&lsaquo;"
+            	nextText="&rsaquo;"
+            	firstText="&laquo;"
             	lastText="&raquo;"
             	(pageChanged)="pageChanged($event)"
             >
@@ -150,20 +150,20 @@
               <td>{{asrp.dateCert | myDate}}</td>
               <td>{{asrp.actNo}}</td>
               <td style="text-align: right">{{asrp.totAmtAuth | currency: 'USD' : true}}</td>
-              <td><input type="text" formControlName="aieAmount" class="form-control" size="5" placeholder="0.00" style="text-align:center"  style="text-align: right" /></td>              
-              <td><input type="text" formControlName="aieAuto"   class="form-control" size="5" style="text-align:center"  /></td>              
-              <td><input type="text" formControlName="aieCredit" class="form-control" size="5" style="text-align:center" /> </td>              
+              <td><input type="text" formControlName="aieAmount" class="form-control" size="5" placeholder="0.00" style="text-align:center"  style="text-align: right" /></td>
+              <td><input type="text" formControlName="aieAuto"   class="form-control" size="5" style="text-align:center"  /></td>
+              <td><input type="text" formControlName="aieCredit" class="form-control" size="5" style="text-align:center" /> </td>
               <td>
                 <input type="text" formControlName="aieStatus" class="form-control" size="5" style="text-align:center" (click)="toggleAieStatus(asrp, i)"/>
-                
-              </td>              
+
+              </td>
             </tr>
           </table>
         </div>
 
-		<!--  this modal has the textarea modeled in the reactive forms 
-		      - it is addressable programmatically by aieRepairForm.controls.modalDescriptonText 
-		      - use .setValue() to set change value 
+		<!--  this modal has the textarea modeled in the reactive forms
+		      - it is addressable programmatically by aieRepairForm.controls.modalDescriptonText
+		      - use .setValue() to set change value
 		      - the control is at the same level as the array group (defined to hold row values above)
 		-->
 		<div id="myModal" class="modal fade" bsModal #genericModal="bs-modal">
@@ -185,22 +185,22 @@
 						<button *ngIf="modalButtons == 'OkCancel'"     type="button" class="btn btn-primary" data-dismiss="modal" (click)="genericModalClick('ok')">Ok</button>
 						<button *ngIf="modalButtons == 'OkCancel'"     type="button" class="btn btn-primary" data-dismiss="modal" (click)="genericModalClick('cancel')">Cancel</button>
 						<button *ngIf="modalButtons == 'Ok'"           type="button" class="btn btn-primary" data-dismiss="modal" (click)="genericModalClick('ok')">Ok</button>
-						
+
 					</div>
 					<div *ngIf="modalButtons == 'Ok'" class="modal-footer" style="text-align:center;">
-						
+
 					</div>
-					
+
 				</div>
 			</div>
 		</div>
-        
+
         </form>
       </div>
 
       <div class="col-md-12" style="text-align:center">
-        <strong>Selecting "Save Bill Backs" will process the selected billbacks&nbsp;</strong> 
-        <button type="button" class="btn btn-dt2 btn-sm" (click)="createBillBacks()">Create Bill Backs</button> 
+        <strong>Selecting "Save Bill Backs" will process the selected billbacks&nbsp;</strong>
+        <button type="button" class="btn btn-dt2 btn-sm" (click)="createBillBacks()">Create Bill Backs</button>
         <button type="button" class="btn btn-dt2 btn-sm" (click)="clearScreen()">Clear</button>
       </div>
     </div>

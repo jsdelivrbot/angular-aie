@@ -63,13 +63,18 @@ export class AieMiscComponent implements OnInit {
   @ViewChild('genericModal') public genericModal: ModalDirective;
   @ViewChild('paginationModule') public pager: PagerComponent;  
   @Output() updateFctDcId = new EventEmitter();
+  @ViewChild('aiedescModal'     )      public aiedescModal:       ModalDirective;
     
     userLID: string;              // defined logged in user's Lid
     lvl1Perm: string;             // used by salesCode D1 or D2
     lvl2Perm: string;             // used by salesCode D1 or D2
+    lvl5Perm: string;              
+    lvl7Perm: string; 
+    lvl8Perm: string;  
     agencyCl: string;
     tag: string;
     
+    inResult: any;
     errorMessage: string;
     tagSearchForm;
     customer;
@@ -84,7 +89,7 @@ export class AieMiscComponent implements OnInit {
     endDate: string = "";
     srchRadio: string = "A" ;    //allCharges; fuelCharges; carWashes;
     srchChk: string = "";
-    srchAmt: number = 0;
+    srchAmt: number = 0.00;
     
  
     miscSearchForm;
@@ -121,6 +126,9 @@ export class AieMiscComponent implements OnInit {
 //              this.userRegion = currentSecurityRecord.region;
               this.lvl1Perm = currentSecurityRecord.lvl1Perm;    // get these lvl1 and lvl2 values from dataservice 
               this.lvl2Perm = currentSecurityRecord.lvl2Perm;
+              this.lvl5Perm = currentSecurityRecord.lvl5Perm;     
+              this.lvl7Perm = currentSecurityRecord.lvl7Perm;
+              this.lvl8Perm = currentSecurityRecord.lvl8Perm;
              
         });      
         
@@ -189,6 +197,41 @@ export class AieMiscComponent implements OnInit {
     //Get all Fleet Card Transaction records to be displayed
 
     getMiscRecords() {
+        
+        if (this.startDate == null) {
+            this.startDate = "";
+        }
+                       
+        if (this.endDate == null) {
+            this.endDate = "";
+        }
+                       
+        if (this.srchRadio == null) {
+            this.srchRadio = "A";
+        }
+                       
+        if (this.srchChk == null) {
+            this.srchChk = "";
+        }
+                    
+        this.srchAmt = document.getElementById('srchAmt')["value"];
+        
+        if (this.srchAmt == null) {
+            this.srchAmt = 0;
+        }
+        
+        if ( isNaN(this.srchAmt) ) {
+             alert ("Enter search Amount in format 99999.99");
+             document.getElementById('srchAmt')["focus"];
+             return false;
+        }
+ 
+        if (this.srchAmt > 99999.99 ) { 
+           alert ("Amount is too large, maximum allowed Search amount is $99999.99");
+           document.getElementById('srchAmt')["focus"];
+           return false;
+        }   
+      
         this.sysStatus = "";
 
         let element = document.getElementsByName('undoBtn') as HTMLSelectElement;
@@ -425,6 +468,54 @@ export class AieMiscComponent implements OnInit {
            this.haveNoPage = true;
        }
     }
+    
+    srchAmtChanged() {
+        var srchamt = document.getElementById('srchAmt')["value"]; 
+               
+        if ( isNaN(srchamt) ) {
+             alert ("Enter search amount in format 99999.99");
+             document.getElementById('srchAmt')["focus"];
+             return false;
+        }
+        
+        if (srchamt > 99999.99 ) { 
+           alert ("Amount is too large, maximum allowed amount is $99,999.99");
+           document.getElementById('srchAmt')["focus"];
+           return false;
+        }   
+        
+//        alert ("line 487:==>" + srchamt +"<==");
+        if ((srchamt == "") || (srchamt == undefined) || (srchamt == " ") || (srchamt == "  ") || (srchamt == "   ") || (srchamt == "    ") || (srchamt == "     ") || (srchamt == "      ") || (srchamt == "       ") || (srchamt == "        ")){
+            srchamt = 0;
+            document.getElementById('srchAmt')["value"] = srchamt;
+        }
+    }
+    
+    aieAmtChanged(i) {
+        var fctamt = document.getElementsByName('fct_aie_amount')[i]["value"];
+          
+        if ((fctamt == 0) || (fctamt == null)) { 
+            alert ("Billback amount must be > 0");
+            document.getElementsByName('fct_aie_amount')[i]["focus"];
+            return false;
+        }   
+        
+        if (fctamt > 99999.99 ) { 
+            alert ("Amount is too large, maximum allowed amount is $99999.99");
+            document.getElementsByName('fct_aie_amount')[i]["focus"];
+            return false;
+        }   
+        this.miscForm.get(['miscRows',i,'fct_aie_amount']).setValue(fctamt);
+        this.miscPage[i].fct_aie_amount = fctamt ;  
+       // alert ("line 441:" + fctamt) ; 
+        
+        var fctUpd = document.getElementsByName('fct_toUpdate')[i]["value"];
+        if (fctUpd != "Y") {
+            fctUpd  = "Y";             // This row is eligible to be updated
+            this.miscForm.get(['miscRows',i,'fct_toUpdate']).setValue(fctUpd);
+            this.miscPage[i].fct_toUpdate = fctUpd ;
+        } 
+    }
         
     saveDesc(misc, i) {
        // alert ("line 430:" +document.getElementsByName('fct_billback_desc')[i]["value"]);
@@ -439,6 +530,28 @@ export class AieMiscComponent implements OnInit {
     }
     
     submitDesc(misc, i) {
+        console.info("450 Logged in user's Lid :=" + this.userLID + "lvl1Perm:" + this.lvl1Perm + "lvl2Perm:" + this.lvl2Perm);
+        
+//        if ( ! (this.lvl1Perm == "X" || this.lvl2Perm == "X" || this.lvl5Perm == "X" || this.lvl7Perm == "X" || this.lvl8Perm == "X") ) {
+//            alert ("Your current permission levels do not allow saving the description");
+//            return false;
+//        }
+        
+        var dcIdDesc = document.getElementsByName('fct_billback_desc')[i]["value"];
+        if (dcIdDesc.toLowerCase().indexOf('"') > -1) {
+            alert ('Description detail contains invalid character: QUOTE ("), \n Clear and re-enter description and click "Submit"');
+            document.getElementsByName('idModalDesc')[i]["value"] = dcIdDesc;
+            this.aiedescModal.show();
+            return false;
+        }        
+
+        if (dcIdDesc.toLowerCase().indexOf('<script') > -1) {
+            alert ('Description detail contains invalid characters: <script \n Clear and re-enter description and click "Submit"');
+            document.getElementsByName('idModalDesc')[i]["value"] = dcIdDesc;
+            this.aiedescModal.show();
+            return false;
+        }        
+        
         if (this.origModalDesc != document.getElementsByName('idModalDesc')[i]["value"]) {
             this.changedModalDesc = document.getElementsByName('idModalDesc')[i]["value"];
             document.getElementsByName('fct_billback_desc')[i]["value"]= this.changedModalDesc;
@@ -454,12 +567,19 @@ export class AieMiscComponent implements OnInit {
           }
     }
     
-    clearModalDesc(misc, i) {          
-        if (document.getElementsByName('idModalDesc')[i]["value"] == "") {
+    clearModalDesc(misc, i) { 
+//        this.sysStatus = "";
+//        if ( ! (this.lvl1Perm == "X" || this.lvl2Perm == "X" || this.lvl5Perm == "X" || this.lvl7Perm == "X" || this.lvl8Perm == "X") ) {
+////           this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen";
+//            alert ("Your current permission levels do not allow clearing the description");
+//            return false;
+//        }
+        
+        if ((document.getElementsByName('idModalDesc')[i]["value"] == "") && (document.getElementsByName('fct_billback_desc')[i]["value"] == "")) {
             alert ("Nothing to clear. This window will be closed");
             document.getElementsByName('fct_desc_upd')[i]["value"]= "";
         } else {
-            document.getElementsByName('fct_billback_desc')[i]["value"] = "";  // Null 
+            document.getElementsByName('fct_billback_desc')[i]["value"] = document.getElementsByName('idModalDesc')[i]["value"] = "";  // Null 
             this.descChgSw = this.misc[i].fct_desc_upd = "Y";  
             if (misc.fct_toUpdate != "Y") {
                 misc.fct_toUpdate = "Y";
@@ -467,129 +587,6 @@ export class AieMiscComponent implements OnInit {
         }
     }
 
-//    salesChanged(e, i) {
-//        console.log("Sales Code changed target value", e.target.value);
-//        var salein = this.miscPage[i].fct_sales_code;
-//
-//        if ((salein == "  ") || (salein == undefined) || (salein == "")) {
-//             alert ("Please select a valid Sales Code");
-//             this.miscPage[i].fct_sales_code.focus;
-//             return false;
-//        } 
-//   
-//        if ((salein =="D1") || (salein =="D2")) {
-//  //        IF NOT (SE-LVL1-PERM = "X" OR SE-LVL2-PERM = "X")  
-//            alert ("Only CO Admin & CO-Support can use D1 and D2");
-//            this.miscPage[i].fct_sales_code.focus;
-//            this.miscPage[i].fct_sales_code.select;
-//            return false;
-//        }  
-// 
-//        this.miscPage[i].fct_sales_code = e.target.value;
-//        return true;
-//    }
-//    
-//    costAcctChanged(e, i) {
-//        console.log("Cost Acct changed target value", e.target.value);
-//        
-//        var salein = this.miscPage[i].fct_sales_code;
-//        
-//        if ((salein == "  ") || (salein == undefined) || (salein == "")) {
-//             alert ("Please select a valid Sales Code first");
-//             this.miscPage[i].fct_sales_code.focus;
-//             return false;
-//        } 
-//   
-//        if ((salein =="D1") || (salein =="D2")) {
-//  //        IF NOT (SE-LVL1-PERM = "X" OR SE-LVL2-PERM = "X")  
-//            alert ("Only CO Admin & CO-Support can use D1 and D2.");
-//            this.miscPage[i].fct_sales_code.focus;
-//            this.miscPage[i].fct_sales_code.select();
-//            return false;
-//        }  
-//        
-//        var costin = this.miscPage[i].fct_cost_account; 
-//        
-//        if  ((costin == undefined) || (costin == "")) {
-//             alert ("Please select a valid Cost Account");
-//             this.miscPage[i].fct_cost_account.focus;
-//             return false;
-//        }    
-//        
-//        if ((salein =="A1") || (salein =="A8") || (salein =="Q1")) {  
-//           if (costin !="000") {
-//               alert ("This cost account is NOT allowed for the sales code " + salein );
-//               this.miscPage[i].fct_cost_account.focus;
-//               return false;
-//            }
-//        }    
-//   
-//        if ((salein =="U2") || (salein =="U3") || (salein ==" V3") || (salein =="X2")) {
-//            if ((costin == "000") || (costin == "")) {
-//                alert ("Cost account is mandatory for this sales code " + salein );
-//                this.miscPage[i].fct_cost_account.focus;
-//                return false;
-//            }  
-//        }
-//
-//        if (costin !="000") {
-//            if ((salein =="A1") || (salein =="A8") || (salein =="Q1")) {   
-//                alert ("This cost account is NOT allowed for the sales code " + salein );
-//                this.miscPage[i].fct_cost_account.focus;
-//                return false;
-//            }  
-//            else
-//            if (salein == "V3") {
-//                if ((costin !="160") && (costin !="161")) {
-//                     alert ("Only cost account allowed for the sales code " + salein + " is 160 OR 161");
-//                     this.miscPage[i].fct_cost_account.focus;
-//                     return false;
-//                }
-//            }
-//            else
-//            if ((salein == "U2") || (salein == "U3")) {  
-//                 if ((costin !="145") && (costin !="170") && (costin !="172") && (costin !="180") && (costin !="811")) {
-//                      alert ("For this sales code " + salein + ", " + costin +" is NOT a valid cost account");
-//                      this.miscPage[i].fct_cost_account.focus;
-//                      return false;
-//                 }
-//            }
-//            else    
-//            if ((costin !="145") && (costin !="170") && (costin !="171") && (costin !="172") && (costin !="180") && (costin !="190") && (costin !="191") && (costin !="511") && (costin !="611") && (costin !="711") && (costin !="712") && (costin !="811")) {
-//                 alert ("For this sales code " + salein + ", " + costin +" is NOT a valid cost account.");
-//                 this.miscPage[i].fct_cost_account.focus;
-//                 return false;
-//                    
-//            }
-//        }
-//        
-//        if ((salein =="P1") && (costin !="511")) {
-//             alert ("Sales code P1 can only be used with cost account 511");
-//             this.miscPage[i].fct_cost_account.focus;
-//             return false;
-//        }  
-//        
-//        if ((costin =="511") && (salein !="P1")) {
-//             alert ("Cost account 511 can only be used with sales code P1");
-//             this.miscPage[i].fct_cost_account.focus;
-//             return false;
-//        }  
-//        
-//        if ((salein =="V4") && (costin !="191")) {
-//             alert ("Sales code V4 can only be used with cost account 191");
-//             this.miscPage[i].fct_cost_account.focus;
-//             return false;
-//        }  
-// 
-//        if ((costin =="191") && (salein !="V4")) {
-//             alert ("Cost account 191 can only be used with sales code V4");
-//             this.miscPage[i].fct_cost_account.focus;
-//             return false;
-//        }
-//        
-//        this.miscPage[i].fct_cost_account = e.target.value;
-//        return true;
-//    }
     
      /**
      * Define an array of FCTs that have been selected to be updated 
@@ -598,23 +595,30 @@ export class AieMiscComponent implements OnInit {
      *
      */
     saveBillBacksMisc() {
-
+//  alert ("line 559 perm/1/2/5/7/8:=" +this.lvl1Perm + "==" + this.lvl2Perm + "===" + this.lvl5Perm + "====" + this.lvl7Perm + "=====" + this.lvl8Perm);
+        this.sysStatus = "";
+        if ( ! (this.lvl1Perm == "X" || this.lvl2Perm == "X" || this.lvl5Perm == "X" || this.lvl7Perm == "X" || this.lvl8Perm == "X") ) {
+            this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen";
+            alert ("Your current permission level(s) do not allow AIE Bill Back function");
+            return false;
+        }
+        
         console.log(" in aie-misc.component.ts...");
         var obj = document.getElementsByName('fct_aie_amount');
         var len = obj.length;
         
-//        var updElig = "N";
-//        for (var i=0; i<len; i++) {
-//             if (document.getElementsByName('fct_toUpdate')[i]["value"] == "Y") {  
-//                // alert ("Line 559:" + document.getElementsByName('fct_key'[i]["value"]));
-//                 updElig = "Y";
-//             }
-//        }
-//         
-//        if (updElig == "N") {
-//            alert ("No record is eligible to 'Save Bill Back'/update");
-//            return false;
-//        } 
+        var updElig = "N";
+        for (var i=0; i<len; i++) {
+             if (document.getElementsByName('fct_toUpdate')[i]["value"] == "Y") {  
+                // alert ("Line 559:" + document.getElementsByName('fct_key'[i]["value"]));
+                 updElig = "Y";
+             }
+        }
+         
+        if (updElig == "N") {
+            alert ("No record is eligible to 'Save Bill Back'/update");
+            return false;
+        } 
 
         for (var i=0; i<len; i++) {
              if (document.getElementsByName('fct_toUpdate')[i]["value"] == "Y") {                            // Fleet Card Trans update
@@ -622,9 +626,22 @@ export class AieMiscComponent implements OnInit {
                  var fctkey     = document.getElementsByName('fct_key' )      [i]["value"];
                  var fctstatus  = document.getElementsByName('fct_aie_status')[i]["value"];
                  var fctamt     = document.getElementsByName('fct_aie_amount')[i]["value"];
-//                 alert ("line 618 fctstatus/fctamt:" + fctstatus + " fctamt: " +fctamt);
+               //  alert ("line 618 fctstatus/fctamt:" + fctstatus + " fctamt: " +fctamt);
+                 if ((fctamt == 0) || (fctamt == null)) { 
+                      alert ("Billback amount must be > 0.");
+                      document.getElementsByName('fct_aie_amount')[i]["focus"];
+                      return false;
+                 }   
                  var salescode  = this.miscPage[i].fct_sales_code;
                  var costacct   = this.miscPage[i].fct_cost_account; 
+                 
+                 if ((salescode == "  ") || (salescode == undefined) || (salescode == "")) {
+                         alert ("Please Select Sales Code.");
+                         this.miscPage[i].fct_sales_code.focus;
+                         this.miscPage[i].fct_sales_code.select;
+                         return false;
+                 } 
+                 
                   if (fctstatus == "S") {
                      if ((salescode == "  ") || (salescode == undefined) || (salescode == "")) {
                          alert ("Please Select Sales Code");
@@ -649,7 +666,13 @@ export class AieMiscComponent implements OnInit {
 //                        }
 //                     }    
                                
-                     if (fctamt > 99999.99 ) { 
+                      if ((fctamt == 0) || (fctamt == null)) { 
+                          alert ("Billback amount must be > 0");
+                          document.getElementsByName('fct_aie_amount')[i]["focus"];
+                          return false;
+                      }   
+                      
+                      if (fctamt > 99999.99 ) { 
                          alert ("Amount is too large, maximum allowed amount is $99999.99");
                          document.getElementsByName('fct_aie_amount')[i]["focus"];
                          return false;
@@ -671,28 +694,43 @@ export class AieMiscComponent implements OnInit {
                  }
                  
      //*********** Backend Logic **********//                 
-                 if ((fctstatus == "B") && (fctcredit == "Y"))
+                 if ((fctstatus == "B") && (fctcredit == "Y")){
                       fctstatus = "T";
+                      this.miscForm.get(['miscRows',i,'fct_aie_status']).setValue(fctstatus);
+                      this.miscPage[i].fct_aie_status = fctstatus ;
+                  }
                  
-                 if ((fctstatus == "T") && (document.getElementsByName('fct_orig_status')[i]["value"]== "T"))
+                 if ((fctstatus == "T") && (document.getElementsByName('fct_orig_status')[i]["value"]== "T")) {
                       fctstatus = "B";
+                      this.miscForm.get(['miscRows',i,'fct_aie_status']).setValue(fctstatus);
+                      this.miscPage[i].fct_aie_status = fctstatus ;
+                 }
+                     
                  // alert ("line 672 fctstatus/fctamt:" + fctstatus + " fctamt: " +fctamt);
                  if (fctstatus == "S") {
                      fctstatus = "P";
+                     this.miscForm.get(['miscRows',i,'fct_aie_status']).setValue(fctstatus);
+                     this.miscPage[i].fct_aie_status = fctstatus ;
                      //document.getElementsByName('fct_aie_status')[i]["value"] = "P";
                      //document.getElementsByName('fct_orig_status')[i]["value"]  = "P";
                  }
                  else
                  if ((fctstatus == "P") && (fctamt == 0)) {
                       fctstatus = " ";
+                      this.miscForm.get(['miscRows',i,'fct_aie_status']).setValue(fctstatus);
+                      this.miscPage[i].fct_aie_status = fctstatus ;
                       //document.getElementsByName('fct_aie_status')[i]["value"] = " ";
                       //document.getElementsByName('fct_orig_status')[i]["value"]  = " "; 
                  }
                  else
                  if (fctstatus == " ") {
-                     fctamt = 0;  
+                     fctamt = 0;
+                     this.miscForm.get(['miscRows',i,'fct_aie_amount']).setValue(fctamt);
+                     this.miscPage[i].fct_aie_amount = fctamt ;  
                      //document.getElementsByName('fct_aie_amount')[i]["value"] = 0;
-                     fctstatus = " ";  
+                     fctstatus = " ";
+                     this.miscForm.get(['miscRows',i,'fct_aie_status']).setValue(fctstatus);
+                     this.miscPage[i].fct_aie_status = fctstatus ;  
                      //document.getElementsByName('fct_aie_status')[i]["value"] = " ";
                      //document.getElementsByName('fct_orig_status')[i]["value"]  = " ";
                      document.getElementsByName('fct_billback_desc')[i]["value"] = " ";
@@ -708,14 +746,29 @@ export class AieMiscComponent implements OnInit {
                this.miscPage[i].fct_cost_account = 161;
 
         if (costacct == 160) {
-            this.miscPage[i].fct_cost_account     = 161;
-            this.miscPage[i].fct_sales_code = "V3";
+            this.miscPage[i].fct_cost_account = 161;
+            this.miscPage[i].fct_sales_code   = "V3";
         }
  
         var desc = document.getElementsByName('fct_billback_desc')[i]["value"];
         this.miscForm.get(['miscRows',i,'fct_billback_desc']).setValue(desc);
         this.miscPage[i].fct_billback_desc = desc;
-                 
+        if (desc.length > 0) {
+           if (desc.toLowerCase().indexOf('"') > -1) {
+               alert ('Description detail contains invalid character: QUOTE ("), \n Clear and/or re-enter description and click "Submit".');
+               document.getElementsByName('idModalDesc')[i]["value"] = desc;
+               this.aiedescModal.show();
+               return false;
+           }        
+
+           if (desc.toLowerCase().indexOf('<script') > -1) {
+               alert ('Description detail contains invalid characters: <script \n Clear and/or re-enter description and click "Submit".');
+               document.getElementsByName('idModalDesc')[i]["value"] = desc;
+               this.aiedescModal.show();
+               return false;
+           }        
+        }
+         
         var descUpd = document.getElementsByName('fct_desc_upd' )[i]["value"];
         this.miscForm.get(['miscRows',i,'fct_desc_upd']).setValue(descUpd);
         this.miscPage[i].fct_desc_upd = descUpd ;
@@ -743,23 +796,36 @@ export class AieMiscComponent implements OnInit {
                      alert("No record is eligible to 'Save Bill Back'/update");
                      return;
                  }
-        
+                 
+                 this.sysStatus = "";
                  this.aieMiscService.saveBillBacksMisc(fctsToUpdate)
                      .subscribe(
                         misc => {
-                             let msg = "Successfully updated:=" +fctkey +"==" + fctstatus +"===" + fctamt;
-                             alert("\n Successfully updated FCT! \n\n Please click OK to refresh the screen.");
+                            this.totalItems = this.misc.length;
+                            if ((this.totalItems != 0) || (this.misc != null)) {
+                                console.log("result is true");
+                                this.sysStatus = "Successfully updated";
+                            } else {
+                                console.log("result is false");
+                                this.sysStatus = "Update is Unsuccessful, please search the tag and review again";
+                            }
+                            this.loadingBarComponent.loadingModal.hide();
+ //                            let msg = "Successfully updated:=" +fctkey +"==" + fctstatus +"===" + fctamt;
+ //                            alert("\n Successfully updated FCT! \n\n Please click OK to refresh the screen.");
                              this.miscPages = [];
                              this.miscPage = [];
                              this.totalPages = 0;
                              this.currentPage = 0;
                              this.haveNoPage = true;
-                             this.getMiscRecords();   
+ //                            this.getMiscRecords(); 
                         },
                         error =>  {
                             this.errorMessage = <any>error;
                             console.log(this.errorMessage);
-                            alert("ERROR: " + this.errorMessage);
+ //                           alert("ERROR: " + this.errorMessage);
+                            this.sysStatus = "UPDATE ERROR" + error.errorMessage;
+                            console.log("Msg Received=>" + error.errorMessage);
+                            this.loadingBarComponent.loadingModal.hide();
                         }
                     );
                  console.log("Bill Backs sent from client component to client service...");
@@ -770,88 +836,6 @@ export class AieMiscComponent implements OnInit {
         
     }
     
-//    validateSalesCdCostAcct(i, salescode, costacct) {
-//        var salein ="";
-//        var costin ="";
-// 
-//        if (salescode  == "V3") {
-//             costin = "161";
-//             this.misc[i].fct_cost_account = 161;
-//             salein = this.misc[i].fct_sales_code = "V3" ;
-//        } else {
-//            if ((costacct == 160) || (costacct == 161)) {
-//                 costin = "161";
-//                 this.misc[i].fct_cost_account = 161;
-//                 salein = this.misc[i].fct_sales_code = "V3" ;
-//             } else {
-//                costin = costacct;
-//                salein = salescode;
-//            }
-//        }
-//   
-//        if ((salein =="D1") || (salein =="D2")) {
-//  //        IF NOT (SE-LVL1-PERM = "X" OR SE-LVL2-PERM = "X")  
-//             alert ("Only CO Admin & CO-Support can use D1 and D2");
-//             return false;
-//        }  
-//    
-//        if ((salein =="U2") || (salein =="U3") || (salein ==" V3") || (salein =="X2")) {
-//            if ((costin == "000") || (costin == "")) {
-//               alert ("Cost account is mandatory for this sales code " + salein );
-//               return false;
-//            }  
-//        }
-//
-//        if (costin !="000") {
-//            if ((salein =="A1") || (salein =="A8") || (salein =="Q1")) {   
-//               alert ("This cost account is NOT allowed for the sales code " + salein );
-//               return false;
-//            }  
-//            else
-//            if (salein == "V3") {
-//                if ((costin !="160") && (costin !="161")) {
-//                     alert ("Only cost account allowed for the sales code " + salein + " is 160 OR 161");
-//                     return false;
-//                }
-//            }
-//            else
-//            if ((salein == "U2") || (salein == "U3")) {  
-//                 if ((costin !="145") && (costin !="170") && (costin !="172") && (costin !="180") && (costin !="811")) {
-//                      alert ("For this sales code " + salein + ", " + costin +" is NOT a valid cost account");
-//                      return false;
-//                 }
-//            }
-//            else    
-//            if ((costin !="145") && (costin !="170") && (costin !="171") && (costin !="172") && (costin !="180") && (costin !="190") && (costin !="191") && (costin !="511") && (costin !="611") && (costin !="711") && (costin !="712") && (costin !="811")) {
-//                 alert ("For this sales code " + salein + ", " + costin +" is NOT a valid cost account.");
-//                 return false;
-//                    
-//            }
-//        }
-//        
-//        if ((salein =="P1") && (costin !="511")) {
-//             alert ("Sales code P1 can only be used with cost account 511");
-//             return false;
-//        }  
-//        
-//        if ((costin =="511") && (salein !="P1")) {
-//             alert ("Cost account 511 can only be used with sales code P1");
-//             return false;
-//        }  
-//        
-//        if ((salein =="V4") && (costin !="191")) {
-//             alert ("Sales code V4 can only be used with cost account 191");
-//             return false;
-//        }  
-// 
-//        if ((costin =="191") && (salein !="V4")) {
-//             alert ("Cost account 191 can only be used with sales code V4");
-//             return false;
-//        }
-//        return true;
-//  
-//    }
-//    
     toggleAieCredit(row, i) {
         if (document.getElementsByName('scNegative')[i]["value"] == "Y") {
             alert ("You cannot apply a credit to a transaction that is currently pending. \nYou must wait until the bill back has processed before you can apply a credit");

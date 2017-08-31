@@ -1,0 +1,211 @@
+<a name="content" id="content"></a>
+<div class="row">
+  <ol class="breadcrumb">
+    <li><a href="#"></a></li>
+    <li><a routerLink="/home">AIE Decision Tool</a></li>
+    <li>AIE Repair</li>
+  </ol>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      AIE Repair
+    </div>
+
+    <div class="panel-body">
+      <div class="col-md-12" style="text-align:center">
+        <div class="row">
+
+          <app-tag-get-cust-veh (updateCustAndVehicle)="newCustAndVeh($event)"></app-tag-get-cust-veh>
+
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <p><strong>Choose Your Report Options</strong></p>
+
+              <div class="col-md-4">
+                	<div style="background-color:#d9edf7; width:100%; padding:5px 0px 5px 15px; font-weight: bold; text-align:left; margin-bottom:10px">
+                    Select Date Range
+                  </div>
+                  <app-daterange
+						        (updateDateRange)="newDateRange($event)"
+						        [dr]="myDateRange"
+                	></app-daterange>
+              </div>
+
+              <div class="col-md-4">
+                <div style="background-color:#d9edf7; width:100%; padding:5px 0px 5px 15px; font-weight: bold; text-align:left; margin-bottom:10px">
+	                Select Report Options
+                </div>
+
+                <p style="text-align:left">
+                	<input type="radio" [(ngModel)]="optShowWhich" name="optionsRadios" id="optShowAll" value="optShowAll" />&nbsp;&nbsp;
+                	<label class="control-label">Show All Changes/Repairs</label>
+                </p>
+                <p style="text-align:left; margin-left:50px"><strong>Or</strong></p>
+                <p style="text-align:left">
+                	<input type="radio" [(ngModel)]="optShowWhich" name="optionsRadios" id="optShowAvailable" value="optShowAvailable" />&nbsp;&nbsp;
+                	<label class="control-label">Show Only Charges/Repairs Available for Billback</label>
+                </p>
+              </div>
+
+              <div class="col-md-4">
+                <div style="background-color:#d9edf7; width:100%; padding:5px 0px 5px 15px; font-weight: bold; text-align:left; margin-bottom:10px">
+	                Reason for Repair
+                </div>
+
+                <div class="form-group form-group5 form-inline" style="text-align:left">
+                  <app-repair-reason
+                  	[(repReason)]="repReason"
+                  	(updateRepairReason)="updateRepairReason($event)"
+                  ></app-repair-reason>
+                </div>
+
+                <div class="form-group form-group5 form-inline" style="text-align:left">
+                  <label>Enter Dollar Amount or Search on $&nbsp;
+                  	<input type="text" id="TextInput" size="5" class="form-control" placeholder="0.00" [(ngModel)]="repAmount"/>
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-md-12">
+                <label>
+                	<button type="button" class="btn btn-dt2 btn-sm" (click)="getAsRpClick(loadingModal)">
+                		<label>Submit</label>
+                	</button>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-10" style="text-align:left">
+            &nbsp;
+              <alert type="danger" *ngIf="!aieRepairForm.valid" class="alert">
+	          	Row(s) below are not valid
+	          </alert>
+          </div>
+
+          <div *ngIf="!haveNoPage" class="col-md-2" style="text-align: right;">
+            Results: {{ startItem }}-{{ endItem }} of {{ totalItems }}
+            <br>
+            <pagination
+            	#paginationModule
+            	[boundaryLinks]="true"
+            	[directionLinks]="false"
+            	[totalItems]="totalItems"
+            	[maxSize]="5"
+            	[itemsPerPage]="itemsPerPage"
+            	rotate="true"
+            	[ngModel]="currentPage"
+            	class="pagination-sm"
+            	previousText="&lsaquo;"
+            	nextText="&rsaquo;"
+            	firstText="&laquo;"
+            	lastText="&raquo;"
+            	(pageChanged)="pageChanged($event)"
+            >
+            </pagination>
+          </div>
+        </div>
+
+        <form [formGroup]="aieRepairForm">
+        <!-- <button type="button" (click)="show()">show</button> -->
+        <!-- <sales-app formControlName="salesCode" ></sales-app>  -->
+        <div class="table-responsive" id="accordion" role="tablist" aria-multiselectable="true">
+          <table formArrayName="asrpRows" class="table table-striped table-bordered">
+            <tr class="info" style="text-align:center">
+              <th>Repair Class</th>
+              <th>Reason Code</th>
+              <th>Sales Code /<br> Cost Account</th>
+              <th>Description</th>
+              <th>Transaction Date</th>
+              <th>ACT#</th>
+              <th>Transaction Amount</th>
+              <th>AIE Amount</th>
+              <th>Auto AIE</th>
+              <th>Credit AIE</th>
+              <th>AIE Status</th>
+            </tr>
+
+            <!--  *ngIf="!asrpPage || asrpPage.length() == 0" -->
+            <tr *ngIf="haveNoPage">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr *ngFor="let asrp of asrpPage, let i = index" [formGroupName]="i">
+              <td>{{asrp.repairCl}}</td>
+              <td>{{asrp.reason}}</td>
+              <td>
+                <app-sales-cost-select [isTable]="true" [(salesCode)]="asrp.salesCode" [(costAccount)]="asrp.finCA"></app-sales-cost-select>
+              </td>
+              <!-- <td (click)="togglePopover(pop, asrp)"><span popover triggers="" #pop="bs-popover">{{asrp.assembly}}</span> </td>   -->
+              <td>{{asrp.assembly}} &nbsp; <input type="checkbox" formControlName="aieDesc" (click)="showDescriptionModal(asrp, i)"/></td>
+              <td>{{asrp.dateCert | myDate}}</td>
+              <td>{{asrp.actNo}}</td>
+              <td style="text-align: right">{{asrp.totAmtAuth | currency: 'USD' : true}}</td>
+              <td><input type="text" formControlName="aieAmount" class="form-control" size="5" placeholder="0.00" style="text-align:center"  style="text-align: right" /></td>
+              <td><input type="text" formControlName="aieAuto"   class="form-control" size="5" style="text-align:center"  /></td>
+              <td><input type="text" formControlName="aieCredit" class="form-control" size="5" style="text-align:center" /> </td>
+              <td>
+                <input type="text" formControlName="aieStatus" class="form-control" size="5" style="text-align:center" (click)="toggleAieStatus(asrp, i)"/>
+
+              </td>
+            </tr>
+          </table>
+        </div>
+
+		<!--  this modal has the textarea modeled in the reactive forms
+		      - it is addressable programmatically by aieRepairForm.controls.modalDescriptonText
+		      - use .setValue() to set change value
+		      - the control is at the same level as the array group (defined to hold row values above)
+		-->
+		<div id="myModal" class="modal fade" bsModal #genericModal="bs-modal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">{{modalTitle}}</h4>
+					</div>
+					<div class="modal-bodyCCD">
+						<p><strong>{{modalDescription}}</strong></p>
+						<p *ngIf="modalMode == 'Description'" style="text-align:center">
+							<textarea class="form-control" rows="3" maxlength="100" name="comments" id="custom_format_1" formControlName="modalDescriptionText">
+							</textarea>
+						</p>
+					</div>
+					<div class="modal-footer" style="text-align:center;">
+						<button *ngIf="modalButtons == 'SubmitCancel'" type="button" class="btn btn-primary" data-dismiss="modal" (click)="genericModalClick('save')">Submit</button>
+						<button *ngIf="modalButtons == 'SubmitCancel'" type="button" class="btn btn-primary" data-dismiss="modal" (click)="genericModalClick('cancel')">Cancel</button>
+						<button *ngIf="modalButtons == 'OkCancel'"     type="button" class="btn btn-primary" data-dismiss="modal" (click)="genericModalClick('ok')">Ok</button>
+						<button *ngIf="modalButtons == 'OkCancel'"     type="button" class="btn btn-primary" data-dismiss="modal" (click)="genericModalClick('cancel')">Cancel</button>
+						<button *ngIf="modalButtons == 'Ok'"           type="button" class="btn btn-primary" data-dismiss="modal" (click)="genericModalClick('ok')">Ok</button>
+
+					</div>
+					<div *ngIf="modalButtons == 'Ok'" class="modal-footer" style="text-align:center;">
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+        </form>
+      </div>
+
+      <div class="col-md-12" style="text-align:center">
+        <strong>Selecting "Save Bill Backs" will process the selected billbacks&nbsp;</strong>
+        <button type="button" class="btn btn-dt2 btn-sm" (click)="createBillBacks()">Create Bill Backs</button>
+        <button type="button" class="btn btn-dt2 btn-sm" (click)="clearScreen()">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-loading-bar></app-loading-bar>
+

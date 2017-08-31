@@ -5,8 +5,7 @@ import { SecurityRecord } from '../common-components/common-structures';
 
 @Injectable()
 export class LandingPageService {
-
-  private headers = new Headers({'Content-Type': 'application/json'});
+  
   constructor(private http: Http) { }
     
     getLIDs(entName: string): Observable<string[]>  {

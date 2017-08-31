@@ -63,6 +63,11 @@ export class AieMultipleComponent implements OnInit {
     saveSerial: number = 0;
     saveCustomer: string = "";
     
+    tempRegion: number = 0;
+    tempFmc: number = 0;
+    inCustRegion: number = 0; 
+    inCustFmc: number = 0;
+    
     inResult: any;
     errorMessage: string;
     sysStatus: string ="";
@@ -165,18 +170,19 @@ export class AieMultipleComponent implements OnInit {
               this.userPermLvl8 = currentSecurityRecord.lvl8Perm;
           }); 
 
-      if ( !( this.userPermLvl1 == "X" || this.userPermLvl2 == "X" ||  this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
-           this.sysStatus = "Your current permission levels do not allow you to perform any function on this screen"; 
-      } 
-      else {
-          this.getAllRegionRecords(); 
-          this.sysStatus = "Select Customer and click 'Get Tags'";
-      }
- 
+      this.getAllRegionRecords(); 
+
       this.inSelectDelectAll = false;
       this.noOfTagsSelected = 0;
       this.inSalesCode = "";
       this.inCostAcct = "";
+      
+      if ( !( this.userPermLvl1 == "X" || this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
+           this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen"; 
+      } 
+      else {
+          this.sysStatus = "Select Customer and click 'Get Tags'";
+      }
   }
 
      regions: Region[];
@@ -187,6 +193,10 @@ export class AieMultipleComponent implements OnInit {
         document.getElementById('idCustomer')['value'] = '';
         this.fmc = '';
         this.inFmc = 0;
+        this.regions = [];
+        this.fmcs = [];
+        this.customers = [];
+        this.inCustomer = '';
         this.AieMultipleService.getRegions()
              .subscribe(
                regions => {
@@ -206,14 +216,19 @@ export class AieMultipleComponent implements OnInit {
     fmcs: string[];
     getCustFmcRecords(loadingModal) {
         this.loadingBarComponent.loadingModal.show();
-        console.log("AieMultipleService component getCustFmcRecords() this.region:"+ this.inRegion);
-        document.getElementById('idCustomer')['value'] = '';
+        console.log("AieMultiple Component getCustFmcRecords() this.region:"+ this.inRegion);
+        
         this.inCustomer = '';
-
+        this.fmcs = [];
+        this.customers = [];
+        this.clearFields();
+        document.getElementById('idCustomer')['value'] = '';
+        
         this.AieMultipleService.getCustFmcRecords(this.inRegion.toString())
              .subscribe(
                fmcs => {
                    this.fmcs = fmcs;
+                   this.inCustomer = '';
                    this.loadingBarComponent.loadingModal.hide();
                    },
                error =>  {
@@ -226,33 +241,94 @@ export class AieMultipleComponent implements OnInit {
     customers: string[];
     getCustomers(loadingModal) {
         this.loadingBarComponent.loadingModal.show();
+        console.log("AieMultiple Component getCustomers() this.region:"+ this.inRegion + " Fmc:" + this.inFmc);
+        this.customers = [];
+        this.inCustomer = '';
+        this.clearFields ();
         this.AieMultipleService.getCustomers(this.inRegion, this.inFmc)
             .subscribe(
                 customers => {
                     this.customers = customers;
+                    console.log("Customers: ", this.customers);
                     this.loadingBarComponent.loadingModal.hide();
                     },
                  error =>  {
                    this.loadingBarComponent.loadingModal.hide();
                    this.errorMessage = <any>error;
                });
-        console.log("Customers: ", this.customers);
     }
 
     getCustomerVehTags(loadingModal) {
         console.log("AieMultiples: B4 this.AieMultipleService.getAieMultiples call " );
-
-        if ( !( this.userPermLvl1 == "X" || this.userPermLvl2 == "X" ||  this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
-           this.sysStatus = "Your current permission levels do not allow you to perform any function on this screen";
-           alert("Your current permission levels do not allow you to perform any function on this screen");
-           document.getElementById('idCustomer').focus(); 
-           return false;
+  
+        console.log("AieMultiples: getCustomerVehTags this.inRegion:", this.inRegion );
+        console.log("AieMultiples: getCustomerVehTags this.inFmc:", this.inFmc );
+        
+        if ( ! ( this.inRegion > 0 ) ) {
+            alert ("ERROR - Please select a Region and FMC to retrieve Tags");
+            return false;
         }
         
-            this.inFmc = Number(this.inCustomer.substr(3,2));
-            this.inSubFmc = Number(this.inCustomer.substr(6,2));
-            this.inBoac = this.inCustomer.substr(9,6);
-            this.inSerial = Number(this.inCustomer.substr(16,3));
+        
+        this.inCustRegion = Number(this.inCustomer.substr(0,2)); 
+        this.inCustFmc = Number(this.inCustomer.substr(3,2)); 
+        
+        console.log("AieMultiples: getCustomerVehTags this.inCustRegion:", this.inCustRegion );
+        console.log("AieMultiples: getCustomerVehTags this.inCustFmc:", this.inCustFmc );       
+        
+        if ( ( this.inCustRegion != this.inRegion ) ||
+             ( this.inCustFmc != this.inFmc ) ) {
+            alert ("ERROR - Customer Region/FMC different from Region/FMC selected");
+            return false;
+        }
+        
+        console.log("AieMultiples: getCustomerVehTags this.inCustomer length:", this.inCustomer.length ); 
+        
+        if (this.inCustomer.length < 19) {
+            alert ("ERROR - 19 Character Customer Number expected");
+            return false;
+        }
+
+        this.inRegion = Number(this.inCustomer.substr(0,2));     
+        this.inFmc = Number(this.inCustomer.substr(3,2));
+        this.inSubFmc = Number(this.inCustomer.substr(6,2));
+        this.inBoac = this.inCustomer.substr(9,6);
+        this.inSerial = Number(this.inCustomer.substr(16,3));
+
+//        console.log("updCustomerVehTags this.inRegion:", this.inRegion );
+//        console.log("updCustomerVehTags this.inFmc:", this.inFmc );
+//        console.log("updCustomerVehTags this.inSubFmc:", this.inSubFmc );
+//        console.log("updCustomerVehTags this.inBoac:", this.inBoac );
+//        console.log("updCustomerVehTags this.inSerial:", this.inSerial );
+//        console.log("updCustomerVehTags this.saveRegion:", this.saveRegion );
+//        console.log("updCustomerVehTags this.saveFmc:", this.saveFmc );
+//        console.log("updCustomerVehTags this.saveSubFmc:", this.saveSubFmc );
+//        console.log("updCustomerVehTags this.saveBoac:", this.saveBoac );
+//        console.log("updCustomerVehTags this.saveSerial:", this.saveSerial );
+
+//        if ( (this.inRegion != this.saveRegion) ||
+//             (this.inFmc != this.saveFmc) ||
+//             (this.inSubFmc != this.saveSubFmc) ||
+//             (this.inBoac != this.saveBoac) ||
+//             (this.inSerial != this.saveSerial) ) {
+//           if ( (this.saveRegion > 0) &&
+//                (this.saveBoac > ' ') &&
+//                (this.saveSerial > 0) ) {
+//                alert ("ERROR - Customer Number changed. Please retrieve Tags again before update.");
+//                this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
+//                this.saveBoac = this.saveCustomer = "";  
+//                return false; }
+//           else {
+//              alert ("ERROR - Please retrieve Tags again before update.");
+//              this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
+//              this.saveBoac = this.saveCustomer = "";  
+//              return false;
+//           }
+//        }        
+        
+            console.log("AieMultiples: Region:" + this.inRegion  );
+            console.log("AieMultiples: FMC:" + this.inFmc  );
+            console.log("AieMultiples: subFMC:" + this.inSubFmc  );
 
             this.loadingBarComponent.loadingModal.show();
             this.AieMultipleService.getAieMultiples(this.inRegion,this.inFmc,this.inSubFmc,this.inBoac,this.inSerial)
@@ -477,8 +553,16 @@ export class AieMultipleComponent implements OnInit {
 // when dropdown FMC is selected, this triggers the loading of  list of Customer#s for the selected region and FMC
     changeFmc(newFmc,loadingModal) {
         console.log("get Cust# for Region and FMC:" + this.inRegion + " " + newFmc);
-        this.inFmc = newFmc;
+        console.log("FMC Length:" + newFmc.length     );
+        if ( newFmc.length > 1 ) {
+           console.log("FMC 1:" + newFmc[0]     );
+           this.inFmc = newFmc[0];
+        } 
+        else {
+           this.inFmc = newFmc;
+        }
         this.getCustomers(loadingModal);
+        this.inCustomer='';
     }
 
     changeCustomer(newCustomer) {
@@ -568,11 +652,31 @@ export class AieMultipleComponent implements OnInit {
 
     updCustomerVehTags(loadingModal) {
 
-        if ( !( this.userPermLvl1 == "X" || this.userPermLvl2 == "X" ||  this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
-           this.sysStatus = "Your current permission levels do not allow you to perform any function on this screen";
-           alert("Your current permission levels do not allow you to perform any function on this screen");
-           document.getElementById('idCustomer').focus(); 
+        if ( !( this.userPermLvl1 == "X" || this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
+           this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen";
+           alert("Your current permission levels do not allow you to perform update functions on this screen");
            return false;
+        }
+        
+        console.log("AieMultiples: getCustomerVehTags this.inRegion:", this.inRegion );
+        console.log("AieMultiples: getCustomerVehTags this.inFmc:", this.inFmc );
+        
+        this.inCustRegion = Number(this.inCustomer.substr(0,2)); 
+        this.inCustFmc = Number(this.inCustomer.substr(3,2)); 
+        
+        console.log("AieMultiples: getCustomerVehTags this.inCustRegion:", this.inCustRegion );
+        console.log("AieMultiples: getCustomerVehTags this.inCustFmc:", this.inCustFmc );       
+        
+        
+        if (this.inCustomer.length < 19) {
+            alert ("ERROR - 19 Character Customer Number expected");
+            return false;
+        }
+        
+        if ( ( this.inCustRegion != this.inRegion ) ||
+             ( this.inCustFmc != this.inFmc ) ) {
+            alert ("ERROR - Customer Region/FMC different from Region/FMC selected");
+            return false;
         }
         
         this.tempAmtPerTag = 0.0;
@@ -582,17 +686,36 @@ export class AieMultipleComponent implements OnInit {
         this.inSubFmc = Number(this.inCustomer.substr(6,2));
         this.inBoac = this.inCustomer.substr(9,6);
         this.inSerial = Number(this.inCustomer.substr(16,3));
-        
+
+//        console.log("updCustomerVehTags this.inRegion:", this.inRegion );
+//        console.log("updCustomerVehTags this.inFmc:", this.inFmc );
+//        console.log("updCustomerVehTags this.inSubFmc:", this.inSubFmc );
+//        console.log("updCustomerVehTags this.inBoac:", this.inBoac );
+//        console.log("updCustomerVehTags this.inSerial:", this.inSerial );
+//        console.log("updCustomerVehTags this.saveRegion:", this.saveRegion );
+//        console.log("updCustomerVehTags this.saveFmc:", this.saveFmc );
+//        console.log("updCustomerVehTags this.saveSubFmc:", this.saveSubFmc );
+//        console.log("updCustomerVehTags this.saveBoac:", this.saveBoac );
+//        console.log("updCustomerVehTags this.saveSerial:", this.saveSerial );
+
         if ( (this.inRegion != this.saveRegion) ||
              (this.inFmc != this.saveFmc) ||
              (this.inSubFmc != this.saveSubFmc) ||
              (this.inBoac != this.saveBoac) ||
              (this.inSerial != this.saveSerial) ) {
-           alert ("ERROR - Customer Number changed. Please retrieve Tags again before update.");
-           this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
-           this.saveBoac = this.saveCustomer = "";  
-           document.getElementById('idCustomer').focus();
-           return false;
+           if ( (this.saveRegion > 0) &&
+                (this.saveBoac > ' ') &&
+                (this.saveSerial > 0) ) {
+                alert ("ERROR - Customer Number changed. Please retrieve Tags again before update.");
+                this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
+                this.saveBoac = this.saveCustomer = "";  
+                return false; }
+           else {
+              alert ("ERROR - Please retrieve Tags again before update.");
+              this.saveRegion = this.saveFmc = this.saveSubFmc = this.saveSerial = 0;  
+              this.saveBoac = this.saveCustomer = "";  
+              return false;
+           }
         }
 
         if ( this.inBoac == "777777" || this.inBoac == "999999" ) {
@@ -897,10 +1020,21 @@ export class AieMultipleComponent implements OnInit {
 
     }
 
-
     clearPage(loadingModal) {
         console.log("clear page");
+        this.inRegion = 0;
+        this.inFmc = 0;
+        this.inSubFmc = 0;
+        this.inBoac = '';
+        this.inSerial = 0;
+        
         this.ngOnInit();
+        this.regions = [];
+        this.fmcs = [];
+        this.customers = [];
+        this.inCustomer = '';
+        document.getElementById('idFmc')['value'] = "";
+        
         this.inBillBackOrCredit = '';
         this.inBillBack = '';
         this.inCredit = '';
@@ -915,14 +1049,13 @@ export class AieMultipleComponent implements OnInit {
         document.getElementsByName('inBillBackOrCredit')[0]["checked"] = false;
         document.getElementsByName('inBillBackOrCredit')[1]["checked"] = false;
     
-        if ( !( this.userPermLvl1 == "X" || this.userPermLvl2 == "X" ||  this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
-           this.sysStatus = "Your current permission levels do not allow you to perform any function on this screen";
-           document.getElementById('idCustomer').focus(); 
-           return false;
+        if ( !( this.userPermLvl1 == "X" || this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
+           this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen";
         }
 
-        this.aieMultVehs.splice(0);
-        this.totalItems  = this.aieMultVehs.length;
+//      console.log("this.aieMultVehs.length:", JSON.stringify(this.aieMultVehs.length) ); 
+//      this.aieMultVehs.splice(0);
+        this.totalItems  = 0;
         // build   tagsForThisPage
         this.tagsForThisPage.splice(0);
         this.tagRows.splice(0);
@@ -932,6 +1065,43 @@ export class AieMultipleComponent implements OnInit {
         this.currentPage = 1;
         this.haveNoPage = false;
 
+    }
+    
+    clearFields () {
+        
+       
+        this.customers = [];
+        this.inCustomer = '';
+        
+        this.inBillBackOrCredit = '';
+        this.inBillBack = '';
+        this.inCredit = '';
+
+        document.getElementById('idCustomer')['value'] = '';
+        this.sysStatus = "Select Customer and click 'Get Tags'";
+        this.inBillBackOrCredit = this.inFundCode = this.inAcct1 = this.inAcct2 = this.inSalesCode = this.inCostAcct = this.inDesc = '';
+
+        document.getElementsByName('inBillBackOrCredit')[0]["value"] = "";
+        document.getElementsByName('inBillBackOrCredit')[1]["value"] = "";
+        document.getElementsByName('inBillBackOrCredit')[0]["checked"] = false;
+        document.getElementsByName('inBillBackOrCredit')[1]["checked"] = false;
+    
+        if ( !( this.userPermLvl1 == "X" || this.userPermLvl5 == "X" ||  this.userPermLvl7 == "X" ||  this.userPermLvl8 == "X" ) ) {
+           this.sysStatus = "Your current permission levels do not allow you to perform update functions on this screen";
+        }
+
+//      console.log("this.aieMultVehs.length:", JSON.stringify(this.aieMultVehs.length) ); 
+//      this.aieMultVehs.splice(0);
+        this.totalItems  = 0;
+        // build   tagsForThisPage
+        this.tagsForThisPage.splice(0);
+        this.tagRows.splice(0);
+        this.tagRows = this.commonServise.breakArray(10,this.tagsForThisPage);
+        console.log("this.tagRows: ", JSON.stringify(this.tagRows) );
+        this.startItem = this.endItem = this.totalPages = 0;
+        this.currentPage = 1;
+        this.haveNoPage = false;
+        
     }
 
 }

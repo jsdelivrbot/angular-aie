@@ -30,7 +30,8 @@
 <label class="control-label">Customer:&nbsp;</label>
 <input placeholder="00-00-00-XXXXXX-000" [disabled]="!idLID.valid" [(ngModel)]="customer" (ngModelChange)="changeCustomer($event, idCustomer.valid)"
 	[typeahead]="customers" class="form-control" id="idCustomer" name="idCustomer" #idCustomer="ngModel"
-	[typeaheadMinLength]="0" [typeaheadOptionsLimit]="10" pattern="^[0-9]{2}-[0-9]{2}-[0-9]{2}-[a-zA-Z0-9]{6}-[0-9]{3}$">
+	[typeaheadMinLength]="0" [typeaheadOptionsLimit]="10" pattern="^[0-9]{2}-[0-9]{2}-[0-9]{2}-[a-zA-Z0-9]{6}-[0-9]{3}$"
+	maxlength="18">
 &nbsp;&nbsp;&nbsp;&nbsp;
 
 <!-- Loading modal -->

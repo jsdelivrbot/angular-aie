@@ -1,0 +1,158 @@
+<a id="content" name="content"></a>
+
+<div class="row">
+	<ol class="breadcrumb">
+		<li><a href="#"><span aria-hidden="true"
+				class="glyphicon glyphicon-menu-hamburger" title="Main Menu"></span></a>
+		</li>
+
+
+		<li><a routerLink="/home">AIE Decision Tool</a></li>
+
+
+		<li>AIE Single</li>
+	</ol>
+</div>
+
+
+<div class="panel panel-default">
+	<div class="panel-heading">AIE Single</div>
+
+	<form #aieSingleForm="ngForm" (ngSubmit) = "onSubmit(aieSingleForm.value)" novalidate>
+
+
+		<div class="panel-body">
+		<div>
+		<span style="color: #C00; align:center; font:Bold; size:10px;"><p *ngFor="let msg of message">{{msg}}</p>	</span>
+
+		</div>
+			<div class="panel panel-primary">
+
+				<div class="panel-body panel-report">
+					<!-- left column-->
+
+					<div class="col-md-12">
+						<div class="form-group2 form-inline">
+							<span style="color:#C00; margin-left:-9px;">*&nbsp;</span><label>Required fields.</label>
+						</div>
+					</div>
+					<div class="col-md-6">
+				 		<div class="form-horizontal">
+
+							<div class="form-group form-inline">
+								<label class="col-sm-5 control-label">&nbsp;
+<!-- 								<div class="col-sm-7"> -->
+									<span style="color:#C00; margin-left:-9px;">*&nbsp;</span>Bill Back</label>
+									<input id="optionsRadios1" type="radio"
+									value="" name="credInd" [(ngModel)] = "aieSingle.credInd" #credInd="ngModel" required>&nbsp;&nbsp;&nbsp;OR&nbsp;&nbsp;
+									<label>Credit&nbsp;</label>
+									<input id="optionsRadios2" type="radio"
+									value="C" name="credInd" [(ngModel)] = "aieSingle.credInd" required>
+<!-- 								</div> -->
+  							</div>
+<!--   							<div class="form-group form-inline"> -->
+<!-- 								<label class="col-sm-5 control-label"> -->
+<!--    								<span style="color:#C00; margin-left:-9px;">*&nbsp;</span> -->
+<!--   								</label> -->
+<!--   								<div class="col-sm-7"> -->
+  									<cust-select [(region)]="region" [(fmc)]="fmc" [(customer)]="customer" name="custNo" required ngDefaultControl></cust-select>
+<!--              					</div> -->
+<!--            					</div> -->
+
+           					<div class="form-group form-inline">
+								<label class="col-sm-5 control-label" data-toggle="tooltip" title="Enter tag number">Tag: </label>
+  								<div class="col-sm-7">
+  									<strong>G</strong>
+  									<input class="form-control" id="tag1"
+									placeholder="" size="2" type="text" name="dc_class" [(ngModel)] = "aieSingle.dc_class" #dc_classVal="ngModel" minlength="2" maxlength="2" pattern="^[0-9]{2}$" >
+									&nbsp;&nbsp;<strong>-</strong>&nbsp;
+
+							 		<!-- <small *ngIf="dc_class.errors?.minlength || dc_class.errors?.maxlength" class="error">
+    								DC Class must be at least 2 digits long.
+  									</small> -->
+
+									<input class="form-control"
+									id="tag2" placeholder="" size="5" type="text" name="tag" [(ngModel)] = "aieSingle.tag" minlength="5" #tagVal="ngModel" maxlength="5"
+									pattern="^[0-9]{4}[A-Z]{1}$" >&nbsp;&nbsp;&nbsp;
+								</div>
+							</div>
+							<div class="form-group form-inline">
+ 								<label class="col-sm-5 control-label" data-toggle="tooltip" title="Enter Fund Code">Fund Code:</label>
+  								<div class="col-sm-7">
+  									<input class="form-control" id="fundCode" placeholder=""
+									size="2" type="text" name="fundCdBOAC" [(ngModel)] = "aieSingle.fundCdBOAC" minlength="2" maxlength="2" [value]='fundCdBOAC' (input)="fundCdBOAC=$event.target.value.toUpperCase()">
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+					<!-- right column -->
+
+					<div class="col-md-6">
+ 						<div class="form-horizontal">
+
+ 							<div class="form-group form-inline">
+  								<label class="col-sm-5 control-label" data-toggle="tooltip" title="Enter Account 1">Account 1:</label>
+  								<div class="col-sm-7">
+  									<input class="form-control" id="acct1" placeholder="" size="10" type="text" name="bldgNo"
+  									[(ngModel)] = "aieSingle.bldgNo" maxlength="8" (input)="bldgNo=$event.target.value.toUpperCase()" >
+								</div>
+							</div>
+							<div class="form-group form-inline">
+ 									<label class="col-sm-5 control-label" data-toggle="tooltip" title="Enter Account 1">Account 2:</label>
+								<div class="col-sm-7">
+  									<input class="form-control" id="acct2" placeholder=""
+									size="10" type="text" name="projNo" [(ngModel)] = "aieSingle.projNo" maxlength="8" (input)="projNo=$event.target.value.toUpperCase()">
+								</div>
+							</div>
+
+							<div class="form-group form-inline">
+  								<label class="col-sm-5 control-label"><span style="color:#C00;">*&nbsp;</span>Sales Code:</label>
+								<div class="col-sm-7">
+								<app-sales-code-select #salesCdSelector (salesCodeChange)="salesCodeChangeBrodCast($event)" [(salesCode)]="salesCd" name="salesCd" [(ngModel)]="aieSingle.salesCd" required ngDefaultControl></app-sales-code-select>
+								</div>
+							</div>
+							<div class="form-group form-inline">
+								<label class="col-sm-5 control-label"><span style="color:#C00;">&nbsp;*&nbsp;</span>Cost Account:</label>
+                				<div class="col-sm-7">
+                					<app-cost-acct-select  #costAcctSelector (costAcctChange)="costAcctChangeBrodCast($event)" [(costAcct)]="costAcct" name="costAcct" [(ngModel)]="aieSingle.costAcct" required ngDefaultControl></app-cost-acct-select>
+								</div>
+							</div>
+							<div class="form-group form-inline">
+  								<label class="col-sm-5 control-label"><span style="color:#C00;" title="Enter description">&nbsp;*&nbsp;</span>Description:</label>
+  								<div class="col-sm-7">
+  									<input class="form-control" id="description1" placeholder="Enter description" type="textarea"
+									name="desc1" [(ngModel)]="aieSingle.desc1" minlength="0" maxlength="100" [value]='desc1' (input)="desc1=$event.target.value.toUpperCase()" #desc="ngModel" required>
+								</div>
+							</div>
+							<div class="form-group form-inline">
+  								<label class="col-sm-5 control-label"><span style="color:#C00;">&nbsp;*&nbsp;</span>Amount:</label>
+  								<div class="col-sm-7">
+  									<input class="form-control" id="amount" placeholder="00.00" type="text" name="dolAmt"
+									[(ngModel)]="aieSingle.dolAmt" #amount="ngModel" required pattern="^[0-9]{0,7}(\.[0-9]{0,2})?$" required>
+									<!--  pattern="^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$" -->
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+					<div class="col-md-12" style="text-align: center">
+						<button class="btn btn-dt2 btn-sm" >Submit</button>
+						&nbsp;&nbsp;
+						<button class="btn btn-dt2 btn-sm" type="button" (click)="clear()">Clear</button>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+	</form>
+</div>
+
+<!--  <pre>
+{{aieSingleForm.value | json}}
+ </pre>
+ -->

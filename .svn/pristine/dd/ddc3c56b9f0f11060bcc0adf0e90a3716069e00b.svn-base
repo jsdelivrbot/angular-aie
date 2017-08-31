@@ -1,0 +1,448 @@
+<a id="content" href="" name="content"></a>
+
+<div class="row">
+  <ol class="breadcrumb">
+    <li><a href="#"></a></li>
+    <li><a routerLink="/home">AIE Decision Tool</a></li>
+    <li>Sale AIE</li>
+  </ol>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Sale AIE
+    </div>
+
+    <div class="panel-body">
+      <div class="col-md-12" style="text-align:center">
+        <div class="row"><span id="idMessage" style="color: red;font-weight:bold" name="message" align="center" >{{message}}</span></div>
+        <div class="row">
+          <div class="col-md-9" style="text-align:left">
+            <div class="form-group form-group5 form-inline">
+              &nbsp;<br />
+              <label class="control-label">Region:&nbsp;</label>
+               <select class="form-control" id="idRegion" [(ngModel)]="region" (ngModelChange)="changeRegion($event, loadingModal)">
+              <!--  <select  class="form-control" (change)="changeRegion($event.target.value)"> -->
+				<option value=0 selected>Select</option>
+				<option *ngFor="let region of regions">{{region.rg_Region}}</option>
+			  </select>&nbsp;&nbsp;
+
+			  <label class="control-label">Sale #:&nbsp;</label>
+              <select class="form-control" name="Sale" id="idSaleNo" [(ngModel)]="saleNo" (ngModelChange)="changeSaleNo($event)">
+              <!-- <select class="form-control" name="Sale #s" (change)="changeSaleNo($event.target.value)"> -->
+			  <option value=" " selected>Select </option>
+				<option *ngFor="let saleNo of saleNos" value='{{saleNo}}'>{{saleNo}}</option>
+              </select>&nbsp;&nbsp;
+              <label class="control-label">G</label>&nbsp;
+              	<input type="text" id="idAgencyCl" [(ngModel)]="agencyCl" autocomplete="on" autofocus="autofocus" #idAgencyCl  (input)="idAgencyCl.value=$event.target.value.toUpperCase()" class="form-control" maxlength ="2" size="2"/>&nbsp;
+              <label class="control-label">-&nbsp;</label>
+              	<input type="text" id="idTag" [(ngModel)]="tag" autofocus="autofocus" class="form-control" #idTag (input)="idTag.value=$event.target.value.toUpperCase()" maxlength = "5" size="6" />&nbsp;&nbsp;
+
+              <input type="checkbox" id="checkSaleOnlyId" [checked]="checkSaleOnly" (change)="checkSaleOnly= !checkSaleOnly" />&nbsp;<label class="control-label" for="checkSaleOnlyId">This sale only</label>&nbsp;&nbsp;
+
+              <button type="submit" class="btn btn-dt2 btn-sm" (click)="editTag()">Search</button>
+
+              <button type="clear" class="btn btn-dt2 btn-sm" (click)="getSasySaleRecords()">Clear</button>
+            </div>
+          </div>
+
+
+		 <div *ngIf="!haveNoPage" class="col-md-3" style="text-align: right;">
+            Results: {{ startItem }}-{{ endItem }} of {{ totalItems }}
+            <br>
+            <pagination
+            	#paginationModule
+            	[boundaryLinks]="true"
+            	[directionLinks]="false"
+            	[totalItems]="totalItems"
+            	[maxSize]="5"
+            	[itemsPerPage]="itemsPerPage"
+            	rotate="true"
+            	[(ngModel)]="currentPage"
+            	class="pagination-sm"
+            	previousText="&lsaquo;"
+            	nextText="&rsaquo;"
+            	firstText="&laquo;"
+            	lastText="&raquo;"
+            	(pageChanged)="pageChanged($event,confirmalertmodal)"
+            >
+            </pagination>
+          </div>
+        </div>
+	<div class="clearfix">&nbsp;</div>
+	<div class="col-md-12" style="text-align:center" *ngIf="!haveNoPage">
+        <button type="submit" value="billBack" class="btn btn-dt2 btn-sm" id="idBillBack" (click)="editBillBackFields(aieBillBackModal)" *ngIf="userPermUpd">Create Bill Backs</button>
+        <button type="clear" class="btn btn-dt2 btn-sm" (click)="clearscreenmodal.show()">Clear</button>
+   </div>
+<form [formGroup]="saleAieForm">
+  <div formArrayName="saRows">
+	<!-- <div  class="col-md-12" style="background-color:#eee; padding:5px 0 0 0; text-align:left; margin-top:5px;"
+	name="role" *ngFor="let saleAie of saleAiePage, let i = index" [formGroupName] = "i" ngDefaultControl> -->
+		<div *ngIf="haveNoPage"></div>
+	    <div *ngIf="!haveNoPage">
+			<div  class="col-md-12" style="background-color:#eee; padding:5px 0 0 0; text-align:left; margin-top:5px;"
+		  *ngFor="let saleAie of saleAiePage, let i = index" [formGroupName] = "i">
+
+	<!--first col-->
+			<div class="col-md-3" style="padding:0px;">
+			    <div class="form-horizontal form-inline">
+				  <div class="form-group3"><label class="col-sm-6 control-label" for="agencyClTag">Class-Tag: </label>
+				  	<div class="col-sm-6">
+						<div class="readonlySale"><a id="agencyClTag" role="button" data-toggle="collapse" data-parent="#accordion" aria-expanded="false" aria-controls="collapseOne"
+							title="Click tag number to expand vehicle details" (click)="toggleView(i)">{{saleAie.ss_Agency_Cl}} - {{saleAie.ss_Tag}}</a>
+							<input type="hidden" formControlName="ss_Agency_Cl" value="{{saleAie.ss_Agency_Cl}}"/>
+							<input type="hidden" formControlName="ss_Tag" value="{{saleAie.ss_Tag}}"/>
+							</div>
+				 	</div>
+				  </div>
+				  <div class="form-group3 form-inline"><label class="col-sm-6 control-label">Status: </label>
+					  <div class="col-sm-6">
+					  	<div class="readonlySale">{{saleAie.ssBillBack}}</div>
+					  </div>
+				  </div>
+				</div>
+			</div>
+	<!--second column-->
+			<div class="col-md-2" style="padding:0px;">
+				<div class="form-horizontal">
+					  <div class="form-group3"><label class="col-sm-6 control-label" for="VsrBillBackFlag">Mod:</label>
+						<div class="col-sm-6" style="padding-top:5px;">
+						<!--Mod checkbox to be disabled all time-->
+						<div><input id="vsrBillBackFlag" type="checkbox" [checked]="saleAie.vsrBillBackFlag" (change)="saleAie.vsrBillBackFlag = !saleAie.vsrBillBackFlag" *ngIf="true" disabled/></div>
+						</div>
+					  </div>
+					  <div class="form-horizontal">
+						<div class="form-group3"><label class="col-sm-6 control-label">Est. Cost:</label>
+							<div class="col-sm-6"><div class="readonlySale"><span id="estCostTotal" style="text-align:right;">{{saleAie.estCostTotal | currency:'USD':true}}</span></div>
+							</div>
+					    </div>
+					  </div>
+				</div>
+			</div>
+	<!--third col-->
+			<div class="col-md-2" style="padding:0px;">
+				<div class="form-horizontal">
+				  	<div class="form-group3"><label class="col-sm-6 control-label">Act. Cost:</label>
+				  		<div class="col-sm-6"><div class="readonlySale"><span id="estCostTotal" style="text-align:right;">{{saleAie.actCostTotal | currency:'USD':true}}</span></div>
+						</div>
+					</div>
+					<div class="form-horizontal">
+				  		<div class="form-group3"><label class="col-sm-6 control-label" for="ssBbOther">Other Cost:</label>
+				  			<div class="col-sm-6">
+				  			<div class="readonlySale">
+				  				<input class="readonlySale" style="text-align:right;" id="ssBbOther" name='ssBbOther' class="form-control1" aria-label="amount" placeholder="0.00"
+				  				formControlName="ssBbOther" (change)="computeCosts(i)" autofocus="autofocus" value="{{saleAie.ssBbOther | number : '1.2-2'}}"
+				  				size="12" maxlength="10" [readonly]="saleAie.allFieldsDisable"/>
+				  			</div>
+				    		</div>
+				  		</div>
+					</div>
+				 </div>
+			</div>
+
+	<!-- fourth col-->
+			<div class="col-md-3" style="padding:0px;">
+				<div class="form-horizontal">
+				 <div class="form-group3"><label class="col-sm-6 control-label">Est. Loss:</label>
+				  	<div class="col-sm-6">
+				  		<div class="readonlySale"><span id="estCostTotal">{{saleAie.estLossTotal | currency:'USD':true}}</span></div>
+				 	</div>
+				  </div>
+				  <div class="form-group3"><label class="col-sm-6 control-label">Total:</label>
+				  <div class="col-sm-6">
+					<div class="readonlySale"><span id="estAllTotal"> {{saleAie.estAllTotal | currency:'USD':true}}</span></div>
+				 </div>
+				  </div>
+
+				</div>
+			</div>
+	  <!-- fifth col-->
+			<div class="col-md-2" style="padding:0px;">
+				<div class="form-horizontal">
+		  			<div class="form-group3"><label class="col-sm-6 control-label" for="ssBillBackFlag">Billback:</label>
+		  				<div class="col-sm-6" style="padding-top:5px;">
+							<div>
+								<input  type="checkbox" id="ssBillBackFlag"  [checked]="saleAie.billBackFlag"
+								(change)="saleAie.billBackFlag = !saleAie.billBackFlag;onCheckBillBack(i)"
+								*ngIf="saleAie.allFieldsDisable" disabled/>
+
+							<input  type="checkbox" id="ssBillBackFlag" formControlName="billBackFlag" [checked]="saleAie.billBackFlag"
+								(change)="saleAie.billBackFlag = !saleAie.billBackFlag;onCheckBillBack(i)"
+								*ngIf="!saleAie.allFieldsDisable"/>
+
+							</div>
+		  				</div>
+		  			</div>
+				</div>
+			</div>
+
+		    <div class="col-md-1" style="padding:0px;">&nbsp;</div>
+		    <div class="clearfix" name="tagRow" id="tagRow">&nbsp;</div>
+		    <div  role="tabpanel" aria-labelledby="headingOne"  style="padding:0px 20px 10px 20px;" *ngIf="viewThis[i]">
+
+		                <!-- <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne" *ngIf="viewThis[i]"> -->
+
+	            <div class="row">
+	            	<div class="col-md-12">
+	                	<div class="form-group form-group5 form-inline" *ngFor="let vsrRecord of saleAie.vsrRecords, let j = index">
+	                        <button type="del" name="delEst" id="delEst" class="btn btn-dt2 btn-sm" (click)="deleteVsr(vsrRecord)"
+	                        [ngClass]='{disabled: vsrRecord.deleteButtonDisable }'>Del Est.</button>
+	                        <label class="control-label">Status:<span class="readonly"> &nbsp;{{vsrRecord.estManual}}</span></label>&nbsp;&nbsp;
+
+	                        <label for="NewBillBackFlag">Inc: &nbsp;</label>
+	                        <input type="checkbox" id="newBillBackFlag" name='billBackFlag' [checked]="vsrRecord.billBackFlag"
+	                        (change)="vsrRecord.billBackFlag = !vsrRecord.billBackFlag;checkBillBackFlag(i,j,$event.target.value)"
+	                        *ngIf="vsrRecord.billBackCheckBoxDisable" disabled>&nbsp;
+	                        <input type="checkbox" id="newBillBackFlag" name='billBackFlag' [checked]="vsrRecord.billBackFlag"
+	                        (change)="vsrRecord.billBackFlag = !vsrRecord.billBackFlag;checkBillBackFlag(i,j,$event.target.value)"
+	                        *ngIf="!vsrRecord.billBackCheckBoxDisable">&nbsp;
+
+	                        <label class="control-label">Estimate Cost:<span class="readonly"> &nbsp;{{vsrRecord.estimateCost| currency:'USD':true}}</span></label>&nbsp;&nbsp;
+	                        <label class="control-label">Repair Type:<span class="readonly">&nbsp;{{vsrRecord.repClassKey}}</span></label>
+	                        <label class="control-label">Description:<span class="readonly">&nbsp;{{vsrRecord.userDefDsc}}</span></label>&nbsp;
+	                    </div>
+
+	                    <div class="form-group form-group5 form-inline">
+	                        <button type="add" class="btn btn-dt2 btn-sm" (click)="createVsrEdit(saleAie,i)" title="Click here to Add Estimate" [ngClass]='{disabled: saleAie.allFieldsDisable }'>Add Est. </button>
+
+	                        <label class="control-label" for="newPartsCost">Parts: &nbsp;</label>
+	                        <input id="newPartsCost" class="form-control" aria-label="amount" placeholder="0.00" name="newPartsCost"
+	                        	formControlName="newPartsCost" maxlength = "10" size="10" [readonly]="saleAie.allFieldsDisable"/>&nbsp;&nbsp;
+
+	                        <label class="control-label" for="newLaborCost">Labor:&nbsp;</label>
+	                        <input id="newLaborCost" class="form-control" aria-label="amount" placeholder="0.00" name="newLaborCost"
+	                        	formControlName="newLaborCost" maxlength ="10" size="10" [readonly]="saleAie.allFieldsDisable"/>&nbsp;&nbsp;
+
+	                        <label class="control-label" for="newRepairClassKey">ChooseType:&nbsp;</label>
+	                        <!--  	<app-repair-class-select  [(repairClassKey)]="repairClassKey">
+	                        	</app-repair-class-select> -->
+	                        	<select class="form-control" style="max-width:100%;" id="newRepairClassKey" name="newRepairClassKey" formControlName="newRepairClassKey" (Change)="change($event)"
+	                        	*ngIf="saleAie.allFieldsDisable" disabled>
+	                        	<option value="">Select</option>
+	                        	<option value="A">Body</option>
+	                        	<option value="E">Enhancement</option>
+	                        	<option value="G">Glass</option>
+	                        	<option value="M">Mechanical</option>
+	                        	<option value="O">Miscellaneous</option>
+								</select>
+								<select class="form-control" style="max-width:100%;" id="newRepairClassKey" name="newRepairClassKey" formControlName="newRepairClassKey" (Change)="change($event)"
+	                        	*ngIf="!saleAie.allFieldsDisable">
+	                        	<option value="">Select</option>
+	                        	<option value="A">Body</option>
+	                        	<option value="E">Enhancement</option>
+	                        	<option value="G">Glass</option>
+	                        	<option value="M">Mechanical</option>
+	                        	<option value="O">Miscellaneous</option>
+								</select>
+	                        <label class="control-label" for="newUserDefDsc">Description:&nbsp;</label>&nbsp;
+	                        <input type="text" id="newUserDefDsc" class="form-control" name="newUserDefDsc" formControlName="newUserDefDsc" size="20" maxlength="25" placeholder="Enter repair description" value=""
+	                        		[readonly]="saleAie.allFieldsDisable"/>&nbsp;
+	                     </div>
+	                </div>
+
+	                <div class="form-group form-group5 form-inline">
+	                      <input type="radio" formControlName="ssBbELossSrc" id="ssBbELossSrcP" name='ssBbELossSrc' value="P"
+	                      	*ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <input type="radio" formControlName="ssBbELossSrc" (change)="computeCosts(i)" id="ssBbELossSrcP" name='ssBbELossSrc' value="P"
+	                      	*ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <label class="control-label1" for="ssBbELossSrcP">Proceeds : {{saleAie.vhSoldProceeds | currency:'USD':true}}</label>&nbsp;&nbsp;
+
+	                      <input type="radio" formControlName="ssBbELossSrc" id="ssBbELossSrcG" name='ssBbELossSrc' value='G'
+	                      *ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <input type="radio" formControlName="ssBbELossSrc" (change)="computeCosts(i)" id="ssBbELossSrcG" name='ssBbELossSrc' value='G'
+	                      *ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <label class="control-label1" for="ssBbELossSrcG">GSA Fleet Value:{{0.00 | currency:'USD':true}}</label> &nbsp;&nbsp;
+
+	                      <input type="radio" formControlName="ssBbELossSrc" id="ssBbELossSrcF"  name='ssBbELossSrc' value='F'
+	                      *ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <input type="radio" formControlName="ssBbELossSrc" (change)="computeCosts(i)" id="ssBbELossSrcF"  name='ssBbELossSrc' value='F'
+	                      *ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <label class="control-label1" for="ssBbELossSrcF">Fair Market Value : {{saleAie.vhFairMktVal | currency:'USD':true}}</label> &nbsp;&nbsp;
+
+	                      <input type="checkbox" id="blackBookFlag"	[checked]="saleAie.blackBookFlag"
+	                      	(change)="saleAie.blackBookFlag = !saleAie.blackBookFlag" [disabled]="true"/>&nbsp;
+	                      <label class="control-label1" for="blackBookFlag">Black Book </label>&nbsp;&nbsp;
+
+	                      <input type="radio" formControlName="ssBbELossSrc" id="ssBbELossSrcM"  name='ssBbELossSrc' value="M"
+	                      *ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <input type="radio" formControlName="ssBbELossSrc" (change)="computeCosts(i)" id="ssBbELossSrcM"  name='ssBbELossSrc' value="M"
+	                      *ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <label class="control-label1" for="ssBbELossSrcM">Manual Value:</label>&nbsp;
+
+	                      <input style="text-align:right;" value="{{saleAie.ssBbManVal | number : '1.2-2'}}" placeholder="0.00" id="ssBbManVal" aria-label="amount" name="ssBbManVal" formControlName="ssBbManVal"
+	                       (change)="onChangeSsBbManValUpd(i,saleAie)" class="form-control" maxlength ="9" size="10" [readonly]="saleAie.allFieldsDisable" />&nbsp;
+
+	                </div>
+	                <div class="form-group form-group5 form-inline">
+	                      <label class="control-label1" for="ssBbManValDsc">Manual Value Description:</label> &nbsp;
+	                      <input name="ssBbManValDsc" formControlName="ssBbManValDsc" autofocus="autofocus" type="text" id="ssBbManValDsc"  (change)="onChangeSsBbManValDscUpd(i,saleAie)"
+	                      	 class="form-control" size="50" maxlength="50" value={{saleAie.ssBbManValDsc}} [readonly]="saleAie.allFieldsDisable"/>
+	                </div>
+
+	                <div class="form-group form-group5 form-inline">
+	                      <label class="control-label" for="ssBbOtherDesc">Other Costs Description:&nbsp;</label>&nbsp;
+	                      <input type="text" id="ssBbOtherDesc" class="form-control" name="ssBbOtherDesc" formControlName="ssBbOtherDesc"  (change)="onChangeSsBbOtherDescUpd(i,saleAie)"
+	                      	value={{saleAie.ssBbOtherDesc}} size="100" maxlength="100" [readonly]="saleAie.allFieldsDisable"/>&nbsp;
+	                </div>
+	                <div class="form-group form-group5 form-inline">
+
+	                      <input type="checkbox" id="otherDescTowing" formControlName="otherDescTowing"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescTowing')" [checked]="saleAie.otherDescTowing"
+	                      (change)="saleAie.otherDescTowing = !saleAie.otherDescTowing"	*ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <input type="checkbox" id="otherDescTowing" formControlName="otherDescTowing"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescTowing')" [checked]="saleAie.otherDescTowing"
+	                      (change)="saleAie.otherDescTowing = !saleAie.otherDescTowing"	*ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <label class="control-label" for="otherDescTowing">Towing</label>&nbsp;&nbsp;
+
+	                      <input type="checkbox" id="otherDescTransportation" formControlName="otherDescTransportation"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescTransportation')" [checked]="saleAie.otherDescTransportation"
+	                      (change)="saleAie.otherDescTransportation = !saleAie.otherDescTransportation" *ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <input type="checkbox" id="otherDescTransportation" formControlName="otherDescTransportation"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescTransportation')" [checked]="saleAie.otherDescTransportation"
+	                      (change)="saleAie.otherDescTransportation = !saleAie.otherDescTransportation" *ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <label class="control-label"for="otherDescTransportation">Transportation</label>&nbsp;&nbsp;
+
+	                      <input type="checkbox" id="otherDescEarlySelling" formControlName="otherDescEarlySelling"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescEarlySelling')" [checked]="saleAie.otherDescEarlySelling"
+	                      (change)="saleAie.otherDescEarlySelling = !saleAie.otherDescEarlySelling" *ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <input type="checkbox" id="otherDescEarlySelling" formControlName="otherDescEarlySelling"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescEarlySelling')" [checked]="saleAie.otherDescEarlySelling"
+	                      (change)="saleAie.otherDescEarlySelling = !saleAie.otherDescEarlySelling" *ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <label class="control-label" for="otherDescEarlySelling">Early selling fees due to accident</label>&nbsp;&nbsp;
+
+	                      <input type="checkbox" id="otherDescExtCleaning"formControlName="otherDescExtCleaning"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescExtCleaning')" [checked]="saleAie.otherDescExtCleaning"
+	                      (change)="saleAie.otherDescExtCleaning = !saleAie.otherDescExtCleaning" *ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+
+	                      <input type="checkbox" id="otherDescExtCleaning"formControlName="otherDescExtCleaning"
+	                       *ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <label class="control-label" for="otherDescExtCleaning">Extensive cleaning required</label>&nbsp;&nbsp;
+
+						  <input type="checkbox" id="otherDescBioHazard" formControlName="otherDescBioHazard"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescBioHazard')" [checked]="saleAie.otherDescBioHazard"
+	                      (change)="saleAie.otherDescBioHazard = !saleAie.otherDescBioHazard" *ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <input type="checkbox" id="otherDescBioHazard" formControlName="otherDescBioHazard"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescBioHazard')" [checked]="saleAie.otherDescBioHazard"
+	                      (change)="saleAie.otherDescBioHazard = !saleAie.otherDescBioHazard" *ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <label class="control-label" for="otherDescBioHazard">Bio hazard expenses</label>&nbsp;&nbsp;
+
+	                      <input type="checkbox" id="otherDescExtDecalRemoval" formControlName="otherDescExtDecalRemoval"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescExtDecalRemoval')" [checked]="saleAie.otherDescExtDecalRemoval"
+	                      (change)="saleAie.otherDescExtDecalRemoval = !saleAie.otherDescExtDecalRemoval" *ngIf="!saleAie.allFieldsDisable"/>&nbsp;
+	                      <input type="checkbox" id="otherDescExtDecalRemoval" formControlName="otherDescExtDecalRemoval"
+	                      (click)="checkOtherDesc(i,saleAie,'otherDescExtDecalRemoval')" [checked]="saleAie.otherDescExtDecalRemoval"
+	                      (change)="saleAie.otherDescExtDecalRemoval = !saleAie.otherDescExtDecalRemoval" *ngIf="saleAie.allFieldsDisable" disabled/>&nbsp;
+	                      <label class="control-label" for="otherDescExtDecalRemoval">Extensive decal removal</label>&nbsp;&nbsp;
+	                </div>
+	            </div>
+	        </div>
+
+	    </div>
+    </div>
+    </div> <!-- end formArrayName="saRows" -->
+    </form>
+
+
+	   <div *ngIf="!haveNoPage" class="col-md-12" style="text-align:center">
+	        <!--  <button type="submit" value="billBack" class="btn btn-dt2 btn-sm" id="idBillBack"  (click)="modalBillBack($event.target.value, aieBillBackModal)">Create Bill Backs</button> -->
+	        <button type="submit" value="billBack" class="btn btn-dt2 btn-sm" id="idBillBack" (click)="editBillBackFields(aieBillBackModal)" *ngIf="userPermUpd">Create Bill Backs</button>
+	        <button type="clear" class="btn btn-dt2 btn-sm" (click)="clearscreenmodal.show()">Clear</button>
+	   </div>
+	   <div *ngIf="!haveNoPage" class="col-md-12" style="text-align: right;">
+            Results: {{ startItem }}-{{ endItem }} of {{ totalItems }}
+            <br>
+            <pagination
+            	#paginationModule
+            	[boundaryLinks]="true"
+            	[directionLinks]="false"
+            	[totalItems]="totalItems"
+            	[maxSize]="5"
+            	[itemsPerPage]="itemsPerPage"
+            	rotate="true"
+            	[(ngModel)]="currentPage"
+            	class="pagination-sm"
+            	previousText="&lsaquo;"
+            	nextText="&rsaquo;"
+            	firstText="&laquo;"
+            	lastText="&raquo;"
+            	(pageChanged)="pageChanged($event,confirmalertmodal)"
+            >
+            </pagination>
+       </div>
+   </div>
+
+ </div>
+</div>
+<!-- /.container -->
+
+<!--  Modal HTML section-->
+
+<div class="modal fade" bsModal #aieBillBackModal="bs-modal" [config]="{backdrop: 'static'}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+      	<button type="button" class="close pull-right" (click)="aieBillBackModal.hide()" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+        <h4 class="modal-title" style="text-align: center;">Create Bill Backs</h4>
+      </div>
+      <div class="modal-bodyCCD">
+        <p><strong>Are you sure you want Create Bill Backs</strong></p>
+      </div>
+        <div class="modal-footer" style="text-align:center;">
+       		<button type="button" class="btn btn-primary" data-dismiss="modal"
+       				(click)="aieBillBackModal.hide();sendSaleAieUpdate()" >Submit</button>
+        	<button type="button" class="btn btn-primary" (click)="aieBillBackModal.hide()">Cancel</button>
+      	</div>
+    </div>
+  </div>
+</div>
+
+<!-- Clear Screen Modal -->
+    <div bsModal #clearscreenmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
+		<div class="modal-dialog">
+			<div class="modal-content" style="width: 300px">
+				<div class="modal-header">
+					<button type="button" class="close pull-right" (click)="clearscreenmodal.hide()" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" style="text-align: center;">Clear Screen</h4>
+				</div><br>
+				<div class="modal-bodyCCD">
+					<p><strong>Are you sure you want to clear the screen? </strong></p>
+					<p><strong>Any unsaved changes will be gone.          </strong></p>
+				</div>
+				<div class="modal-footer" style="text-align: center;">
+					<button type="button" class="btn btn-primary" data-dismiss="modal"
+							(click)="clearscreenmodal.hide(); getSasySaleRecords();">YES</button>
+					<button type="button" class="btn btn-primary" (click)="clearscreenmodal.hide()">NO</button>
+				</div>
+			</div>
+		</div>
+	</div>
+<!-- Clear Screen Modal -->
+    <div bsModal #confirmalertmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
+		<div class="modal-dialog">
+			<div class="modal-content" style="width: 300px">
+				<div class="modal-header">
+					<button type="button" class="close pull-right" (click)="confirmalertmodal.hide()" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" style="text-align: center;">Alert</h4>
+				</div><br>
+				<div class="modal-bodyCCD">
+					<p><strong>Your page contains unsaved changes which may be lost if you navigate away. </strong></p>
+					<p><strong>Click OK to navigate, or Cancel to stay.</strong></p>
+				</div>
+				<div class="modal-footer" style="text-align: center;">
+					<button type="button" class="btn btn-primary" data-dismiss="modal"
+							(click)="confirmalertmodal.hide(); refreshAndSetPage(currentPage);">OK</button>
+					<button type="button" class="btn btn-primary" (click)="pager.selectPage(previousPage);confirmalertmodal.hide()">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<!-- Loading modal to show Loading... -->
+<app-loading-bar></app-loading-bar>
+

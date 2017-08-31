@@ -1,0 +1,41 @@
+<div class="footer">
+  <div class="col-md-2">
+    <p>Related Sites</p>
+    <p>
+	    <a href="{{gsaUrl}}" target="_blank">GSA</a><br>
+	    <a href="{{autoAuctonsUrl}}" target="_blank">Auto Auctions</a><br>
+	    <a href="{{autoChoiceUrl}}/" target="_blank">AutoChoice</a><br>
+	    <a href="{{drmUrl}}" target="_blank">DRM</a><br>
+	    <a href="{{gsaFastUrl}}" target="_blank">F.A.S.T.</a><br>
+    </p>
+  </div>
+  <div class="col-md-2">
+    <p>&nbsp;</p>
+    <p>
+	    <a href="{{fvsUrl}}"  target="_blank">Federal Vehicle Standard</a><br>
+	    <a href="{{fedFMSUrl}}"  target="_blank">FedFMS</a><br>
+	    <a href="{{gsaVcssUrl}}"  target="_blank">VCSS</a><br>
+	    <a href="{{vfeUrl}}"  target="_blank">VFE</a>
+    </p>
+  </div>
+  <div class="col-md-2">
+    <p>Other Interest<br>
+    <p>
+	    <a href="{{usaUrl}}"  target="_blank">USA.gov</a><br>
+	    <a href="{{dataUrl}}"  target="_blank">Data.gov</a><br>
+	    <a href="{{recoveryUrl}}"  target="_blank">Recovery.gov</a><br>
+	    <a href="{{whitehousUrl}}"  target="_blank">Whitehouse.gov</a>
+    </p>
+  </div>
+  <div class="col-md-2">
+    <p>&nbsp;</p>
+  </div>
+  <div class="col-md-4 footerbkg">
+    <p style="color: rgb(0, 0, 0);">GSA/FAS Asset and Transportation Mgmt. Helpdesk</p>
+    <p>Hours of Operation<br>
+       8:00 AM - 7:00 PM EST<br>
+       Tel: 1-866-472-6711<br>
+       Email: gsadrivethruhelp@gsa.gov
+    </p>
+  </div>
+</div>

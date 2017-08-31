@@ -6,7 +6,7 @@
        <li>
          <a href="#"><span aria-hidden="true" class="glyphicon glyphicon-menu-hamburger" title="Main Menu"></span></a>
       </li>
-      <li><a href="#">AIE Decision Tool</a></li>
+      <li><a routerLink="/home">AIE Decision Tool</a></li>
       <li>AIE Multiple</li>
     </ol>
 
@@ -34,7 +34,7 @@
         <div>
 
         <div class="col-md-12" >
-               <div class="form-group form-group5 form-inline" style="width: 800px">&nbsp;<br />
+            <div class="form-group form-group5 form-inline" style="width: 800px">&nbsp;<br />
              <label class="control-label">Region:&nbsp;</label>
                <select class="form-control" id="idRegion" name="idRegion" [(ngModel)]="inRegion"  (ngModelChange)="changeRegion($event, loadingModal); " #idRegion="ngModel" required>
 				<option [hidden]="true" [ngValue]="regions">Select</option>
@@ -49,9 +49,9 @@
 			  <label class="control-label">Customer:&nbsp;</label>
               <input placeholder="00-00-00-XXXXXX-000" [(ngModel)]="inCustomer" (ngModelChange)="changeCustomer($event)"
 	                 [typeahead]="customers" class="form-control" id="idCustomer" size="20" maxlength="19"
-	                 [typeaheadMinLength]="0" [typeaheadOptionsLimit]="10" name="idCustomer" [disabled]="!idFmc > 0"  #idCustomer = "ngModel" required  > &nbsp;
-			  <button type="button" class="btn btn-dt2 btn-sm" [disabled]="!idCustomer.valid" (click)="getCustomerVehTags(loadingModal)">Get Tags</button>
-               </div>
+	                 [typeaheadMinLength]="0" [typeaheadOptionsLimit]="10" name="idCustomer" [disabled]="idFmc.value < 0"  #idCustomer = "ngModel" required  > &nbsp; 
+	      	  <button type="button" class="btn btn-dt2 btn-sm" [disabled]="(!idCustomer.valid) || (idRegion < 0) || (idFmc.value < 0) " (click)="getCustomerVehTags(loadingModal)">Get Tags</button>
+            </div>
          </div>
 
   	 	<table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -252,7 +252,7 @@
           </div>
 
           <div class="col-md-12" style="text-align:center">
-            <button type="submit" class="btn btn-dt2 btn-sm" (click)="updCustomerVehTags(loadingModal)">Submit</button>
+            <button type="submit" class="btn btn-dt2 btn-sm" [disabled]="(!idCustomer.valid) || (idRegion < 0) || (idFmc.value < 0)" (click)="updCustomerVehTags(loadingModal)">Submit</button>
             &nbsp;&nbsp;<button type="clear" class="btn btn-dt2 btn-sm" (click)="clearPage(loadingModal)">Clear</button>
           </div>
 </div>

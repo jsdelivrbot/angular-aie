@@ -1,8 +1,8 @@
 <div class="banner">
-  <img src="/assets/images/AIEbanner.jpg" width="465" height="63" alt="GSA logo for Fleet Drive-thru">
+  <img src="../../assets/images/AIEbanner.jpg" width="465" height="63" alt="GSA logo for Fleet Drive-thru">
   <div class="welcome" style="text-align: right">
-    <a href="#">Privacy Statement</a>
-    <p style="padding-top: 10px; font-size: larger;">{{customerLid}} - {{customerName}}</p>
+    <a href="https://www.gsa.gov/portal/content/116609" target="_blank">Privacy Statement</a>
+    <p style="padding-top: 10px; font-size: larger;" *ngIf="isActiveNav()">{{customerLid}} - {{customerName}}</p>
   </div>
 </div>
 
@@ -46,16 +46,16 @@
           <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-          <li><a href="#">Over-Tank Report</a></li>
-          <li><a href="#">Car Wash Report</a></li>
-          <li><a href="#">Same Day/Back-to-Back Report</a></li>
-          <li><a href="#">FSR Management Fleet Card Reports</a></li>
+          <li><a routerLink="/home">Over-Tank Report</a></li>
+          <li><a routerLink="/home">Car Wash Report</a></li>
+          <li><a routerLink="/home">Same Day/Back-to-Back Report</a></li>
+          <li><a routerLink="/home">FSR Management Fleet Card Reports</a></li>
         </ul>
       </li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
-      <li><a href="#">Help</a></li>
-      <li><a [routerLink]="['']">Logout</a></li>
+      <li><a routerLink="/home">Help</a></li>
+      <li><a routerLink="" (click)="logout()">Logout</a></li>
     </ul>
   </div>
 </div>

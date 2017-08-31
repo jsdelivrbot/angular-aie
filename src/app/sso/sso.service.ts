@@ -5,7 +5,6 @@ import { HostDetails } from '../common-components/host.details';
 
 @Injectable()
 export class SsoService {
-    private headers = new Headers({'Content-Type': 'application/json'});
   constructor(private http: Http) { }
 
     initiateSSO(): Observable<boolean>  {
@@ -18,7 +17,7 @@ export class SsoService {
         let url = 'sso/ValidateSSO';
         console.log("URL" , url);
         return this.http
-                 .post(url, {headers: this.headers})
+                 .post(url, "")
                  .map(res => res.json())
                  .catch(this.handleError);
     }
@@ -30,8 +29,6 @@ export class SsoService {
     }
 
     loginWithSSO() {
-      let headers = new Headers();
-      headers.append('Content-Type', 'application/x-www-form-urlencoded');
       let url = 'sso/getent';
       return this.http.get(url)
         .map(res => res)

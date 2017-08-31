@@ -41,7 +41,7 @@ export class TagGetCustVehComponent implements OnInit {
             ])),
             tag: new FormControl("", Validators.compose([
                 Validators.required
-                ,Validators.pattern('[0-9]{4}[A-Za-z]{1}')
+                ,Validators.pattern('[0-9]{4}[A-Za-z0-9]{1}')
             ]))    
         });
         this.tagSearchForm.valueChanges

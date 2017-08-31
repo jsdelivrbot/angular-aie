@@ -34,7 +34,7 @@ export class SsoComponent implements OnInit {
         this.ssoService.loginWithSSO().subscribe(
           entName => {
             this.entName = entName._body;
-            console.log("EntName "+ this.entName);
+            //console.log("EntName "+ this.entName);
             let user = this.entName;
             if (user){
               localStorage.setItem('currentUser', user);

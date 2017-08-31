@@ -63,6 +63,7 @@ import {AlertService} from "./_services/alert.service";
 import {AuthGuard} from "./_guards/auth.guard";
 import { SalesCostSelectComponent } from './common-components/sales-cost-select/sales-cost-select.component';
 import {ZeroPadderPipe} from "./zero-padder.pipe";
+import { LogoutComponent } from './logout/logout.component';
 
 
 @NgModule({
@@ -98,6 +99,7 @@ import {ZeroPadderPipe} from "./zero-padder.pipe";
     CostAcctComponent,
     LoginValidateComponent,
     SalesCostSelectComponent,
+    LogoutComponent,
 
   ],
   imports: [
@@ -149,6 +151,10 @@ import {ZeroPadderPipe} from "./zero-padder.pipe";
         {
             path: 'multiple',
             component: AieMultipleComponent, canActivate: [AuthGuard]
+        },
+        {
+          path: 'logout',
+          component: LogoutComponent
         },
         {
             path: 'validatesso',

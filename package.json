@@ -4,20 +4,17 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "node server.js",
+    "start": "ng serve --proxy-config proxy.config.json",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e",
-    "postinstall": "ng build "
+    "e2e": "ng e2e"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "^4.0.0",
-    "@angular/cli": "1.1.1",
     "@angular/common": "^4.0.0",
     "@angular/compiler": "^4.0.0",
-    "@angular/compiler-cli": "^4.0.0",
     "@angular/core": "^4.0.0",
     "@angular/forms": "^4.0.0",
     "@angular/http": "^4.0.0",
@@ -28,7 +25,6 @@
     "angular2-cookie": "^1.2.6",
     "bootstrap": "^3.3.7",
     "core-js": "^2.4.1",
-    "express": "^4.15.4",
     "moment": "^2.18.1",
     "ng-daterangepicker": "^0.2.0",
     "ng2-auto-complete": "^0.12.0",
@@ -36,10 +32,11 @@
     "ng2-daterangepicker": "^2.0.7",
     "ngx-bootstrap": "^1.7.1",
     "rxjs": "^5.1.0",
-    "typescript": "~2.3.3",
     "zone.js": "^0.8.4"
   },
   "devDependencies": {
+    "@angular/cli": "1.1.1",
+    "@angular/compiler-cli": "^4.0.0",
     "@angular/language-service": "^4.0.0",
     "@types/jasmine": "2.5.45",
     "@types/node": "~6.0.60",
@@ -54,6 +51,7 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "protractor": "~5.1.2",
     "ts-node": "~3.0.4",
-    "tslint": "~5.3.2"
+    "tslint": "~5.3.2",
+    "typescript": "~2.3.3"
   }
 }

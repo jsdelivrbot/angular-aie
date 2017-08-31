@@ -5,10 +5,10 @@
     <ol class="breadcrumb">
       <li><a href="#"></a></li>
 
-      <li><a href="#">AIE Decision Tool</a></li>
+      <li><a routerLink="/home">AIE Decision Tool</a></li>
 
       <li>AIE Fleet Card</li>
-      
+
     </ol>
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -20,45 +20,45 @@
             <div class="col-md-12" style="text-align:left">
               <div class="form-group form-group5 form-inline">
                 &nbsp;<br />
-                
-               
-                
-                <!-- 
+
+
+
+                <!--
                 	Here shows how to implement data bindings from you custom component in three different ways:
-                	
+
                 	1. 	If you just want the output from the component just use the event emmiter defined in
-                		in the child (ex. "(regionChange)="region=$event") and capture the data return from the event, 
+                		in the child (ex. "(regionChange)="region=$event") and capture the data return from the event,
                 		setting it equal to the parentVariable.
-                	
+
                 	2. 	If you just want to send input to the child just use [childVariable]="parentVariable"
                 		(ex. [region]="region")
-                	
+
                 	3. 	If you want a two way binding (input and output) make sure the @Input and @Output annotation
                 		pair is defined in the child. Then use its input name for binding (ex. "[(fmc)]"="parentVarName").
-                		This two way binding is actually equivalent to: [fmc]="fmc" (fmcChange)="fmc=$event".   		
+                		This two way binding is actually equivalent to: [fmc]="fmc" (fmcChange)="fmc=$event".
                 -->
                 <span style="color: #C00;">&nbsp;*&nbsp;</span>
                 <label class="control-label">Required Fields&nbsp;</label>
                 <br>
                 <br>
-                
-                
-                <app-region-select [(zone)]="zone" [(lid)]="lid" [(customer)]="customer" 
+
+
+                <app-region-select [(zone)]="zone" [(lid)]="lid" [(customer)]="customer"
                 (customerChange)="customerValidCheck()" (validLID)="lidValid=$event"></app-region-select>
-                
-                   
+
+
 <!--                 <button type="button" class="btn btn-dt2 btn-sm" (click)="displayStartDatePicker()">Select Start Date</button> -->
 <!--                 <dialog class="modal" open id="idStartDate" style='display:none'> -->
 <!--                 	<h5 class="modal-title" style="font-size:200%; text-align:center">Select Start Date</h5> -->
 <!--                 	<datepicker [(ngModel)]="startDate"></datepicker> {{startDate|date:"MM/dd/yyyy"}} -->
 <!--                 </dialog> -->
-                
+
 <!--                 <button type="button" class="btn btn-dt2 btn-sm" (click)="displayEndDatePicker()">Select End Date</button> -->
 <!--                 <dialog class="modal" open id="idEndDate" style='display:none'> -->
 <!--                 	<h5 class="modal-title" style="font-size:200%; text-align:center">Select End Date</h5> -->
 <!--                 	<datepicker [(ngModel)]="endDate"></datepicker> {{endDate|date:"MM/dd/yyyy"}} -->
 <!--                	</dialog> -->
-                
+
                 <span style="color: #C00;">&nbsp;*&nbsp;</span>
                 <label class="control-label">Report Type:&nbsp;</label>
                 <select [disabled]="!lidValid" class="form-control" [(ngModel)]="reportType" id="idReportType" name="idReportType" #idReportType="ngModel" required>
@@ -66,37 +66,37 @@
 		            <option value = "overTank">Over Tank</option>
 					<option value = "carWash">Car Wash</option>
 					<option value = "roadsideAssistance">Roadside Assistance</option>
-					<option value = "sameDay">Same Day/Back-to-Back</option>	
+					<option value = "sameDay">Same Day/Back-to-Back</option>
                 </select>&nbsp;&nbsp;
-                
+
                 <!--  				Date Range Picker            -->
 				<app-daterange (updateDateRange)="newDateRange($event)" [(dr)]="myDateRange"></app-daterange>&nbsp;&nbsp;
-				
+
 				<button [disabled]="!idReportType.valid || !lidValid || !customerValid" type="button" (click)="getFCTRecords()" class="btn btn-dt2 btn-sm">Search</button>
-              </div>	
+              </div>
             </div>
-          
-          
-            
+
+
+
           </div>
-          
+
           <div class="table-responsive">
           	<br>
           	<div *ngIf="!haveNoPage" style="text-align: right;">
             Results: {{ startItem }}-{{ endItem }} of {{ totalItems }}
             <br>
-            <pagination 
-            	[boundaryLinks]="true" 
-            	[directionLinks]="false" 
+            <pagination
+            	[boundaryLinks]="true"
+            	[directionLinks]="false"
             	[totalItems]="totalItems"
-            	[maxSize]="5" 
+            	[maxSize]="5"
             	[itemsPerPage]="itemsPerPage"
             	rotate="true"
-            	[(ngModel)]="currentPage" 
+            	[(ngModel)]="currentPage"
             	class="pagination-sm"
-            	previousText="&lsaquo;" 
-            	nextText="&rsaquo;" 
-            	firstText="&laquo;" 
+            	previousText="&lsaquo;"
+            	nextText="&rsaquo;"
+            	firstText="&laquo;"
             	lastText="&raquo;"
             	(pageChanged)="pageChanged($event)"
             >
@@ -120,11 +120,11 @@
 		    		Row(s) below are not valid
 		    	</alert>
         </div>
-	       
+
   			<form (ngSubmit)= "getFCTRecords()"  [formGroup]="fctForm">
   			<br/>
   			<br/>
-  			
+
             <table formArrayName="fctRows" class="table table-striped table-bordered">
               <tr class="info" style="text-align:center">
                 <th width="8%">CL-Tag No.</th>
@@ -140,7 +140,7 @@
                 <th width="11%">Sales Code / Cost Acct.</th>
 <!--                 <th width="6%">Cost Acct.</th> -->
                 <th width="14%">Justification</th>
-                
+
 <!--                 <th width="8%">CL-Tag No.</th> -->
 <!--                 <th width="10%">BOAC-Serial</th> -->
 <!--                 <th width="5%">Date</th> -->
@@ -169,19 +169,19 @@
                 <td>{{fct.fct_unit_cost | currency:'USD':true}}</td>
 				<td>{{fct.fct_total_cost | currency:'USD':true}}</td>
 				<td>{{fct.fct_product_desc}}</td>
-                <td><input type="text" id="aieAmount" class="form-control" formControlName="fct_aie_amount" [(ngModel)]="fct.fct_aie_amount"/></td>
+                <td><input type="text" id="aieAmount" class="form-control" formControlName="fct_aie_amount" [(ngModel)]="fct.fct_aie_amount" maxlength="8"/></td>
 				<td>
 					<app-sales-cost-select [isTable]="true" [(salesCode)]="fct.fct_sales_code" [(costAccount)]="fct.fct_cost_account"></app-sales-cost-select>
 				</td>
-                <td>    		
-	      			<app-justification-select *ngIf="overTank" [(justification)]="fct.fct_justification" justType="fctOne" 
+                <td>
+	      			<app-justification-select *ngIf="overTank" [(justification)]="fct.fct_justification" justType="fctOne"
 	      			(justificationChange)="justTrigger($event, aiejustmodal, i)"></app-justification-select>
-	      			
-	      			<app-justification-select *ngIf="sameDay" [(justification)]="fct.fct_justification" justType="fctTwo" 
+
+	      			<app-justification-select *ngIf="sameDay" [(justification)]="fct.fct_justification" justType="fctTwo"
 	      			(justificationChange)="justTrigger($event, aiejustmodal, i)"></app-justification-select>
-	      			
+
 <!-- 	      			Other two report Types (Roadside Assistance and Car Wash) -->
-	      			<app-justification-select *ngIf="!overTank && !sameDay" [(justification)]="fct.fct_justification" 
+	      			<app-justification-select *ngIf="!overTank && !sameDay" [(justification)]="fct.fct_justification"
 	      			justType="decision123" (justificationChange)="justTrigger($event, aiejustmodal, i)"></app-justification-select>
 				</td>
 
@@ -196,25 +196,25 @@
 								</button>
 								<h4 class="modal-title">AIE Different Agency</h4>
 							</div>
-			
+
 							<div class="modal-bodyCCD">
 								<p [hidden]="!aieBill">
 									<strong>Please note the reason for the bill back below:</strong>
 									<input class="form-control" rows="3" maxlength="100"
 										name="comments" id="custom_format_1" id="fct_justfy_reason" formControlName="fct_justfy_reason" name="fct_justfy_reason" #billBackDesc/>
 								</p>
-			
+
 								<p [hidden]="!aieDiff">
 									<label class="control-label">Change Customer
-										Number:&nbsp;</label> 
+										Number:&nbsp;</label>
 									<input class="form-control" id="" formControlName="fct_newCustNum" #newCustNum/>
 									<br>
 									{{fct.fct_newCustNum}}
 								</p>
-								
+
 								<p [hidden]="!incTank">
 									<label class="control-label">Change Vehicle Tank Size for {{fct.fct_class}}-{{fct.fct_tag}}:&nbsp;</label>
-									<input #tankSize id="idTank" type="text" class="form-control" 
+									<input #tankSize id="idTank" type="text" class="form-control"
 									formControlName="fct_gas_tank_size" #tankSize/>
 									<br>
 								</p>
@@ -234,21 +234,21 @@
 														|| (incTank && (tankSize.value == null || tankSize.value == ''))">
 										<alert type="danger" class="alert">
 		    								Invalid Fields
-		    							</alert>		
-											
+		    							</alert>
+
 									</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				
+
               </tr>
             </table>
             </form>
           </div>
         </div>
-		
-        
+
+
         <div class="col-md-12" style="text-align:center">
           <strong>Selecting "Save Bill Backs" will process the
           selected billbacks&nbsp;</strong> <button type="button" [disabled]="!fctForm.valid"
@@ -258,12 +258,12 @@
       </div>
     </div>
   </div>
-  
-  
+
+
 
 	<!-- Loading modal -->
 	<app-loading-bar></app-loading-bar>
-	
+
 	<!-- Save Billbacks Modal -->
 	<div bsModal #savebillbacksmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
 		<div class="modal-dialog">
@@ -278,14 +278,14 @@
 					<p style="text-align: center"><strong>Are you sure you want to<br><br>SAVE BILL BACKS or <br><br>REVIEW SELECTED? </strong></p>
 				</div>
 				<div class="modal-footer" style="text-align: center;">
-					<button type="button" class="btn btn-primary" data-dismiss="modal" 
+					<button type="button" class="btn btn-primary" data-dismiss="modal"
 							(click)="savebillbacksmodal.hide(); saveBillBacks()">YES</button>
 					<button type="button" class="btn btn-primary" (click)="savebillbacksmodal.hide()">NO</button>
 				</div>
 			</div>
 		</div>
 	</div>
-	
+
 	<!-- Clear Screen Modal -->
 	<div bsModal #clearscreenmodal="bs-modal" class="modal fade" [config]="{backdrop: 'static'}">
 		<div class="modal-dialog">
@@ -301,14 +301,14 @@
 					<p style="text-align: center"><strong>Any UNSAVED CHANGES will be LOST.          </strong></p>
 				</div>
 				<div class="modal-footer" style="text-align: center;">
-					<button type="button" class="btn btn-primary" data-dismiss="modal" 
+					<button type="button" class="btn btn-primary" data-dismiss="modal"
 							(click)="clearscreenmodal.hide(); reloadPage();">YES</button>
 					<button type="button" class="btn btn-primary" (click)="clearscreenmodal.hide()">NO</button>
 				</div>
 			</div>
 		</div>
-	</div>	
+	</div>
 
-	
+
 </div>
 

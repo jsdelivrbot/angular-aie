@@ -75,11 +75,25 @@ export class AieDecisionComponent implements OnInit {
   sequenceNo;
   userLid;
   justifIndex: number;
-    
+
   selectedZone : number;
   selectedLID  : string;
   hasEditAccess: boolean;
-    
+
+//userLID      : string;
+  userRegion   : number;
+  userPermLvl1 : string;
+  userPermLvl2 : string;
+  userPermLvl3 : string;
+  userPermLvl4 : string;
+  userPermLvl5 : string;
+  userPermLvl6 : string;
+  userPermLvl7 : string;
+  userPermLvl8 : string;
+  userPermLvl9 : string;
+
+  currentSecurityRecord: any;
+
   constructor(
       private aieDecisionService: AieDecisionService, 
       private commonService: CommonService,
@@ -96,8 +110,29 @@ export class AieDecisionComponent implements OnInit {
   ngOnInit() {
       this.dataService.currentZone.subscribe(currentZone => this.selectedZone = currentZone);
       this.dataService.currentLid.subscribe(currentLid => this.selectedLID = currentLid);
-      this.dataService.hasEditAccess.subscribe(hasEditAccess => this.hasEditAccess = hasEditAccess);
-      console.log("selectedLID/hasEditAccess : " + this.selectedLID + "/" + this.hasEditAccess);
+
+//    window.open("/decision/45", "_self");
+
+      if (this.selectedLID == "") {
+          alert("LID IS EMPTY!  PLEASE LOG IN FIRST.");
+          window.open("/home", "_self");
+      }  
+
+//    this.dataService.hasEditAccess.subscribe(hasEditAccess => this.hasEditAccess = hasEditAccess);
+//    console.log("selectedLID/hasEditAccess : " + this.selectedLID + "/" + this.hasEditAccess);
+      
+      this.dataService.currentSecurityRecord.subscribe(           
+          currentSecurityRecord =>  {
+              this.currentSecurityRecord = currentSecurityRecord;
+//            this.userLID      = currentSecurityRecord.lid;
+              this.userRegion   = currentSecurityRecord.region;
+              this.userPermLvl1 = currentSecurityRecord.lvl1Perm;
+//            this.userPermLvl2 = currentSecurityRecord.lvl2Perm;
+              this.userPermLvl5 = currentSecurityRecord.lvl5Perm;
+              this.userPermLvl7 = currentSecurityRecord.lvl7Perm;
+              this.userPermLvl8 = currentSecurityRecord.lvl8Perm;
+          }); 
+
       
       this.aieForm = new FormGroup({
             aie_class: new FormControl(""),
@@ -128,6 +163,13 @@ export class AieDecisionComponent implements OnInit {
           aie_boac: new FormControl(""),
           aie_serial: new FormControl("")
       });
+
+      this.hasEditAccess = false;  
+      if (this.userPermLvl1 == "X" || this.userPermLvl5 == "X" || this.userPermLvl7 == "X" || this.userPermLvl8 == "X")
+          this.hasEditAccess = true;
+
+      if (this.hasEditAccess == false)
+          alert("Please note that your LID is only allowed to VIEW Repair records. \n\n\Cannot submit any change(s).");                        
 
       this.repairclass = this.repairClassesParam;
       this.initScreen();
@@ -299,9 +341,6 @@ export class AieDecisionComponent implements OnInit {
         this.lid         = "";
         this.customer    = "";
         this.hideTableButtons();
-
-        if (this.hasEditAccess == false)
-            alert("Please note that your LID is only allowed to view Repair records. \n\n\Cannot submit any change(s).");                        
         
         if (this.repairclass == 123) {
             document.getElementById("reviewButton1"    )["style"]["display"   ] = "none";

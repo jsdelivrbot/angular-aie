@@ -37,7 +37,7 @@
   	</label>
   	<div class="col-sm-7">
 		<input placeholder="00-00-00-000000-000" [disabled]="!idFMC.valid" [(ngModel)]="customer" (ngModelChange)="changeCustomer($event)"
-		[typeahead]="customers" class="form-control" id="idCustomer"
+		[typeahead]="customers" class="form-control" id="idCustomer" maxlength="19"
 		[typeaheadMinLength]="0" [typeaheadOptionsLimit]="10">
 	</div>
 </div>

@@ -122,35 +122,35 @@ import { LogoutComponent } from './logout/logout.component';
 //    Moment,
     AlertModule.forRoot(),
     RouterModule.forRoot([
-      { path: 'home', component: LandingPageComponent, canActivate: [AuthGuard] },
+      { path: 'home', component: LandingPageComponent },
       { path: '', component: LoginValidateComponent },
         {
             path: 'sale',
-            component: SaleAieComponent, canActivate: [AuthGuard]
+            component: SaleAieComponent
         },
         {
             path: 'repair',
-            component: RepairAieComponent, canActivate: [AuthGuard]
+            component: RepairAieComponent
         },
         {
             path: 'single',
-            component: AieSingleComponent, canActivate: [AuthGuard]
+            component: AieSingleComponent
         },
         {
             path: 'fleet-card',
-            component: AieFleetCardComponent, canActivate: [AuthGuard]
+            component: AieFleetCardComponent
         },
         {
             path: 'decision/:repairClasses',
-            component: AieDecisionComponent, canActivate: [AuthGuard]
+            component: AieDecisionComponent
         },
         {
             path: 'misc',
-            component: AieMiscComponent, canActivate: [AuthGuard]
+            component: AieMiscComponent
         },
         {
             path: 'multiple',
-            component: AieMultipleComponent, canActivate: [AuthGuard]
+            component: AieMultipleComponent
         },
         {
           path: 'logout',
